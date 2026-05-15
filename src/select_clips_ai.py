@@ -32,14 +32,14 @@ INCLUDE clips whose title suggests:
 - An exciting or unexpected outcome
 - Hype adjectives paired with clear gameplay context: insane/crazy/sick/impossible/unreal + action
 
-EXCLUDE clips whose title clearly signals no gameplay value:
-- Pure lobby, menu, or loading screen content
-- Streamer reaction with no play described
-- Tournament pre-show, interview, or announcement
-- Completely generic with zero context ("clip", "wow", "lol", standalone "wtf")
+EXCLUDE a clip if:
+- Title is pure lobby, menu, or loading screen content
+- Title is a streamer reaction with no play described
+- Title is a single word or name with zero gameplay context (e.g. "wow", "lol", just a player name)
+- Title gives no indication of what actually happened in the clip
+- When in doubt, EXCLUDE — only keep clips where the title clearly implies a highlight moment
 
-When ambiguous, INCLUDE — viewers will judge.
-Try to return exactly {n} clips. If the pool has fewer, return as many as possible.
+Try to return exactly {n} clips. If fewer clearly qualify, return fewer — do not pad with weak clips.
 
 Candidates:
 {candidate_block}
