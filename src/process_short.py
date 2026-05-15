@@ -20,7 +20,7 @@ def _crop_clip(input_path: str, output_path: str, max_seconds: int = None) -> st
         "ffmpeg", "-y",
         "-i", input_path,
         "-vf", VERTICAL_FILTER,
-        "-c:v", "libx264", "-preset", "fast", "-crf", "23",
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
         "-c:a", "aac", "-b:a", "128k",
     ]
     if max_seconds:
