@@ -18,10 +18,14 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y ffmpeg fonts-dejavu
-          pip install -r requirements.txt
+      - name: Cache apt packages
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: ffmpeg
+          version: 1.0
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
 
       - name: Restore used clips history
         uses: actions/cache@v4
