@@ -45,7 +45,6 @@ jobs:
           CLIPS_DAYS_AGO_END: ${{ vars.CLIPS_DAYS_AGO_END }}
           MIN_CLIP_DURATION: ${{ vars.MIN_CLIP_DURATION }}
           MAX_CLIP_DURATION: ${{ vars.MAX_CLIP_DURATION }}
-          EXCLUDED_LANGUAGES: ${{ vars.EXCLUDED_LANGUAGES }}
         run: python3 -c "
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
