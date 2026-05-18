@@ -13,9 +13,8 @@ on:
 jobs:
   pipeline:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.game == '' || github.event.inputs.game == matrix.game }}
     strategy:
-      fail-fast: false   # un jeu qui plante ne bloque pas les autres
+      fail-fast: false
       matrix:
         include:
           - game: valorant
@@ -30,30 +29,43 @@ jobs:
             hour_offset: 4
 
     steps:
+      - id: gate
+        run: |
+          if [ -n "${{ github.event.inputs.game }}" ] && [ "${{ github.event.inputs.game }}" != "${{ matrix.game }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Wait (stagger jobs by 1h)
-        if: ${{ github.event_name == 'schedule' && matrix.hour_offset > 0 }}
+        if: steps.gate.outputs.skip != 'true' && github.event_name == 'schedule' && matrix.hour_offset > 0
         run: sleep $(( ${{ matrix.hour_offset }} * 3600 ))
 
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.skip != 'true'
 
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.skip != 'true'
         with:
           python-version: "3.12"
           cache: pip
 
       - name: Install system deps (ffmpeg)
+        if: steps.gate.outputs.skip != 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg
 
       - name: Install Python deps
+        if: steps.gate.outputs.skip != 'true'
         run: pip install -r requirements.txt
 
       - name: Restore Medal cookies
+        if: steps.gate.outputs.skip != 'true'
         run: echo "${{ secrets.MEDAL_COOKIES }}" | base64 -d > medal_cookies.txt
 
       - name: Run pipeline — ${{ matrix.game }}
+        if: steps.gate.outputs.skip != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           YOUTUBE_TOKEN_VALORANT:          ${{ secrets.YOUTUBE_TOKEN_VALORANT }}
@@ -64,6 +76,7 @@ jobs:
         run: python run_pipeline.py --game ${{ matrix.game }}
 
       - name: Commit used clips history
+        if: steps.gate.outputs.skip != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -77,6 +90,7 @@ jobs:
           done
 
       - name: Upload outputs
+        if: steps.gate.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: output-${{ matrix.game }}-${{ github.run_id }}
