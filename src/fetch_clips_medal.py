@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from datetime import datetime, timezone, timedelta
 
 import requests
 
@@ -160,13 +161,21 @@ def fetch_medal_clips(limit: int = None, slugs: list[str] = None) -> list[dict]:
     }
     per_game = max(1, total // len(catalog))
 
+    cutoff = datetime.now(timezone.utc) - timedelta(days=90)
     used_ids: set = set()
     for slug in catalog:
         path = _used_path(slug)
         if os.path.exists(path):
             with open(path) as f:
                 raw = json.load(f)
-            used_ids.update(c if isinstance(c, str) else c["id"] for c in raw)
+            for c in raw:
+                if isinstance(c, str):
+                    used_ids.add(c)
+                else:
+                    used_at = c.get("used_at")
+                    if used_at and datetime.fromisoformat(used_at) < cutoff:
+                        continue  # clip expiré, réintègre le pool
+                    used_ids.add(c["id"])
 
     session = _build_session()
 
@@ -215,8 +224,9 @@ def mark_clips_used(clips: list[dict]) -> None:
             with open(path) as f:
                 existing = json.load(f)
         existing_ids = {c if isinstance(c, str) else c["id"] for c in existing}
+        now = datetime.now(timezone.utc).isoformat()
         new_entries = [
-            {k: v for k, v in c.items() if k != "local_path"}
+            {**{k: v for k, v in c.items() if k != "local_path"}, "used_at": now}
             for c in slug_clips if c["id"] not in existing_ids
         ]
         with open(path, "w") as f:
