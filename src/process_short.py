@@ -1,100 +1,77 @@
 import logging
 import os
+import re
 import subprocess
-import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
-from config.settings import OUTPUT_SHORTS, OUTPUT_TIKTOK
+from config.settings import OUTPUT_TIKTOK
 
 log = logging.getLogger(__name__)
 
-SHORTS_MAX_SECONDS = 59
-TIKTOK_MAX_SECONDS = 60
+TIKTOK_MAX_SECONDS = 59
 
-# Crop 16:9 → 9:16 (center crop) then scale to 1080x1920
-VERTICAL_FILTER = "crop=ih*9/16:ih,scale=1080:1920"
+# Center-crop 16:9 → 9:16, scale to 1080×1920
+VERTICAL_CROP = "crop=ih*9/16:ih,scale=1080:1920"
 
 
-def _crop_clip(input_path: str, output_path: str, max_seconds: int = None) -> str:
+def _safe_game_name(game: str) -> str:
+    return re.sub(r"[^\w]", "_", game).strip("_")
+
+
+def _build_tiktok(clip: dict, output_path: str) -> None:
     cmd = [
         "ffmpeg", "-y",
-        "-i", input_path,
-        "-vf", VERTICAL_FILTER,
-        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
-        "-c:a", "aac", "-b:a", "128k",
+        "-i", clip["local_path"],
+        "-t", str(TIKTOK_MAX_SECONDS),
+        "-vf", f"{VERTICAL_CROP},fps=30,setpts=PTS-STARTPTS",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "26",
+        "-c:a", "aac", "-b:a", "128k", "-ar", "44100",
+        "-movflags", "+faststart",
+        output_path,
     ]
-    if max_seconds:
-        cmd += ["-t", str(max_seconds)]
-    cmd.append(output_path)
-
     result = subprocess.run(cmd, capture_output=True)
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise RuntimeError(f"FFmpeg failed: {result.stderr.decode()[-500:]}")
-    return output_path
+        raise RuntimeError(f"TikTok encode failed for {clip['id']}: {result.stderr.decode()[-300:]}")
 
 
-def build_tiktok(clip: dict) -> str:
+def build_tiktoks_per_game(clips: list[dict], date_str: str = None) -> list[tuple[dict, str]]:
+    """Build the top 2 vertical TikTok videos per game (day1 + day2)."""
+    if not clips:
+        raise ValueError("No clips provided")
+
+    date_str = date_str or datetime.now().strftime("%Y-%m-%d")
     os.makedirs(OUTPUT_TIKTOK, exist_ok=True)
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    output_path = os.path.abspath(f"{OUTPUT_TIKTOK}/{date_str}_tiktok.mp4")
 
-    log.info(f"Building TikTok clip from: {clip['title'][:50]}")
-    _crop_clip(clip["local_path"], output_path, max_seconds=TIKTOK_MAX_SECONDS)
+    # Top 2 clips per game by view count
+    by_game: dict[str, list[dict]] = {}
+    for clip in clips:
+        game = clip.get("_game", "unknown")
+        by_game.setdefault(game, []).append(clip)
 
-    size_mb = os.path.getsize(output_path) / 1024 / 1024
-    log.info(f"TikTok ready: {output_path} ({size_mb:.1f} MB)")
-    return output_path
+    jobs: list[tuple[dict, str]] = []
+    for game, game_clips in by_game.items():
+        top2 = sorted(game_clips, key=lambda c: c.get("view_count", 0), reverse=True)[:2]
+        safe = _safe_game_name(game)
+        for idx, clip in enumerate(top2, 1):
+            out = os.path.abspath(f"{OUTPUT_TIKTOK}/{date_str}_{safe}_day{idx}.mp4")
+            jobs.append((clip, out))
 
+    log.info(f"Building {len(jobs)} TikToks ({len(by_game)} game(s) × 2)")
 
-def build_shorts(clips: list[dict]) -> str:
-    os.makedirs(OUTPUT_SHORTS, exist_ok=True)
-    date_str = datetime.now().strftime("%Y-%m-%d")
-    output_path = os.path.abspath(f"{OUTPUT_SHORTS}/{date_str}_shorts.mp4")
+    results: list[tuple[dict, str]] = []
 
-    log.info(f"Building Shorts from {len(clips)} clips")
+    def _job(clip_path):
+        clip, out = clip_path
+        _build_tiktok(clip, out)
+        return clip, out
 
-    # Crop each clip to vertical, then concat
-    cropped = []
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for i, clip in enumerate(clips):
-            tmp_path = f"{tmpdir}/clip_{i}.mp4"
-            _crop_clip(clip["local_path"], tmp_path)
-            cropped.append(tmp_path)
+    with ThreadPoolExecutor(max_workers=min(len(jobs), 4)) as ex:
+        futures = {ex.submit(_job, j): j for j in jobs}
+        for f in as_completed(futures):
+            clip, out = f.result()
+            size_mb = os.path.getsize(out) / 1024 / 1024
+            log.info(f"  [{clip['_game']}] {clip['title'][:40]} → {os.path.basename(out)} ({size_mb:.1f} MB)")
+            results.append((clip, out))
 
-        # Build concat list
-        list_path = f"{tmpdir}/list.txt"
-        with open(list_path, "w") as f:
-            for p in cropped:
-                f.write(f"file '{p}'\n")
-
-        # Concat + trim to 59s max
-        subprocess.run([
-            "ffmpeg", "-y",
-            "-f", "concat", "-safe", "0",
-            "-i", list_path,
-            "-t", str(SHORTS_MAX_SECONDS),
-            "-c", "copy",
-            output_path,
-        ], capture_output=True)
-
-    if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise RuntimeError("Shorts build failed")
-
-    size_mb = os.path.getsize(output_path) / 1024 / 1024
-    log.info(f"Shorts ready: {output_path} ({size_mb:.1f} MB)")
-    return output_path
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    from src.fetch_clips import fetch_top_clips
-    from src.download_clips import download_clips
-
-    clips = fetch_top_clips(limit=3)
-    downloaded = download_clips(clips)
-
-    tiktok_path = build_tiktok(downloaded[0])
-    shorts_path = build_shorts(downloaded[:3])
-
-    print(f"TikTok : {tiktok_path}")
-    print(f"Shorts : {shorts_path}")
+    return sorted(results, key=lambda x: x[1])

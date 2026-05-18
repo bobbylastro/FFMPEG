@@ -31,15 +31,31 @@ def _load_used_ids() -> set:
     if not os.path.exists(USED_CLIPS_PATH):
         return set()
     with open(USED_CLIPS_PATH) as f:
-        return set(json.load(f))
+        raw = json.load(f)
+    return {c if isinstance(c, str) else c["id"] for c in raw}
 
 
 def mark_clips_used(clips: list[dict]) -> None:
-    used = _load_used_ids()
-    used.update(c["id"] for c in clips)
+    existing = []
+    if os.path.exists(USED_CLIPS_PATH):
+        with open(USED_CLIPS_PATH) as f:
+            existing = json.load(f)
+    existing_ids = {c if isinstance(c, str) else c["id"] for c in existing}
+    new_entries = [
+        {k: v for k, v in c.items() if k != "local_path"}
+        for c in clips if c["id"] not in existing_ids
+    ]
     with open(USED_CLIPS_PATH, "w") as f:
-        json.dump(sorted(used), f, indent=2)
-    log.info(f"Marked {len(clips)} clips as used ({len(used)} total in history)")
+        json.dump(existing + new_entries, f, indent=2)
+    log.info(f"Marked {len(clips)} clips as used ({len(existing_ids) + len(new_entries)} total in history)")
+
+
+def _is_latin_title(title: str) -> bool:
+    if not title:
+        return False
+    latin = sum(1 for c in title if c.isascii() and c.isalpha())
+    total = sum(1 for c in title if c.isalpha())
+    return total == 0 or (latin / total) >= 0.5
 
 
 def _has_action_keyword(title: str) -> bool:
@@ -85,7 +101,7 @@ def _fetch_clips_for_game(token: str, game_name: str, limit: int, used_ids: set)
 
     clips = []
     cursor = None
-    fetch_limit = limit * 20
+    fetch_limit = max(limit * 20, 100)  # toujours au moins 100 candidats par jeu
 
     while len(clips) < fetch_limit:
         params = {
@@ -116,10 +132,10 @@ def _fetch_clips_for_game(token: str, game_name: str, limit: int, used_ids: set)
     clips = [
         c for c in clips
         if MIN_CLIP_DURATION <= c.get("duration", 0) <= MAX_CLIP_DURATION
-        and c.get("language", "") not in EXCLUDED_LANGUAGES
         and c["id"] not in used_ids
+        and _is_latin_title(c.get("title", ""))
     ]
-    log.info(f"  {game_name}: {before} → {len(clips)} after duration/lang/history filter")
+    log.info(f"  {game_name}: {before} → {len(clips)} after duration/latin-title/history filter")
 
     now = datetime.now(timezone.utc)
     for c in clips:
@@ -140,7 +156,7 @@ def _fetch_clips_for_game(token: str, game_name: str, limit: int, used_ids: set)
 
     if ANTHROPIC_API_KEY:
         from src.select_clips_ai import select_clips_ai
-        clips = select_clips_ai(clips, limit, game_name=game_name)
+        clips = select_clips_ai(clips[:20], min(limit, 4), game_name=game_name)
     else:
         clips = [c for c in clips if _has_action_keyword(c.get("title", ""))]
         clips = clips[:limit]

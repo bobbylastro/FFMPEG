@@ -1,0 +1,86 @@
+name: Clip Pipeline
+
+on:
+  schedule:
+    # Toutes les 72h (lundi, jeudi, dimanche à 00h UTC)
+    - cron: "0 0 */3 * *"
+  workflow_dispatch:
+    inputs:
+      game:
+        description: "Game slug (laisser vide pour tous les jeux)"
+        required: false
+        default: ""
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false   # un jeu qui plante ne bloque pas les autres
+      matrix:
+        include:
+          - game: valorant
+            hour_offset: 0
+          - game: counter-strike-2
+            hour_offset: 1
+          - game: league-of-legends
+            hour_offset: 2
+          - game: apex-legends
+            hour_offset: 3
+          - game: rocket-league
+            hour_offset: 4
+
+    steps:
+      - name: Skip if manual run targets a different game
+        if: ${{ github.event.inputs.game != '' && github.event.inputs.game != matrix.game }}
+        run: echo "Skipping ${{ matrix.game }}" && exit 0
+
+      - name: Wait (stagger jobs by 1h)
+        if: ${{ github.event_name == 'schedule' && matrix.hour_offset > 0 }}
+        run: sleep $(( ${{ matrix.hour_offset }} * 3600 ))
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install system deps (ffmpeg + fonts)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-bebas-neue fonts-ubuntu fonts-open-sans
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Restore Medal cookies
+        run: echo "${{ secrets.MEDAL_COOKIES }}" | base64 -d > medal_cookies.txt
+
+      - name: Run pipeline — ${{ matrix.game }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          YOUTUBE_TOKEN_VALORANT:          ${{ secrets.YOUTUBE_TOKEN_VALORANT }}
+          YOUTUBE_TOKEN_COUNTER_STRIKE_2:  ${{ secrets.YOUTUBE_TOKEN_COUNTER_STRIKE_2 }}
+          YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS: ${{ secrets.YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS }}
+          YOUTUBE_TOKEN_APEX_LEGENDS:      ${{ secrets.YOUTUBE_TOKEN_APEX_LEGENDS }}
+          YOUTUBE_TOKEN_ROCKET_LEAGUE:     ${{ secrets.YOUTUBE_TOKEN_ROCKET_LEAGUE }}
+        run: python run_pipeline.py --game ${{ matrix.game }}
+
+      - name: Commit used clips history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/used_clips/ data/episode_counter.json
+          git diff --cached --quiet || git commit -m "chore: update clip history & episode counter [${{ matrix.game }}]"
+          git push
+
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-${{ matrix.game }}-${{ github.run_id }}
+          path: |
+            output/content_*.json
+            output/thumbnails/
+            output/long/*_compilation.mp4
+            output/shorts/
+          retention-days: 7

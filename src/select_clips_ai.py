@@ -27,19 +27,21 @@ def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming") -
 
     prompt = f"""You are curating a {game_name} highlights compilation for YouTube. Pick the best {n} clips a general audience will enjoy.
 
-INCLUDE clips whose title suggests:
-- A spectacular or skillful play (mechanical outplay, clutch moment, rare achievement)
-- An exciting or unexpected outcome
-- Hype adjectives paired with clear gameplay context: insane/crazy/sick/impossible/unreal + action
+A clip PASSES if its title contains at least one explicit gaming term:
+- Kill count or clutch word: ace, 4k, 3k, 2k, 1v3, 1v5, clutch, collateral, triple, quad, penta, kill, frag
+- Mechanic: flick, spray, peek, flank, snipe, wallbang, jumpshot, aerial, flip reset, speedflip, redirect, dribble, boost steal
+- Outcome: retake, outplay, comeback, overtime, ranked up, win, 1vX
+- Agent/hero/weapon name: Sage, Yoru, Phoenix, Jett, Reyna, Sheriff, Operator, Vandal, AWP, AK, deagle
+- Pro player name: Aceu, Faker, donk, s1mple, ZywOo, TenZ
+- Qualifier + gaming term still PASSES: "almost ace", "worst 4k ever", "sold my ace", "nearly clutched", "how lucky was that spray"
 
-EXCLUDE a clip if:
-- Title is pure lobby, menu, or loading screen content
-- Title is a streamer reaction with no play described
-- Title is a single word or name with zero gameplay context (e.g. "wow", "lol", just a player name)
-- Title gives no indication of what actually happened in the clip
-- When in doubt, EXCLUDE — only keep clips where the title clearly implies a highlight moment
+A clip FAILS only if its title contains NO gaming term at all:
+- Pure song or artist name used as title: "heavenly", "Heart Attack", "lil yachty", "Surf Curse", "Billie Jean", "bye bye", "One Night ft. Sheriff", "worry"
+- Completely vague with no game context: "custom warrior", "long time no see guys", "yall im so back", "We r who we r"
+- Explicit edit/montage label: "first 2026 edit", "edit.mp4", "new edit", "my montage"
+- Random/empty/filename: "t", "g", "Val.mp4", "clip.mp4"
 
-Try to return exactly {n} clips. If fewer clearly qualify, return fewer — do not pad with weak clips.
+Return exactly {n} clips if possible. When two clips are equal quality, prefer higher view count.
 
 Candidates:
 {candidate_block}

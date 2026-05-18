@@ -5,62 +5,143 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
+from PIL import ImageFont
+
 from config.settings import OUTPUT_LONG
 
 log = logging.getLogger(__name__)
 
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+FONT = "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"
+FONT_REGULAR = "/usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf"
+LOGO_PATH = os.path.abspath("assets/logo.png")
+# Logo source is 200×100 (2:1). Scale height to fit 2 text lines comfortably.
+LOGO_W = 350
+LOGO_H = 150
 OVERLAY_DURATION = 5
 FADE_DUR = 0.4
 HOLD_END = OVERLAY_DURATION - FADE_DUR
 
 
+LOGO_X = 20
+TEXT_X = 85
+_TEXT_MAX_PX = (LOGO_X + LOGO_W) - TEXT_X - 15   # right padding 15px
+
+
+def _fit_text(text: str, font_path: str, fontsize: int, max_px: int) -> str:
+    try:
+        font = ImageFont.truetype(font_path, fontsize)
+        if font.getlength(text) <= max_px:
+            return text
+        while text:
+            text = text[:-1]
+            if font.getlength(text + "…") <= max_px:
+                return text + "…"
+        return "…"
+    except Exception:
+        return text[:40]
+
+
 def _escape(text: str) -> str:
-    for ch, repl in [("\\", "\\\\"), ("'", "\\'"), (":", "\\:"), (",", "\\,"), ("[", "\\["), ("]", "\\]")]:
+    for ch, repl in [("\\", "\\\\"), ("'", "\\'"), ("\"", ""), (":", "\\:"), (",", "\\,"), ("[", "\\["), ("]", "\\]"), (";", "")]:
         text = text.replace(ch, repl)
     return text
 
 
 def _apply_overlay(clip: dict, output_path: str) -> None:
-    title = _escape(clip.get("title", "")[:45])
-    broadcaster = _escape(clip.get("broadcaster_name", ""))
-    game = _escape(clip.get("_game", ""))
-    subline = f"{broadcaster}  •  {game}" if game else broadcaster
+    raw_title = clip.get("title", "")
+    raw_broadcaster = clip.get("broadcaster_name", "")
+    title = _escape(_fit_text(raw_title, FONT, 28, _TEXT_MAX_PX))
+    broadcaster = _escape(_fit_text(raw_broadcaster, FONT_REGULAR, 21, _TEXT_MAX_PX))
 
-    # y animates upward (slide in), alpha fades in then out
-    alpha = f"if(lt(t\\,{FADE_DUR})\\,t/{FADE_DUR}\\,if(lt(t\\,{HOLD_END})\\,1\\,if(lt(t\\,{OVERLAY_DURATION})\\,({OVERLAY_DURATION}-t)/{FADE_DUR}\\,0)))"
-    slide = f"if(lt(t\\,{FADE_DUR})\\,(1-t/{FADE_DUR})*35\\,0)"
-
-    vf = (
-        "scale=1920:1080:force_original_aspect_ratio=decrease,"
-        "pad=1920:1080:(ow-iw)/2:(oh-ih)/2,"
-
-        f"drawtext=fontfile={FONT}:text='{title}':"
-        f"x=28:y='H-108+{slide}':"
-        f"alpha='{alpha}':"
-        f"fontsize=28:fontcolor=white:"
-        f"box=1:boxcolor=black@0.55:boxborderw=6,"
-
-        f"drawtext=fontfile={FONT_REGULAR}:text='{subline}':"
-        f"x=28:y='H-70+{slide}':"
-        f"alpha='{alpha}':"
-        f"fontsize=20:fontcolor=white@0.9:"
-        f"box=1:boxcolor=black@0.55:boxborderw=5"
+    alpha = (
+        f"if(lt(t\\,{FADE_DUR})\\,t/{FADE_DUR}"
+        f"\\,if(lt(t\\,{HOLD_END})\\,1"
+        f"\\,if(lt(t\\,{OVERLAY_DURATION})\\,({OVERLAY_DURATION}-t)/{FADE_DUR}\\,0)))"
     )
+    slide = f"if(lt(t\\,{FADE_DUR})\\,(1-t/{FADE_DUR})*25\\,0)"
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", clip["local_path"],
-        "-vf", vf,
-        "-r", "30",
-        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "22",
-        "-c:a", "aac", "-b:a", "128k", "-ar", "48000",
-        output_path,
-    ]
+    encode_args = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "22",
+                   "-c:a", "aac", "-b:a", "128k", "-ar", "48000"]
+
+    # Logo bottom margin: 12px from bottom of frame
+    logo_y = 1080 - LOGO_H - 12
+
+    # Text Y positions are fixed regardless of logo size
+    ty_title = 968   # H-112
+    ty_sub   = 1006  # H-74
+
+    has_logo = os.path.exists(LOGO_PATH)
+
+    if has_logo:
+        # Single-pass filter_complex:
+        # 1. Scale/pad/fps the raw clip → [base]
+        # 2. Loop logo image, scale to LOGO_W×LOGO_H, fade in/out → [logo]
+        # 3. Overlay logo on [base] → add drawtext on top → [out]
+        logo_fc = (
+            f"[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,"
+            f"pad=1920:1080:(ow-iw)/2:(oh-ih)/2,"
+            f"fps=30,setpts=PTS-STARTPTS[base];"
+
+            f"[1:v]loop=loop=-1:size=1:start=0,"
+            f"scale={LOGO_W}:{LOGO_H},format=rgba,"
+            f"fade=type=in:start_time=0:duration={FADE_DUR}:alpha=1,"
+            f"fade=type=out:start_time={HOLD_END}:duration={FADE_DUR}:alpha=1[logo];"
+
+            f"[base][logo]overlay=x=20:y={logo_y}:shortest=1,"
+
+            f"drawtext=fontfile={FONT}:text='{title}':"
+            f"x=85:y='{ty_title}+{slide}':"
+            f"alpha='{alpha}':"
+            f"fontsize=28:fontcolor=white:"
+            f"shadowx=2:shadowy=2:shadowcolor=black@0.8,"
+
+            f"drawtext=fontfile={FONT_REGULAR}:text='{broadcaster}':"
+            f"x=85:y='{ty_sub}+{slide}':"
+            f"alpha='{alpha}':"
+            f"fontsize=21:fontcolor=white@0.9:"
+            f"shadowx=2:shadowy=2:shadowcolor=black@0.8"
+
+            f"[out]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", clip["local_path"],
+            "-i", LOGO_PATH,
+            "-filter_complex", logo_fc,
+            "-map", "[out]",
+            "-map", "0:a?",
+            *encode_args,
+            output_path,
+        ]
+    else:
+        vf = (
+            "scale=1920:1080:force_original_aspect_ratio=decrease,"
+            "pad=1920:1080:(ow-iw)/2:(oh-ih)/2,"
+            "fps=30,setpts=PTS-STARTPTS,"
+
+            f"drawtext=fontfile={FONT}:text='{title}':"
+            f"x=28:y='H-112+{slide}':"
+            f"alpha='{alpha}':"
+            f"fontsize=28:fontcolor=white:"
+            f"box=1:boxcolor=black@0.55:boxborderw=6,"
+
+            f"drawtext=fontfile={FONT_REGULAR}:text='{broadcaster}':"
+            f"x=28:y='H-74+{slide}':"
+            f"alpha='{alpha}':"
+            f"fontsize=20:fontcolor=white@0.9:"
+            f"box=1:boxcolor=black@0.55:boxborderw=5"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", clip["local_path"],
+            "-vf", vf,
+            *encode_args,
+            output_path,
+        ]
+
     result = subprocess.run(cmd, capture_output=True)
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise RuntimeError(f"Overlay failed for {clip['id']}: {result.stderr.decode()[-300:]}")
+        raise RuntimeError(f"Overlay failed for {clip['id']}: {result.stderr.decode()[-500:]}")
 
 
 def build_long_video(clips: list[dict]) -> str:
@@ -72,7 +153,6 @@ def build_long_video(clips: list[dict]) -> str:
     output_path = os.path.abspath(f"{OUTPUT_LONG}/{date_str}_compilation.mp4")
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        # Apply overlays in parallel
         jobs = {i: f"{tmpdir}/clip_{i:02d}.mp4" for i in range(len(clips))}
         overlaid = [None] * len(clips)
         workers = min(len(clips), os.cpu_count() or 4)
@@ -90,7 +170,6 @@ def build_long_video(clips: list[dict]) -> str:
                 overlaid[i] = jobs[i]
                 log.info(f"Overlay [{done}/{len(clips)}]: {clips[i].get('title','')[:40]}")
 
-        # Concat with stream copy (no re-encoding — clips already normalized)
         list_path = f"{tmpdir}/list.txt"
         with open(list_path, "w") as f:
             for p in overlaid:
@@ -112,13 +191,3 @@ def build_long_video(clips: list[dict]) -> str:
     size_mb = os.path.getsize(output_path) / 1024 / 1024
     log.info(f"Long video ready: {output_path} ({size_mb:.1f} MB)")
     return output_path
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    from src.fetch_clips import fetch_top_clips
-    from src.download_clips import download_clips
-    clips = fetch_top_clips(limit=3)
-    downloaded = download_clips(clips)
-    path = build_long_video(downloaded)
-    print(f"Output: {path}")

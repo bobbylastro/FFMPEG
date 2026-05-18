@@ -1,12 +1,14 @@
 .env
 output/long/*.mp4
 output/shorts/*.mp4
-output/tiktok/*.mp4
+output/thumbnails/
 logs/*.log
 __pycache__/
 *.pyc
 .venv/
 venv/
-*.credentials.json
-token_*.json
-# Keep used_clips.json tracked in git so history persists across sessions
+
+# Fichiers sensibles — ne jamais commiter
+token.json
+client_secrets.json
+medal_cookies.txt

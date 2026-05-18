@@ -11,8 +11,6 @@ TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
 YOUTUBE_CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
 YOUTUBE_CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
 
-TIKTOK_CLIENT_KEY = os.getenv("TIKTOK_CLIENT_KEY")
-TIKTOK_CLIENT_SECRET = os.getenv("TIKTOK_CLIENT_SECRET")
 
 GAME = os.getenv("GAME", "Valorant")
 _games_env = os.getenv("GAMES", "")
@@ -45,5 +43,4 @@ ACTION_KEYWORDS = [k.lower() for k in os.getenv("ACTION_KEYWORDS",
 
 OUTPUT_LONG = "output/long"
 OUTPUT_SHORTS = "output/shorts"
-OUTPUT_TIKTOK = "output/tiktok"
 LOGS_DIR = "logs"
