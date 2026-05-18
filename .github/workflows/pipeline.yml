@@ -2,7 +2,7 @@ name: Clip Pipeline
 
 on:
   schedule:
-    - cron: "0 8 * * 1,4"  # lundi et jeudi à 8h UTC (10h Paris)
+    - cron: "0 8 * * 1,3,6"  # lundi, mercredi, samedi à 8h UTC (10h Paris)
   workflow_dispatch:
     inputs:
       game:
