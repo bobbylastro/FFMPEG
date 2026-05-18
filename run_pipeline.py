@@ -11,7 +11,7 @@ from src.download_clips import download_clips
 from src.process_long import build_long_video
 from src.process_short import build_tiktoks_per_game
 from src.generate_thumbnail import generate_thumbnail, bump_episode
-from src.generate_content import get_youtube_title, get_youtube_description, get_shorts_description
+from src.generate_content import get_youtube_title, get_youtube_description, get_shorts_description, generate_chapters
 from src.upload_youtube import upload_from_content, upload_shorts_from_content
 
 # ── Args ───────────────────────────────────────────────────────────────────
@@ -47,8 +47,9 @@ shorts_results = build_tiktoks_per_game(downloaded)   # [(clip, path), ...]
 thumbnail_path = generate_thumbnail(downloaded, game_name, episode=episode)
 
 # ── 6. Titres & descriptions ───────────────────────────────────────────────
-yt_title = get_youtube_title(game_name, episode)
-yt_desc  = get_youtube_description(game_name, episode)
+yt_title   = get_youtube_title(game_name, episode)
+chapters   = generate_chapters(downloaded)
+yt_desc    = chapters + "\n\n" + get_youtube_description(game_name, episode)
 
 date_str  = datetime.now().strftime("%Y-%m-%d")
 date_day2 = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")

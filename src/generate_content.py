@@ -33,6 +33,39 @@ def get_youtube_description(game: str, episode: int) -> str:
     return descriptions[(episode - 1) % len(descriptions)]
 
 
+def generate_chapters(clips: list[dict]) -> str:
+    """Génère un bloc chapitres YouTube (timestamps + label action) pour la description."""
+    if not clips:
+        return ""
+
+    titles_input = "\n".join(f"{i+1}. {c['title']}" for i, c in enumerate(clips))
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    msg = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=300,
+        messages=[{
+            "role": "user",
+            "content": (
+                "Convert these gaming clip titles into very short action labels (3-5 words max).\n"
+                "Rules: no player names, describe only what happens, keep it punchy.\n"
+                "Output exactly one label per line, same order, no numbering, no extra text.\n\n"
+                f"{titles_input}"
+            ),
+        }],
+    )
+
+    labels = [l.strip() for l in msg.content[0].text.strip().splitlines() if l.strip()]
+
+    lines = ["00:00 Intro"]
+    t = 0.0
+    for clip, label in zip(clips, labels):
+        t_int = int(t)
+        lines.append(f"{t_int // 60:02d}:{t_int % 60:02d} {label}")
+        t += clip.get("duration", 30)
+
+    return "\n".join(lines)
+
+
 def get_shorts_description(clip: dict) -> str:
     """Génère une description Shorts optimisée via Claude Haiku pour ce clip."""
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
