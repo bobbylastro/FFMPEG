@@ -5,7 +5,7 @@ import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
-from config.settings import OUTPUT_TIKTOK
+from config.settings import OUTPUT_SHORTS
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def build_tiktoks_per_game(clips: list[dict], date_str: str = None) -> list[tupl
         raise ValueError("No clips provided")
 
     date_str = date_str or datetime.now().strftime("%Y-%m-%d")
-    os.makedirs(OUTPUT_TIKTOK, exist_ok=True)
+    os.makedirs(OUTPUT_SHORTS, exist_ok=True)
 
     # Top 2 clips per game by view count
     by_game: dict[str, list[dict]] = {}
@@ -54,7 +54,7 @@ def build_tiktoks_per_game(clips: list[dict], date_str: str = None) -> list[tupl
         top2 = sorted(game_clips, key=lambda c: c.get("view_count", 0), reverse=True)[:2]
         safe = _safe_game_name(game)
         for idx, clip in enumerate(top2, 1):
-            out = os.path.abspath(f"{OUTPUT_TIKTOK}/{date_str}_{safe}_day{idx}.mp4")
+            out = os.path.abspath(f"{OUTPUT_SHORTS}/{date_str}_{safe}_day{idx}.mp4")
             jobs.append((clip, out))
 
     log.info(f"Building {len(jobs)} TikToks ({len(by_game)} game(s) × 2)")
