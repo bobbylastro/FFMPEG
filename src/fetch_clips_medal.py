@@ -87,7 +87,7 @@ def _fetch_game_clips(
     }
 
     MIN_CANDIDATES = max(30, limit * 2)
-    MAX_PAGES = 4
+    MAX_PAGES = 6
 
     seen_ids: set = set()
     items: list = []
@@ -140,6 +140,12 @@ def _fetch_game_clips(
             break  # plus de résultats disponibles
         if len(clips) >= MIN_CANDIDATES:
             break  # assez de candidats, inutile de charger plus
+
+    if len(clips) < MIN_CANDIDATES:
+        log.warning(
+            f"  {game_name}: seulement {len(clips)} candidats après {MAX_PAGES} pages "
+            f"(seuil={MIN_CANDIDATES}) — le pool de clips frais s'épuise"
+        )
 
     clips.sort(key=lambda c: c["view_count"], reverse=True)
     return clips
