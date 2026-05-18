@@ -1,9 +1,8 @@
 name: Clip Pipeline
 
 on:
-  schedule:
-    # Toutes les 72h (lundi, jeudi, dimanche à 00h UTC)
-    - cron: "0 0 */3 * *"
+  # schedule:
+  #   - cron: "0 0 */3 * *"  # réactiver après le premier run manuel
   workflow_dispatch:
     inputs:
       game:
