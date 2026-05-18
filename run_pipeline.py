@@ -11,7 +11,7 @@ from src.download_clips import download_clips
 from src.process_long import build_long_video
 from src.process_short import build_tiktoks_per_game
 from src.generate_thumbnail import generate_thumbnail, bump_episode
-from src.generate_content import get_youtube_title, get_youtube_description, get_shorts_description, generate_chapters
+from src.generate_content import get_youtube_title, get_youtube_description, generate_ai_content
 from src.upload_youtube import upload_from_content, upload_shorts_from_content
 
 # ── Args ───────────────────────────────────────────────────────────────────
@@ -46,23 +46,24 @@ shorts_results = build_tiktoks_per_game(downloaded)   # [(clip, path), ...]
 # ── 5. Miniature ──────────────────────────────────────────────────────────
 thumbnail_path = generate_thumbnail(downloaded, game_name, episode=episode)
 
-# ── 6. Titres & descriptions ───────────────────────────────────────────────
-yt_title   = get_youtube_title(game_name, episode)
-chapters   = generate_chapters(downloaded)
-yt_desc    = chapters + "\n\n" + get_youtube_description(game_name, episode)
+# ── 6. Titres & descriptions (un seul appel Haiku) ────────────────────────
+yt_title    = get_youtube_title(game_name, episode)
+short_clips = [clip for clip, _ in shorts_results]
+chapters, short_descs = generate_ai_content(downloaded, short_clips)
+yt_desc     = chapters + "\n\n" + get_youtube_description(game_name, episode)
 
 date_str  = datetime.now().strftime("%Y-%m-%d")
 date_day2 = (datetime.now() + timedelta(days=1)).strftime("%Y-%m-%d")
 
 shorts_content = []
-for idx, (clip, path) in enumerate(shorts_results, 1):
+for idx, ((clip, path), desc) in enumerate(zip(shorts_results, short_descs), 1):
     shorts_content.append({
         "day":          idx,
         "publish_date": date_str if idx == 1 else date_day2,
         "clip_title":   clip.get("title", ""),
         "broadcaster":  clip.get("broadcaster_name", ""),
         "video_path":   path,
-        "description":  get_shorts_description(clip),
+        "description":  desc,
     })
 
 # ── 7. Sauvegarde du contenu ───────────────────────────────────────────────

@@ -33,63 +33,72 @@ def get_youtube_description(game: str, episode: int) -> str:
     return descriptions[(episode - 1) % len(descriptions)]
 
 
-def generate_chapters(clips: list[dict]) -> str:
-    """Génère un bloc chapitres YouTube (timestamps + label action) pour la description."""
+def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str, list[str]]:
+    """Un seul appel Haiku pour générer les chapitres YouTube et les descriptions Shorts.
+
+    Retourne (chapters_block, [desc_short_1, desc_short_2, ...]).
+    """
     if not clips:
-        return ""
+        return "", []
 
-    titles_input = "\n".join(f"{i+1}. {c['title']}" for i, c in enumerate(clips))
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=300,
-        messages=[{
-            "role": "user",
-            "content": (
-                "Convert these gaming clip titles into very short action labels (3-5 words max).\n"
-                "Rules: no player names, describe only what happens, keep it punchy.\n"
-                "Output exactly one label per line, same order, no numbering, no extra text.\n\n"
-                f"{titles_input}"
-            ),
-        }],
+    game = clips[0].get("_game", "Gaming")
+    clips_block = "\n".join(f"{i+1}. {c['title']}" for i, c in enumerate(clips))
+    shorts_block = "\n".join(
+        f"SHORT_{i+1}: \"{c['title']}\""
+        for i, c in enumerate(short_clips)
     )
-
-    labels = [l.strip() for l in msg.content[0].text.strip().splitlines() if l.strip()]
-
-    lines = ["00:00 Intro"]
-    t = 0.0
-    for clip, label in zip(clips, labels):
-        t_int = int(t)
-        lines.append(f"{t_int // 60:02d}:{t_int % 60:02d} {label}")
-        t += clip.get("duration", 30)
-
-    return "\n".join(lines)
-
-
-def get_shorts_description(clip: dict) -> str:
-    """Génère une description Shorts optimisée via Claude Haiku pour ce clip."""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    title = clip.get("title", "")
-    broadcaster = clip.get("broadcaster_name", "")
-    game = clip.get("_game", "Valorant")
 
     prompt = (
-        f"Write a short, punchy YouTube Shorts description for a {game} gaming clip.\n"
-        f"Clip title: \"{title}\"\n"
-        f"Player: {broadcaster}\n\n"
-        "Requirements:\n"
-        "- 2-3 lines max, energetic tone\n"
-        "- End with 5-8 relevant hashtags on the last line\n"
-        "- Include #Shorts\n"
-        "- No emojis in hashtags, emojis allowed elsewhere\n"
-        "- Output only the description text, nothing else"
+        f"You are generating content for a {game} YouTube compilation channel.\n\n"
+
+        "## TASK 1 — CHAPTER LABELS\n"
+        "Convert each clip title into a short action label (3-5 words max).\n"
+        "Rules: no player names, describe only the action, punchy.\n"
+        "Output one label per line under the header CHAPTERS:\n\n"
+        f"{clips_block}\n\n"
+
+        "## TASK 2 — SHORTS DESCRIPTIONS\n"
+        "Write a punchy YouTube Shorts description for each clip below.\n"
+        "Rules: 2-3 lines, energetic tone, end with 5-8 hashtags including #Shorts, no player names.\n"
+        "Output each description under its own header SHORT_1:, SHORT_2:, etc.\n\n"
+        f"{shorts_block}"
     )
 
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=200,
+        max_tokens=800,
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text.strip()
+    text = msg.content[0].text.strip()
+
+    # --- Parse CHAPTERS ---
+    chapters_str = ""
+    if "CHAPTERS:" in text:
+        raw = text.split("CHAPTERS:")[1]
+        raw = raw.split("SHORT_1:")[0].strip()
+        labels = [l.strip() for l in raw.splitlines() if l.strip()]
+        lines = ["00:00 Intro"]
+        t = 0.0
+        for clip, label in zip(clips, labels):
+            t_int = int(t)
+            lines.append(f"{t_int // 60:02d}:{t_int % 60:02d} {label}")
+            t += clip.get("duration", 30)
+        chapters_str = "\n".join(lines)
+
+    # --- Parse SHORTS ---
+    short_descs = []
+    for i in range(len(short_clips)):
+        marker = f"SHORT_{i+1}:"
+        next_marker = f"SHORT_{i+2}:"
+        if marker in text:
+            chunk = text.split(marker)[1]
+            if next_marker in chunk:
+                chunk = chunk.split(next_marker)[0]
+            short_descs.append(chunk.strip())
+        else:
+            short_descs.append("")
+
+    return chapters_str, short_descs
 
 
