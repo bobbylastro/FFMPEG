@@ -7,8 +7,9 @@ from PIL import Image, ImageDraw, ImageFont
 
 log = logging.getLogger(__name__)
 
-FONT_BOLD = "/usr/share/fonts/opentype/bebas-neue/BebasNeue-Bold.otf"
-FONT_REG  = "/usr/share/fonts/opentype/bebas-neue/BebasNeue-Regular.otf"
+_ASSETS   = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts")
+FONT_BOLD = os.path.abspath(os.path.join(_ASSETS, "BebasNeue-Regular.otf"))
+FONT_REG  = os.path.abspath(os.path.join(_ASSETS, "BebasNeue-Regular.otf"))
 
 COUNTER_PATH = "data/episode_counter.json"
 OUTPUT_DIR   = "output/thumbnails"

@@ -11,8 +11,9 @@ from config.settings import OUTPUT_LONG
 
 log = logging.getLogger(__name__)
 
-FONT = "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf"
-FONT_REGULAR = "/usr/share/fonts/truetype/open-sans/OpenSans-Regular.ttf"
+_ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts")
+FONT         = os.path.abspath(os.path.join(_ASSETS, "Ubuntu-B.ttf"))
+FONT_REGULAR = os.path.abspath(os.path.join(_ASSETS, "OpenSans-Regular.ttf"))
 LOGO_PATH = os.path.abspath("assets/logo.png")
 # Logo source is 200×100 (2:1). Scale height to fit 2 text lines comfortably.
 LOGO_W = 350

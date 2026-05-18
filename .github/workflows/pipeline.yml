@@ -44,10 +44,10 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install system deps (ffmpeg + fonts)
+      - name: Install system deps (ffmpeg)
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg fonts-bebas-neue fonts-ubuntu fonts-open-sans
+          sudo apt-get install -y ffmpeg
 
       - name: Install Python deps
         run: pip install -r requirements.txt
