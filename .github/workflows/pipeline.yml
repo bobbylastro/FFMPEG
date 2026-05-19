@@ -22,17 +22,17 @@ jobs:
       matrix:
         include:
           - game: valorant
-            hour_offset: 0
+            min_offset: 0
           - game: counter-strike-2
-            hour_offset: 1
+            min_offset: 10
           - game: league-of-legends
-            hour_offset: 2
+            min_offset: 20
           - game: apex-legends
-            hour_offset: 3
+            min_offset: 30
           - game: rocket-league
-            hour_offset: 4
+            min_offset: 40
           - game: r6-siege
-            hour_offset: 5
+            min_offset: 50
 
     steps:
       - id: gate
@@ -51,9 +51,9 @@ jobs:
           fi
           echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
-      - name: Wait (stagger jobs by 1h)
-        if: steps.gate.outputs.skip != 'true' && github.event_name == 'schedule' && matrix.hour_offset > 0
-        run: sleep $(( ${{ matrix.hour_offset }} * 3600 ))
+      - name: Wait (stagger jobs by 10min)
+        if: steps.gate.outputs.skip != 'true' && matrix.min_offset > 0
+        run: sleep $(( ${{ matrix.min_offset }} * 60 ))
 
       - uses: actions/checkout@v4
         if: steps.gate.outputs.skip != 'true'
