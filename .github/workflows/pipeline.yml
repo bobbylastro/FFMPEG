@@ -9,6 +9,10 @@ on:
         description: "Game slug (laisser vide pour tous les jeux)"
         required: false
         default: ""
+      exclude:
+        description: "Slugs à exclure, séparés par des virgules (ex: valorant,apex-legends)"
+        required: false
+        default: ""
 
 jobs:
   pipeline:
@@ -33,11 +37,19 @@ jobs:
     steps:
       - id: gate
         run: |
+          SKIP=false
           if [ -n "${{ github.event.inputs.game }}" ] && [ "${{ github.event.inputs.game }}" != "${{ matrix.game }}" ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            SKIP=true
           fi
+          if [ -n "${{ github.event.inputs.exclude }}" ]; then
+            IFS=',' read -ra EXCLUDES <<< "${{ github.event.inputs.exclude }}"
+            for ex in "${EXCLUDES[@]}"; do
+              if [ "$(echo $ex | tr -d ' ')" = "${{ matrix.game }}" ]; then
+                SKIP=true
+              fi
+            done
+          fi
+          echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
       - name: Wait (stagger jobs by 1h)
         if: steps.gate.outputs.skip != 'true' && github.event_name == 'schedule' && matrix.hour_offset > 0
