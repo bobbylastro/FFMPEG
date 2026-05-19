@@ -9,7 +9,6 @@ from config.settings import ANTHROPIC_API_KEY
 log = logging.getLogger(__name__)
 
 CONTENT_DIR = "data/content"
-COUNTER_PATH = "data/episode_counter.json"
 
 
 def _load_content(game: str) -> dict:

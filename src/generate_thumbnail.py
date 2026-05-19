@@ -11,7 +11,7 @@ _ASSETS   = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts")
 FONT_BOLD = os.path.abspath(os.path.join(_ASSETS, "BebasNeue-Regular.otf"))
 FONT_REG  = os.path.abspath(os.path.join(_ASSETS, "BebasNeue-Regular.otf"))
 
-COUNTER_PATH = "data/episode_counter.json"
+COUNTER_DIR  = "data/episode_counter"
 OUTPUT_DIR   = "output/thumbnails"
 THUMB_W, THUMB_H = 1280, 720
 
@@ -70,14 +70,16 @@ def bump_episode(game: str) -> int:
 
 
 def _get_and_bump_episode(game: str) -> int:
-    data = {}
-    if os.path.exists(COUNTER_PATH):
-        with open(COUNTER_PATH) as f:
-            data = json.load(f)
-    n = data.get(game, 0) + 1
-    data[game] = n
-    with open(COUNTER_PATH, "w") as f:
-        json.dump(data, f, indent=2)
+    os.makedirs(COUNTER_DIR, exist_ok=True)
+    slug = game.lower().replace(" ", "-").replace(":", "").replace(".", "")
+    path = os.path.join(COUNTER_DIR, f"{slug}.json")
+    n = 0
+    if os.path.exists(path):
+        with open(path) as f:
+            n = json.load(f).get("episode", 0)
+    n += 1
+    with open(path, "w") as f:
+        json.dump({"episode": n}, f)
     return n
 
 
