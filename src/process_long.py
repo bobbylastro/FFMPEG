@@ -1,5 +1,8 @@
+import glob
+import json
 import logging
 import os
+import random
 import re
 import subprocess
 import tempfile
@@ -9,6 +12,10 @@ from datetime import datetime
 from PIL import ImageFont
 
 from config.settings import OUTPUT_LONG
+
+MUSIC_DIR        = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "music"))
+CLIP_AUDIO_VOL   = 0.45   # Sons du jeu (réduits mais audibles)
+MUSIC_VOL        = 0.18   # Musique de fond (subtile)
 
 log = logging.getLogger(__name__)
 
@@ -159,6 +166,66 @@ def _apply_overlay(clip: dict, output_path: str) -> None:
         raise RuntimeError(f"Overlay failed for {clip['id']}: {result.stderr.decode()[-500:]}")
 
 
+def _get_duration(path: str) -> float:
+    r = subprocess.run(
+        ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_format", path],
+        capture_output=True,
+    )
+    return float(json.loads(r.stdout)["format"]["duration"])
+
+
+def _add_background_music(video_path: str) -> str:
+    """Mix musique de fond royalty-free avec l'audio des clips. Retourne le nouveau chemin."""
+    music_files = sorted(glob.glob(os.path.join(MUSIC_DIR, "*.mp3")) +
+                         glob.glob(os.path.join(MUSIC_DIR, "*.wav")))
+    if not music_files:
+        log.warning("Aucune musique trouvée dans assets/music/, skip")
+        return video_path
+
+    video_duration = _get_duration(video_path)
+
+    # Sélectionner des morceaux aléatoires jusqu'à couvrir la durée
+    random.shuffle(music_files)
+    selected, total = [], 0.0
+    while total < video_duration:
+        for m in music_files:
+            selected.append(m)
+            total += _get_duration(m)
+            if total >= video_duration:
+                break
+
+    # Fichier de concat pour la musique
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+        music_list = f.name
+        for m in selected:
+            f.write(f"file '{m}'\n")
+
+    out_path = video_path.replace(".mp4", "_music.mp4")
+    result = subprocess.run([
+        "ffmpeg", "-y",
+        "-i", video_path,
+        "-f", "concat", "-safe", "0", "-i", music_list,
+        "-filter_complex",
+        f"[0:a]volume={CLIP_AUDIO_VOL}[orig];"
+        f"[1:a]atrim=0:{video_duration:.3f},asetpts=PTS-STARTPTS,volume={MUSIC_VOL}[music];"
+        f"[orig][music]amix=inputs=2:duration=first[aout]",
+        "-map", "0:v", "-map", "[aout]",
+        "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-movflags", "+faststart",
+        out_path,
+    ], capture_output=True)
+
+    os.remove(music_list)
+
+    if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
+        log.warning(f"Mix musique échoué : {result.stderr.decode()[-300:]}")
+        return video_path
+
+    os.replace(out_path, video_path)
+    log.info(f"Musique mixée ({len(selected)} morceaux, clip={CLIP_AUDIO_VOL}, music={MUSIC_VOL})")
+    return video_path
+
+
 def build_long_video(clips: list[dict]) -> str:
     if not clips:
         raise ValueError("No clips to process")
@@ -202,6 +269,8 @@ def build_long_video(clips: list[dict]) -> str:
 
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         raise RuntimeError("build_long_video failed")
+
+    output_path = _add_background_music(output_path)
 
     size_mb = os.path.getsize(output_path) / 1024 / 1024
     log.info(f"Long video ready: {output_path} ({size_mb:.1f} MB)")
