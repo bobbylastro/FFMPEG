@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -43,21 +44,24 @@ def _fit_text(text: str, font_path: str, fontsize: int, max_px: int) -> str:
 
 
 def _sanitize(text: str) -> str:
-    # Strip emojis and non-ASCII — ffmpeg drawtext ne les supporte pas
-    return text.encode("ascii", "ignore").decode("ascii").strip()
-
-
-def _escape(text: str) -> str:
-    for ch, repl in [("\\", "\\\\"), ("'", "\\'"), ("\"", ""), (":", "\\:"), (",", "\\,"), ("[", "\\["), ("]", "\\]"), (";", ""), ("#", "")]:
-        text = text.replace(ch, repl)
-    return text
+    # Garde uniquement les caractères ASCII imprimables
+    return re.sub(r'[^\x20-\x7E]', '', text).strip()
 
 
 def _apply_overlay(clip: dict, output_path: str) -> None:
     raw_title = clip.get("title", "")
     raw_broadcaster = clip.get("broadcaster_name", "")
-    title = _escape(_fit_text(_sanitize(raw_title), FONT, 28, _TEXT_MAX_PX))
-    broadcaster = _escape(_fit_text(_sanitize(raw_broadcaster), FONT_REGULAR, 21, _TEXT_MAX_PX))
+    title = _fit_text(_sanitize(raw_title), FONT, 28, _TEXT_MAX_PX)
+    broadcaster = _fit_text(_sanitize(raw_broadcaster), FONT_REGULAR, 21, _TEXT_MAX_PX)
+
+    # Écrire dans des fichiers temp — évite tout escaping dans filter_complex
+    clip_id = clip.get("id", "clip")
+    title_file = f"/tmp/dt_title_{clip_id}.txt"
+    sub_file   = f"/tmp/dt_sub_{clip_id}.txt"
+    with open(title_file, "w") as f:
+        f.write(title)
+    with open(sub_file, "w") as f:
+        f.write(broadcaster)
 
     alpha = (
         f"if(lt(t\\,{FADE_DUR})\\,t/{FADE_DUR}"
@@ -95,13 +99,13 @@ def _apply_overlay(clip: dict, output_path: str) -> None:
 
             f"[base][logo]overlay=x=20:y={logo_y}:shortest=1,"
 
-            f"drawtext=fontfile={FONT}:text='{title}':"
+            f"drawtext=fontfile={FONT}:textfile={title_file}:"
             f"x=85:y='{ty_title}+{slide}':"
             f"alpha='{alpha}':"
             f"fontsize=28:fontcolor=white:"
             f"shadowx=2:shadowy=2:shadowcolor=black@0.8,"
 
-            f"drawtext=fontfile={FONT_REGULAR}:text='{broadcaster}':"
+            f"drawtext=fontfile={FONT_REGULAR}:textfile={sub_file}:"
             f"x=85:y='{ty_sub}+{slide}':"
             f"alpha='{alpha}':"
             f"fontsize=21:fontcolor=white@0.9:"
@@ -125,13 +129,13 @@ def _apply_overlay(clip: dict, output_path: str) -> None:
             "pad=1920:1080:(ow-iw)/2:(oh-ih)/2,"
             "fps=30,setpts=PTS-STARTPTS,"
 
-            f"drawtext=fontfile={FONT}:text='{title}':"
+            f"drawtext=fontfile={FONT}:textfile={title_file}:"
             f"x=28:y='H-112+{slide}':"
             f"alpha='{alpha}':"
             f"fontsize=28:fontcolor=white:"
             f"box=1:boxcolor=black@0.55:boxborderw=6,"
 
-            f"drawtext=fontfile={FONT_REGULAR}:text='{broadcaster}':"
+            f"drawtext=fontfile={FONT_REGULAR}:textfile={sub_file}:"
             f"x=28:y='H-74+{slide}':"
             f"alpha='{alpha}':"
             f"fontsize=20:fontcolor=white@0.9:"
@@ -146,6 +150,11 @@ def _apply_overlay(clip: dict, output_path: str) -> None:
         ]
 
     result = subprocess.run(cmd, capture_output=True)
+    for f in (title_file, sub_file):
+        try:
+            os.remove(f)
+        except OSError:
+            pass
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         raise RuntimeError(f"Overlay failed for {clip['id']}: {result.stderr.decode()[-500:]}")
 
