@@ -42,8 +42,13 @@ def _fit_text(text: str, font_path: str, fontsize: int, max_px: int) -> str:
         return text[:40]
 
 
+def _sanitize(text: str) -> str:
+    # Strip emojis and non-ASCII — ffmpeg drawtext ne les supporte pas
+    return text.encode("ascii", "ignore").decode("ascii").strip()
+
+
 def _escape(text: str) -> str:
-    for ch, repl in [("\\", "\\\\"), ("'", "\\'"), ("\"", ""), (":", "\\:"), (",", "\\,"), ("[", "\\["), ("]", "\\]"), (";", "")]:
+    for ch, repl in [("\\", "\\\\"), ("'", "\\'"), ("\"", ""), (":", "\\:"), (",", "\\,"), ("[", "\\["), ("]", "\\]"), (";", ""), ("#", "")]:
         text = text.replace(ch, repl)
     return text
 
@@ -51,8 +56,8 @@ def _escape(text: str) -> str:
 def _apply_overlay(clip: dict, output_path: str) -> None:
     raw_title = clip.get("title", "")
     raw_broadcaster = clip.get("broadcaster_name", "")
-    title = _escape(_fit_text(raw_title, FONT, 28, _TEXT_MAX_PX))
-    broadcaster = _escape(_fit_text(raw_broadcaster, FONT_REGULAR, 21, _TEXT_MAX_PX))
+    title = _escape(_fit_text(_sanitize(raw_title), FONT, 28, _TEXT_MAX_PX))
+    broadcaster = _escape(_fit_text(_sanitize(raw_broadcaster), FONT_REGULAR, 21, _TEXT_MAX_PX))
 
     alpha = (
         f"if(lt(t\\,{FADE_DUR})\\,t/{FADE_DUR}"
