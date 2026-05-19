@@ -27,19 +27,19 @@ def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming") -
 
     prompt = f"""You are curating a {game_name} highlights compilation for YouTube. Pick the best {n} clips a general audience will enjoy.
 
-A clip PASSES if its title contains at least one explicit gaming term:
-- Kill count or clutch word: ace, 4k, 3k, 2k, 1v3, 1v5, clutch, collateral, triple, quad, penta, kill, frag
-- Mechanic: flick, spray, peek, flank, snipe, wallbang, jumpshot, aerial, flip reset, speedflip, redirect, dribble, boost steal
-- Outcome: retake, outplay, comeback, overtime, ranked up, win, 1vX
-- Agent/hero/weapon name: Sage, Yoru, Phoenix, Jett, Reyna, Sheriff, Operator, Vandal, AWP, AK, deagle
-- Pro player name: Aceu, Faker, donk, s1mple, ZywOo, TenZ
-- Qualifier + gaming term still PASSES: "almost ace", "worst 4k ever", "sold my ace", "nearly clutched", "how lucky was that spray"
+A clip PASSES if its title contains at least one explicit gaming term relevant to {game_name}:
+- Kill count or clutch word: ace, 4k, 3k, 2k, 1v2, 1v3, 1v4, 1v5, clutch, collateral, triple, quad, penta, kill, frag, DBNO, down
+- Mechanic or action: flick, spray, peek, flank, snipe, wallbang, jumpshot, headshot, breach, rush, rotate, anchor, drone, defuse, plant
+- Outcome: retake, outplay, comeback, overtime, ranked up, win, 1vX, carried, saved, comeback
+- Any character, operator, agent, hero, or weapon name from {game_name} (e.g. an operator name in R6, agent in Valorant, legend in Apex, champion in LoL)
+- Any pro player name known in the {game_name} competitive scene
+- Qualifier + gaming term still PASSES: "almost ace", "worst 4k ever", "nearly clutched", "how lucky was that"
 
 A clip FAILS only if its title contains NO gaming term at all:
-- Pure song or artist name used as title: "heavenly", "Heart Attack", "lil yachty", "Surf Curse", "Billie Jean", "bye bye", "One Night ft. Sheriff", "worry"
-- Completely vague with no game context: "custom warrior", "long time no see guys", "yall im so back", "We r who we r"
+- Pure song or artist name used as title: "heavenly", "Heart Attack", "lil yachty", "Billie Jean", "bye bye", "worry"
+- Completely vague with no game context: "long time no see guys", "yall im so back", "We r who we r"
 - Explicit edit/montage label: "first 2026 edit", "edit.mp4", "new edit", "my montage"
-- Random/empty/filename: "t", "g", "Val.mp4", "clip.mp4"
+- Random/empty/filename: "t", "g", "clip.mp4"
 
 Return exactly {n} clips if possible. When two clips are equal quality, prefer higher view count.
 

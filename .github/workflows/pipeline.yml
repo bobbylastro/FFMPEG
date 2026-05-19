@@ -27,6 +27,8 @@ jobs:
             hour_offset: 3
           - game: rocket-league
             hour_offset: 4
+          - game: r6-siege
+            hour_offset: 5
 
     steps:
       - id: gate
@@ -73,6 +75,7 @@ jobs:
           YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS: ${{ secrets.YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS }}
           YOUTUBE_TOKEN_APEX_LEGENDS:      ${{ secrets.YOUTUBE_TOKEN_APEX_LEGENDS }}
           YOUTUBE_TOKEN_ROCKET_LEAGUE:     ${{ secrets.YOUTUBE_TOKEN_ROCKET_LEAGUE }}
+          YOUTUBE_TOKEN_R6_SIEGE:          ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
         run: python run_pipeline.py --game ${{ matrix.game }}
 
       - name: Commit used clips history

@@ -45,6 +45,11 @@ GAME_THEMES = {
         "secondary": (255, 255, 255),
         "overlay":   (5,   10,  30,  105),
     },
+    "rainbow-six-siege": {
+        "primary":   (255, 106,   0),        # #FF6A00 — orange Rainbow Six
+        "secondary": (255, 255, 255),
+        "overlay":   (5,   10,  20,  120),   # noir tactique
+    },
 }
 
 _FALLBACK_THEME = {

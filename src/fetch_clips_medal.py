@@ -27,6 +27,7 @@ MEDAL_GAME_CATALOG = {
     "league-of-legends": ("League of Legends",      "bQnfO2HXP"),
     "rocket-league":     ("Rocket League",          "adufon9HW"),
     "apex-legends":      ("Apex Legends",           "5FsRVgww4b"),
+    "r6-siege":          ("Rainbow Six Siege",      "HAuR_DD5N"),
 }
 
 EDITED_PATTERNS = re.compile(
