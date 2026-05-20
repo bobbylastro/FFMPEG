@@ -153,7 +153,7 @@ def _fetch_game_clips(
     return clips
 
 
-def fetch_medal_clips(limit: int = None, slugs: list[str] = None) -> list[dict]:
+def fetch_medal_clips(limit: int = None, slugs: list[str] = None, select: bool = True) -> list[dict]:
     total = limit or CLIPS_PER_VIDEO
     catalog = {
         slug: (name, cat_id)
@@ -185,14 +185,17 @@ def fetch_medal_clips(limit: int = None, slugs: list[str] = None) -> list[dict]:
         try:
             clips = _fetch_game_clips(session, slug, game_name, cat_id, per_game, used_ids)
 
-            # En mode multi-jeux on plafonne à 4/jeu pour diversité.
-            # En mode mono-jeu (per_game élevé) on laisse l'IA sélectionner librement.
-            ai_cap = per_game if len(catalog) == 1 else min(per_game, 4)
-            if ANTHROPIC_API_KEY:
-                from src.select_clips_ai import select_clips_ai
-                clips = select_clips_ai(clips[:50], ai_cap, game_name=game_name)
+            if select:
+                # En mode multi-jeux on plafonne à 4/jeu pour diversité.
+                # En mode mono-jeu (per_game élevé) on laisse l'IA sélectionner librement.
+                ai_cap = per_game if len(catalog) == 1 else min(per_game, 4)
+                if ANTHROPIC_API_KEY:
+                    from src.select_clips_ai import select_clips_ai
+                    clips = select_clips_ai(clips[:50], ai_cap, game_name=game_name)
+                else:
+                    clips = clips[:ai_cap]
             else:
-                clips = clips[:ai_cap]
+                clips = clips[:50]  # retourne les candidats bruts pour sélection combinée
 
             log.info(f"  {game_name}: keeping {len(clips)} clips")
             all_clips.extend(clips)

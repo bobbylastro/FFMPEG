@@ -7,12 +7,15 @@ from datetime import datetime, timedelta
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 from src.fetch_clips_medal import fetch_medal_clips, mark_clips_used, MEDAL_GAME_CATALOG
+from src.fetch_clips_twitch import fetch_twitch_clips
+from src.select_clips_ai import select_clips_ai
 from src.download_clips import download_clips
 from src.process_long import build_long_video
 from src.process_short import build_tiktoks_per_game
 from src.generate_thumbnail import generate_thumbnail, bump_episode
 from src.generate_content import get_youtube_title, get_youtube_description, generate_ai_content
 from src.upload_youtube import upload_from_content, upload_shorts_from_content
+from config.settings import CLIPS_PER_VIDEO
 
 # ── Args ───────────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser(description="Run the clip pipeline for one game.")
@@ -26,10 +29,19 @@ game_name = MEDAL_GAME_CATALOG[game_slug][0]   # ex. "Valorant"
 
 print(f"\n🎮  Game : {game_name}  ({game_slug})\n")
 
-# ── 1. Fetch & download ────────────────────────────────────────────────────
-clips = fetch_medal_clips(slugs=[game_slug])
+# ── 1. Fetch candidates (Medal + Twitch) puis sélection IA combinée ────────
+medal_candidates  = fetch_medal_clips(slugs=[game_slug], select=False)
+twitch_candidates = fetch_twitch_clips(game_slug, game_name)
+
+all_candidates = medal_candidates + twitch_candidates
+print(f"\n  Medal : {len(medal_candidates)} candidats | Twitch : {len(twitch_candidates)} candidats")
+
+clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name)
+
+print(f"\n  {len(clips)} clips retenus après sélection IA combinée :\n")
 for i, c in enumerate(clips, 1):
-    print(f"{i:2}. [{c['_game']:<25}] {int(c['duration']):>3}s | {c['view_count']:>7} views | {c['title']}")
+    source = c.get("_source", "medal")
+    print(f"{i:2}. [{source:<6}] [{c['_game']:<25}] {int(c['duration']):>3}s | {c['view_count']:>7} views | {c['title']}")
 
 downloaded = download_clips(clips)
 mark_clips_used(downloaded)
