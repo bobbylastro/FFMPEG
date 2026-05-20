@@ -12,7 +12,7 @@ from googleapiclient.discovery import build
 
 from src.fetch_clips_medal import MEDAL_GAME_CATALOG
 from src.upload_youtube import _get_credentials
-from src.fetch_analytics import _load, _save, refresh_stats, print_report
+from src.fetch_analytics import _load, _save, refresh_stats, refresh_channel_stats, print_report
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
@@ -98,7 +98,8 @@ if __name__ == "__main__":
     for slug, (name, _) in MEDAL_GAME_CATALOG.items():
         bootstrap(slug, name)
 
-    print("\n=== Refresh des stats ===\n")
+    print("\n=== Refresh des stats & abonnés ===\n")
     for slug, (name, _) in MEDAL_GAME_CATALOG.items():
         refresh_stats(slug)
+        refresh_channel_stats(slug)
         print_report(slug, name)

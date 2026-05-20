@@ -36,7 +36,7 @@
 </head>
 <body>
 <h1>📊 Pipeline Analytics</h1>
-<p class="meta">Mis à jour le 2026-05-20 14:33 UTC</p>
+<p class="meta">Mis à jour le 2026-05-20 14:36 UTC</p>
 <div class="summary">
   <div class="summary-stat"><div class="val">0</div><div class="lbl">abonnés (total)</div></div>
   <div class="summary-stat"><div class="val">2.2K</div><div class="lbl">vues totales</div></div>
@@ -200,16 +200,19 @@
 window.addEventListener('load', function() {
 
     new Chart(document.getElementById('chart_long_apex_legends'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [0],
-                backgroundColor: '#FC442255',
+                backgroundColor: '#FC442222',
                 borderColor: '#FC4422',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FC4422',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -223,16 +226,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_apex_legends'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [98, 0],
-                backgroundColor: '#FC442255',
+                backgroundColor: '#FC442222',
                 borderColor: '#FC4422',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FC4422',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -246,16 +252,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_long_counter_strike_2'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [0],
-                backgroundColor: '#F0A50055',
+                backgroundColor: '#F0A50022',
                 borderColor: '#F0A500',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#F0A500',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -269,16 +278,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_counter_strike_2'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [0, 0],
-                backgroundColor: '#F0A50055',
+                backgroundColor: '#F0A50022',
                 borderColor: '#F0A500',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#F0A500',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -292,16 +304,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_long_league_of_legends'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [1, 0],
-                backgroundColor: '#C89B3C55',
+                backgroundColor: '#C89B3C22',
                 borderColor: '#C89B3C',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#C89B3C',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -315,16 +330,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_league_of_legends'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [53],
-                backgroundColor: '#C89B3C55',
+                backgroundColor: '#C89B3C22',
                 borderColor: '#C89B3C',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#C89B3C',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -338,16 +356,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_long_r6_siege'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [18],
-                backgroundColor: '#FF6A0055',
+                backgroundColor: '#FF6A0022',
                 borderColor: '#FF6A00',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FF6A00',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -361,16 +382,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_r6_siege'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [1073, 486],
-                backgroundColor: '#FF6A0055',
+                backgroundColor: '#FF6A0022',
                 borderColor: '#FF6A00',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FF6A00',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -384,16 +408,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_long_rocket_league'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [1],
-                backgroundColor: '#3BADF855',
+                backgroundColor: '#3BADF822',
                 borderColor: '#3BADF8',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#3BADF8',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -407,16 +434,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_rocket_league'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [250, 0],
-                backgroundColor: '#3BADF855',
+                backgroundColor: '#3BADF822',
                 borderColor: '#3BADF8',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#3BADF8',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -430,16 +460,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_long_valorant'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-18", "2026-05-19"],
             datasets: [{
                 label: 'Vues',
                 data: [2, 1],
-                backgroundColor: '#FF465555',
+                backgroundColor: '#FF465522',
                 borderColor: '#FF4655',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FF4655',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {
@@ -453,16 +486,19 @@ window.addEventListener('load', function() {
         }
     });
     new Chart(document.getElementById('chart_short_valorant'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: ["2026-05-18", "2026-05-19", "2026-05-19", "2026-05-20"],
             datasets: [{
                 label: 'Vues',
                 data: [0, 250, 0, 0],
-                backgroundColor: '#FF465555',
+                backgroundColor: '#FF465522',
                 borderColor: '#FF4655',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '#FF4655',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }]
         },
         options: {

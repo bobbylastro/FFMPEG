@@ -57,16 +57,19 @@ def _fmt(n: int) -> str:
 def _chart_js(chart_id: str, labels: list, values: list, color: str, label: str) -> str:
     return f"""
     new Chart(document.getElementById('{chart_id}'), {{
-        type: 'bar',
+        type: 'line',
         data: {{
             labels: {json.dumps(labels)},
             datasets: [{{
                 label: '{label}',
                 data: {json.dumps(values)},
-                backgroundColor: '{color}55',
+                backgroundColor: '{color}22',
                 borderColor: '{color}',
-                borderWidth: 1,
-                borderRadius: 4,
+                borderWidth: 2,
+                pointBackgroundColor: '{color}',
+                pointRadius: 3,
+                tension: 0.3,
+                fill: true,
             }}]
         }},
         options: {{
