@@ -22,7 +22,7 @@ TWITCH_API_URL  = "https://api.twitch.tv/helix"
 # Medal slug → Twitch game name (exact match required by the API)
 TWITCH_GAME_CATALOG = {
     "valorant":          "VALORANT",
-    "counter-strike-2":  "Counter-Strike 2",
+    "counter-strike-2":  "Counter-Strike",
     "league-of-legends": "League of Legends",
     "rocket-league":     "Rocket League",
     "apex-legends":      "Apex Legends",
