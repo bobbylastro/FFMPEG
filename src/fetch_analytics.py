@@ -111,6 +111,50 @@ def refresh_stats(game_slug: str) -> None:
     _save(game_slug, records)
 
 
+def _channel_path() -> str:
+    return os.path.join(ANALYTICS_DIR, "channels.json")
+
+
+def _load_channels() -> dict:
+    path = _channel_path()
+    if not os.path.exists(path):
+        return {}
+    with open(path) as f:
+        return json.load(f)
+
+
+def _save_channels(data: dict) -> None:
+    os.makedirs(ANALYTICS_DIR, exist_ok=True)
+    with open(_channel_path(), "w") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def refresh_channel_stats(game_slug: str) -> None:
+    """Met à jour le nombre d'abonnés de la chaîne YouTube du jeu."""
+    try:
+        creds   = _get_credentials(game_slug=game_slug)
+        youtube = build("youtube", "v3", credentials=creds)
+        resp = youtube.channels().list(part="statistics", mine=True).execute()
+    except Exception as e:
+        log.warning(f"[analytics] channel stats failed pour {game_slug} : {e}")
+        return
+
+    items = resp.get("items", [])
+    if not items:
+        return
+
+    s = items[0].get("statistics", {})
+    channels = _load_channels()
+    channels[game_slug] = {
+        "subscribers":  int(s.get("subscriberCount", 0)),
+        "total_views":  int(s.get("viewCount", 0)),
+        "video_count":  int(s.get("videoCount", 0)),
+        "checked_at":   datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+    }
+    _save_channels(channels)
+    log.info(f"[analytics] {game_slug} : {channels[game_slug]['subscribers']:,} abonnés")
+
+
 def print_report(game_slug: str, game_name: str) -> None:
     """Affiche un rapport de performance pour les 10 dernières vidéos."""
     records = _load(game_slug)
