@@ -36,7 +36,11 @@ EDITED_PATTERNS = re.compile(
     r'|\bvol\.?\s*\d+\b|\bvolume\s+\d+\b'
     r'|\bmontage\b|\bcompilation\b'
     r'|\b#\d{2,}\b'
-    r'|\bseries\b|\bseason\b',
+    r'|\bseries\b|\bseason\b'
+    # edits & music
+    r'|\bedit\b|\bamv\b'
+    r'|\bft\.|\bfeat\.'
+    r'|\.(mp[34]|wav|mov|avi)\b',
     re.IGNORECASE,
 )
 
