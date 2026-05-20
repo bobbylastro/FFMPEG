@@ -209,7 +209,7 @@ def generate() -> None:
            color: #888; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
   .best span {{ color: #ddd; }}
   .charts-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
-  .chart-block {{ background: #161616; border-radius: 8px; padding: 10px; }}
+  .chart-block {{ background: #161616; border-radius: 8px; padding: 10px; min-width: 0; }}
   .chart-label {{ font-size: .7rem; color: #666; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }}
   .chart-wrap {{ position: relative; height: 110px; }}
   .no-data {{ color: #444; font-size: .8rem; padding: 16px 0; text-align: center; }}
