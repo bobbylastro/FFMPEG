@@ -16,6 +16,7 @@ from src.generate_thumbnail import generate_thumbnail, bump_episode
 from src.generate_content import get_youtube_title, get_youtube_description, generate_ai_content
 from src.upload_youtube import upload_from_content, upload_shorts_from_content
 from src.fetch_analytics import refresh_stats, print_report, record_run
+from src.generate_dashboard import generate as generate_dashboard
 from config.settings import CLIPS_PER_VIDEO
 
 # ── Args ───────────────────────────────────────────────────────────────────
@@ -110,6 +111,7 @@ short_ids  = upload_shorts_from_content(content_path)
 # ── 9. Enregistrement analytics ───────────────────────────────────────────
 with open(content_path, encoding="utf-8") as f:
     record_run(json.load(f), game_slug)
+generate_dashboard()
 
 # ── 10. Résumé ─────────────────────────────────────────────────────────────
 short_urls = [f"https://youtu.be/{vid}" for vid in short_ids]
