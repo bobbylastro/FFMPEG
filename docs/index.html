@@ -30,12 +30,13 @@
   .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .chart-block { background: #161616; border-radius: 8px; padding: 10px; }
   .chart-label { font-size: .7rem; color: #666; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .chart-wrap { position: relative; height: 110px; }
   .no-data { color: #444; font-size: .8rem; padding: 16px 0; text-align: center; }
 </style>
 </head>
 <body>
 <h1>📊 Pipeline Analytics</h1>
-<p class="meta">Mis à jour le 2026-05-20 14:32 UTC</p>
+<p class="meta">Mis à jour le 2026-05-20 14:33 UTC</p>
 <div class="summary">
   <div class="summary-stat"><div class="val">0</div><div class="lbl">abonnés (total)</div></div>
   <div class="summary-stat"><div class="val">2.2K</div><div class="lbl">vues totales</div></div>
@@ -60,11 +61,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_apex_legends" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_apex_legends"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_apex_legends" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_apex_legends"></canvas></div>
             </div>
         </div>
     </div>
@@ -85,11 +86,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_counter_strike_2" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_counter_strike_2"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_counter_strike_2" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_counter_strike_2"></canvas></div>
             </div>
         </div>
     </div>
@@ -110,11 +111,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_league_of_legends" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_league_of_legends"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_league_of_legends" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_league_of_legends"></canvas></div>
             </div>
         </div>
     </div>
@@ -135,11 +136,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_r6_siege" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_r6_siege"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_r6_siege" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_r6_siege"></canvas></div>
             </div>
         </div>
     </div>
@@ -160,11 +161,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_rocket_league" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_rocket_league"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_rocket_league" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_rocket_league"></canvas></div>
             </div>
         </div>
     </div>
@@ -185,11 +186,11 @@
         <div class="charts-row">
             <div class="chart-block">
                 <div class="chart-label">Compilations</div>
-                <canvas id="chart_long_valorant" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_long_valorant"></canvas></div>
             </div>
             <div class="chart-block">
                 <div class="chart-label">Shorts</div>
-                <canvas id="chart_short_valorant" height="110"></canvas>
+                <div class="chart-wrap"><canvas id="chart_short_valorant"></canvas></div>
             </div>
         </div>
     </div>
@@ -213,6 +214,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -235,6 +237,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -257,6 +260,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -279,6 +283,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -301,6 +306,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -323,6 +329,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -345,6 +352,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -367,6 +375,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -389,6 +398,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -411,6 +421,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -433,6 +444,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
@@ -455,6 +467,7 @@ window.addEventListener('load', function() {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },

@@ -71,6 +71,7 @@ def _chart_js(chart_id: str, labels: list, values: list, color: str, label: str)
         }},
         options: {{
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {{ legend: {{ display: false }} }},
             scales: {{
                 x: {{ ticks: {{ color: '#888', font: {{ size: 10 }} }}, grid: {{ display: false }} }},
@@ -112,8 +113,8 @@ def _card(slug: str, records: list, channel: dict) -> tuple:
     if short_labels:
         charts_js += _chart_js(cid_short, short_labels, short_values, color, "Vues")
 
-    long_chart_html  = f'<canvas id="{cid_long}" height="110"></canvas>' if long_labels else '<p class="no-data">Pas encore de données</p>'
-    short_chart_html = f'<canvas id="{cid_short}" height="110"></canvas>' if short_labels else '<p class="no-data">Pas encore de données</p>'
+    long_chart_html  = f'<div class="chart-wrap"><canvas id="{cid_long}"></canvas></div>' if long_labels else '<p class="no-data">Pas encore de données</p>'
+    short_chart_html = f'<div class="chart-wrap"><canvas id="{cid_short}"></canvas></div>' if short_labels else '<p class="no-data">Pas encore de données</p>'
 
     best_html = ""
     if best:
@@ -207,6 +208,7 @@ def generate() -> None:
   .charts-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
   .chart-block {{ background: #161616; border-radius: 8px; padding: 10px; }}
   .chart-label {{ font-size: .7rem; color: #666; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }}
+  .chart-wrap {{ position: relative; height: 110px; }}
   .no-data {{ color: #444; font-size: .8rem; padding: 16px 0; text-align: center; }}
 </style>
 </head>
