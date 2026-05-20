@@ -123,7 +123,8 @@ def _card(slug: str, records: list, channel: dict) -> tuple:
     if best:
         best_html = f'<div class="best">🏆 <span>{best["title"][:55]}</span> — {_fmt(best["stats"]["views"])} vues</div>'
 
-    subs_html = f'<div class="subs" style="color:{color}">{_fmt(subscribers)} <span>abonnés</span></div>' if subscribers else ""
+    subs_val  = _fmt(subscribers) if subscribers else "—"
+    subs_html = f'<div class="subs" style="color:{color}">{subs_val} <span>abonnés</span></div>'
 
     html = f"""
     <div class="card" style="border-top: 3px solid {color}">
