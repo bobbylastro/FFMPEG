@@ -11,7 +11,10 @@ from googleapiclient.http import MediaFileUpload
 
 log = logging.getLogger(__name__)
 
-SCOPES        = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly",
+]
 TOKEN_PATH    = "token.json"
 CATEGORY_GAMING = "20"
 

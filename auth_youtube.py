@@ -14,7 +14,10 @@ Usage :
 import json
 from google_auth_oauthlib.flow import Flow
 
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.readonly",
+]
 
 flow = Flow.from_client_secrets_file(
     "client_secrets.json",
