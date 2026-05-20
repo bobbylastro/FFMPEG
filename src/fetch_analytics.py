@@ -177,17 +177,19 @@ def print_report(game_slug: str, game_name: str) -> None:
         avg_views = sum(r["stats"]["views"] for r in longs) / len(longs)
         print(f"  Compilations ({len(longs)} total, moy. {avg_views:,.0f} vues)")
         for r in recent:
-            v = r["stats"]["views"]
+            v   = r["stats"]["views"]
             bar = "▓" * min(int(v / max(avg_views, 1) * 10), 20)
-            print(f"    #{r['episode']:>3}  {v:>7,} vues  {bar}")
+            ep  = str(r["episode"]) if r.get("episode") is not None else r.get("published_at", "?")
+            print(f"    #{ep:>6}  {v:>7,} vues  {bar}")
 
     if shorts:
         recent = sorted(shorts, key=lambda r: r["published_at"], reverse=True)[:5]
         avg_views = sum(r["stats"]["views"] for r in shorts) / len(shorts)
         print(f"  Shorts ({len(shorts)} total, moy. {avg_views:,.0f} vues)")
         for r in recent:
-            v = r["stats"]["views"]
+            v   = r["stats"]["views"]
             bar = "▓" * min(int(v / max(avg_views, 1) * 10), 20)
-            print(f"    ep{r['episode']:>3}  {v:>7,} vues  {bar}")
+            ep  = str(r["episode"]) if r.get("episode") is not None else r.get("published_at", "?")
+            print(f"    #{ep:>6}  {v:>7,} vues  {bar}")
 
     print(f"{'─'*55}\n")
