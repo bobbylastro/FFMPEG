@@ -32,13 +32,13 @@ def get_youtube_description(game: str, episode: int) -> str:
     return descriptions[(episode - 1) % len(descriptions)]
 
 
-def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str, list[str]]:
-    """Un seul appel Haiku pour générer les chapitres YouTube et les descriptions Shorts.
+def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str, list[str], list[str]]:
+    """Un seul appel Haiku pour générer les chapitres YouTube, les descriptions et titres Shorts.
 
-    Retourne (chapters_block, [desc_short_1, desc_short_2, ...]).
+    Retourne (chapters_block, [desc_short_1, ...], [title_short_1, ...]).
     """
     if not clips:
-        return "", []
+        return "", [], []
 
     game = clips[0].get("_game", "Gaming")
     clips_block = "\n".join(f"{i+1}. {c['title']}" for i, c in enumerate(clips))
@@ -56,7 +56,14 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
         "Output one label per line under the header CHAPTERS:\n\n"
         f"{clips_block}\n\n"
 
-        "## TASK 2 — SHORTS DESCRIPTIONS\n"
+        "## TASK 2 — SHORTS TITLES\n"
+        f"Write a punchy, SEO-optimized YouTube Shorts title for each clip below.\n"
+        f"Rules: 45-60 chars, start with the action (power words: Insane, Clutch, Crazy, Perfect, etc.), "
+        f"include '{game}', no player names, no hashtags.\n"
+        "Output each title under its own header SHORT_TITLE_1:, SHORT_TITLE_2:, etc.\n\n"
+        f"{shorts_block}\n\n"
+
+        "## TASK 3 — SHORTS DESCRIPTIONS\n"
         "Write a punchy YouTube Shorts description for each clip below.\n"
         "Rules: 2-3 lines, energetic tone, end with 5-8 hashtags including #Shorts, no player names.\n"
         "Output each description under its own header SHORT_1:, SHORT_2:, etc.\n\n"
@@ -66,7 +73,7 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     msg = client.messages.create(
         model="claude-haiku-4-5-20251001",
-        max_tokens=800,
+        max_tokens=1000,
         messages=[{"role": "user", "content": prompt}],
     )
     text = msg.content[0].text.strip()
@@ -75,9 +82,9 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
     chapters_str = ""
     if "CHAPTERS:" in text:
         raw = text.split("CHAPTERS:")[1]
-        raw = raw.split("SHORT_1:")[0].strip()
+        raw = raw.split("SHORT_TITLE_1:")[0].strip()
         labels = [l.strip() for l in raw.splitlines() if l.strip()]
-        lines = ["00:00 Intro"]
+        lines = []
         t = 0.0
         for clip, label in zip(clips, labels):
             t_int = int(t)
@@ -85,7 +92,24 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
             t += clip.get("duration", 30)
         chapters_str = "\n".join(lines)
 
-    # --- Parse SHORTS ---
+    # --- Parse SHORTS TITLES ---
+    short_titles = []
+    for i in range(len(short_clips)):
+        marker = f"SHORT_TITLE_{i+1}:"
+        next_marker = f"SHORT_TITLE_{i+2}:"
+        fallback = f"SHORT_{i+1}:"
+        if marker in text:
+            chunk = text.split(marker)[1]
+            if next_marker in chunk:
+                chunk = chunk.split(next_marker)[0]
+            elif fallback in chunk:
+                chunk = chunk.split(fallback)[0]
+            title = chunk.strip().splitlines()[0].strip()
+            short_titles.append(title[:97])
+        else:
+            short_titles.append(short_clips[i].get("title", "")[:97])
+
+    # --- Parse SHORTS DESCRIPTIONS ---
     short_descs = []
     for i in range(len(short_clips)):
         marker = f"SHORT_{i+1}:"
@@ -98,6 +122,6 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
         else:
             short_descs.append("")
 
-    return chapters_str, short_descs
+    return chapters_str, short_descs, short_titles
 
 
