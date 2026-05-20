@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 
 import anthropic
 
@@ -7,10 +8,11 @@ from config.settings import ANTHROPIC_API_KEY
 
 log = logging.getLogger(__name__)
 
-MODEL = "claude-haiku-4-5"
+MODEL = "claude-haiku-4-5-20251001"
 
 
 def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming") -> list[dict]:
+    n = min(n, len(candidates))  # ne pas demander plus que disponible
     """Ask Claude to pick the best n clips from candidates based on title/metadata."""
     if not candidates:
         return []
@@ -55,12 +57,16 @@ Return [] if truly none qualify. No explanation."""
     try:
         resp = client.messages.create(
             model=MODEL,
-            max_tokens=64,
+            max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
         raw = resp.content[0].text.strip()
         log.debug(f"AI response: {raw}")
-        indices = json.loads(raw)
+        # Extraire le tableau JSON même si le modèle ajoute du texte autour
+        match = re.search(r"\[.*?\]", raw, re.DOTALL)
+        if not match:
+            raise ValueError(f"No JSON array found in response: {raw[:100]!r}")
+        indices = json.loads(match.group())
         if not isinstance(indices, list):
             raise ValueError("not a list")
         indices = [int(x) for x in indices if 0 <= int(x) < len(candidates)]
