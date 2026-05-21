@@ -221,7 +221,7 @@ function buildChart(data) {{
     options: {{
       responsive: true,
       maintainAspectRatio: false,
-      interaction: {{ mode: 'index', intersect: false }},
+      interaction: {{ mode: 'nearest', intersect: false }},
       plugins: {{
         legend: {{ display: false }},
         tooltip: {{

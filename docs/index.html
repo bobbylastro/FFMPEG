@@ -39,7 +39,7 @@
 <header>
   <div>
     <h1>Pipeline Analytics</h1>
-    <p class="meta">Mis à jour le 2026-05-21 07:41 UTC</p>
+    <p class="meta">Mis à jour le 2026-05-21 07:49 UTC</p>
   </div>
   <div class="toggle">
     <button id="btn-shorts" class="active" onclick="switchMode('shorts')">Shorts</button>
@@ -87,7 +87,7 @@ function buildChart(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
+      interaction: { mode: 'nearest', intersect: false },
       plugins: {
         legend: { display: false },
         tooltip: {
