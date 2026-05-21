@@ -54,105 +54,49 @@ def _fmt(n: int) -> str:
     return str(n)
 
 
-def _chart_js(chart_id: str, labels: list, values: list, color: str, label: str) -> str:
-    return f"""
-    new Chart(document.getElementById('{chart_id}'), {{
-        type: 'line',
-        data: {{
-            labels: {json.dumps(labels)},
-            datasets: [{{
-                label: '{label}',
-                data: {json.dumps(values)},
-                backgroundColor: '{color}22',
-                borderColor: '{color}',
-                borderWidth: 2,
-                pointBackgroundColor: '{color}',
-                pointRadius: 3,
-                tension: 0.3,
-                fill: true,
-            }}]
-        }},
-        options: {{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {{ legend: {{ display: false }} }},
-            scales: {{
-                x: {{ ticks: {{ color: '#888', font: {{ size: 10 }} }}, grid: {{ display: false }} }},
-                y: {{ ticks: {{ color: '#888', font: {{ size: 10 }} }}, grid: {{ color: '#2a2a2a' }}, beginAtZero: true }}
-            }}
-        }}
-    }});"""
+def _build_chart_data(all_data: dict, video_type: str) -> dict:
+    """Construit un objet Chart.js multi-datasets (une ligne par jeu)."""
+    game_date_views = {}  # slug -> {date: views}
+    all_dates = set()
 
+    for slug, records in all_data.items():
+        filtered = [
+            r for r in records
+            if r["type"] == video_type
+            and r.get("stats", {}).get("views") is not None
+            and r.get("published_at")
+        ]
+        if not filtered:
+            continue
+        date_views: dict[str, int] = {}
+        for r in filtered:
+            date = r["published_at"][:10]
+            date_views[date] = date_views.get(date, 0) + r["stats"]["views"]
+            all_dates.add(date)
+        game_date_views[slug] = date_views
 
-def _card(slug: str, records: list, channel: dict) -> tuple:
-    color = GAME_COLORS.get(slug, "#888")
-    name  = _game_name(slug, records)
+    sorted_dates = sorted(all_dates)
 
-    longs  = [r for r in records if r["type"] == "long"  and r.get("stats", {}).get("views") is not None]
-    shorts = [r for r in records if r["type"] == "short" and r.get("stats", {}).get("views") is not None]
+    datasets = []
+    for slug, date_views in game_date_views.items():
+        color = GAME_COLORS.get(slug, "#888")
+        name  = _game_name(slug, all_data[slug])
+        values = [date_views.get(d) for d in sorted_dates]  # None = pas de donnée
+        datasets.append({
+            "label":               name,
+            "data":                values,
+            "borderColor":         color,
+            "backgroundColor":     color + "22",
+            "borderWidth":         2.5,
+            "pointBackgroundColor": color,
+            "pointRadius":         4,
+            "pointHoverRadius":    7,
+            "tension":             0.3,
+            "fill":                False,
+            "spanGaps":            True,
+        })
 
-    total_views = sum(r["stats"]["views"] for r in longs + shorts)
-    avg_long    = int(sum(r["stats"]["views"] for r in longs)  / len(longs))  if longs  else 0
-    avg_short   = int(sum(r["stats"]["views"] for r in shorts) / len(shorts)) if shorts else 0
-    best        = max(longs + shorts, key=lambda r: r["stats"]["views"], default=None)
-    subscribers = channel.get("subscribers", 0)
-
-    # Graphique compilations
-    longs_sorted = sorted([r for r in longs if r.get("published_at")], key=lambda r: r["published_at"])
-    long_labels  = [f"#{r['episode']}" if r.get("episode") else r["published_at"] for r in longs_sorted]
-    long_values  = [r["stats"]["views"] for r in longs_sorted]
-
-    # Graphique shorts
-    shorts_sorted = sorted([r for r in shorts if r.get("published_at")], key=lambda r: r["published_at"])
-    short_labels  = [f"#{r['episode']}" if r.get("episode") else r["published_at"] for r in shorts_sorted]
-    short_values  = [r["stats"]["views"] for r in shorts_sorted]
-
-    cid_long  = f"chart_long_{slug.replace('-', '_')}"
-    cid_short = f"chart_short_{slug.replace('-', '_')}"
-
-    charts_js = ""
-    if long_labels:
-        charts_js += _chart_js(cid_long, long_labels, long_values, color, "Vues")
-    if short_labels:
-        charts_js += _chart_js(cid_short, short_labels, short_values, color, "Vues")
-
-    long_chart_html  = f'<div class="chart-wrap"><canvas id="{cid_long}"></canvas></div>' if long_labels else '<p class="no-data">Pas encore de données</p>'
-    short_chart_html = f'<div class="chart-wrap"><canvas id="{cid_short}"></canvas></div>' if short_labels else '<p class="no-data">Pas encore de données</p>'
-
-    best_html = ""
-    if best:
-        best_html = f'<div class="best">🏆 <span>{best["title"][:55]}</span> — {_fmt(best["stats"]["views"])} vues</div>'
-
-    subs_val  = _fmt(subscribers) if subscribers else "—"
-    subs_html = f'<div class="subs" style="color:{color}">{subs_val} <span>abonnés</span></div>'
-
-    html = f"""
-    <div class="card" style="border-top: 3px solid {color}">
-        <div class="card-header">
-            <h2 style="color:{color}">{name}</h2>
-            {subs_html}
-        </div>
-        <div class="stats-row">
-            <div class="stat"><div class="val">{_fmt(total_views)}</div><div class="lbl">vues totales</div></div>
-            <div class="stat"><div class="val">{len(longs)}</div><div class="lbl">compilations</div></div>
-            <div class="stat"><div class="val">{_fmt(avg_long)}</div><div class="lbl">moy./compil</div></div>
-            <div class="stat"><div class="val">{len(shorts)}</div><div class="lbl">shorts</div></div>
-            <div class="stat"><div class="val">{_fmt(avg_short)}</div><div class="lbl">moy./short</div></div>
-        </div>
-        {best_html}
-        <div class="charts-row">
-            <div class="chart-block">
-                <div class="chart-label">Compilations</div>
-                {long_chart_html}
-            </div>
-            <div class="chart-block">
-                <div class="chart-label">Shorts</div>
-                {short_chart_html}
-            </div>
-        </div>
-    </div>
-    """
-    return html, charts_js
+    return {"labels": sorted_dates, "datasets": datasets}
 
 
 def generate() -> None:
@@ -161,24 +105,42 @@ def generate() -> None:
     channels   = _load_channels()
     updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-    total_views_all = sum(
-        r["stats"]["views"]
-        for records in all_data.values()
-        for r in records
-        if r.get("stats", {}).get("views") is not None
-    )
-    total_videos  = sum(len(r) for r in all_data.values())
-    total_subs    = sum(c.get("subscribers", 0) for c in channels.values())
+    shorts_data = _build_chart_data(all_data, "short")
+    longs_data  = _build_chart_data(all_data, "long")
 
-    cards_html = ""
-    charts_js  = ""
+    # Légende
+    legend_items = []
     for slug, records in all_data.items():
-        card_html, chart_js = _card(slug, records, channels.get(slug, {}))
-        cards_html += card_html
-        charts_js  += chart_js
+        color = GAME_COLORS.get(slug, "#888")
+        name  = _game_name(slug, records)
+        legend_items.append(
+            f'<div class="legend-item">'
+            f'<div class="legend-dot" style="background:{color}"></div>'
+            f'<span>{name}</span>'
+            f'</div>'
+        )
+    legend_html = "\n  ".join(legend_items)
 
-    if not cards_html:
-        cards_html = '<p class="no-data" style="text-align:center;margin-top:60px">Aucune donnée — lance bootstrap_analytics.py</p>'
+    # Cartes abonnés
+    subs_cards = []
+    for slug, records in all_data.items():
+        color = GAME_COLORS.get(slug, "#888")
+        name  = _game_name(slug, records)
+        ch    = channels.get(slug, {})
+        subs  = ch.get("subscribers", 0)
+        val   = _fmt(subs) if subs else "—"
+        subs_cards.append(
+            f'<div class="subs-card" style="border-top-color:{color}">'
+            f'<div class="game-name" style="color:{color}">{name}</div>'
+            f'<div class="subs-val">{val}</div>'
+            f'<div class="subs-lbl">abonnés</div>'
+            f'</div>'
+        )
+    subs_html = "\n  ".join(subs_cards)
+
+    no_data_msg = ""
+    if not all_data:
+        no_data_msg = '<p class="no-data">Aucune donnée — lance bootstrap_analytics.py</p>'
 
     html = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -189,49 +151,120 @@ def generate() -> None:
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-  body {{ background: #0f0f0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; padding: 24px; }}
-  h1 {{ font-size: 1.6rem; margin-bottom: 4px; }}
-  .meta {{ color: #555; font-size: .8rem; margin-bottom: 28px; }}
-  .summary {{ display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }}
-  .summary-stat {{ background: #1a1a1a; border-radius: 10px; padding: 14px 22px; flex: 1; min-width: 130px; }}
-  .summary-stat .val {{ font-size: 1.8rem; font-weight: 700; }}
-  .summary-stat .lbl {{ color: #666; font-size: .75rem; margin-top: 3px; }}
-  .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: 18px; }}
-  .card {{ background: #1a1a1a; border-radius: 12px; padding: 18px; }}
-  .card-header {{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }}
-  .card-header h2 {{ font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }}
-  .subs {{ font-size: 1.1rem; font-weight: 700; }}
-  .subs span {{ font-size: .7rem; font-weight: 400; color: #888; }}
-  .stats-row {{ display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }}
-  .stat {{ background: #242424; border-radius: 8px; padding: 7px 11px; flex: 1; min-width: 70px; }}
-  .stat .val {{ font-size: 1rem; font-weight: 700; }}
-  .stat .lbl {{ color: #666; font-size: .65rem; margin-top: 2px; }}
-  .best {{ background: #242424; border-radius: 8px; padding: 7px 11px; font-size: .8rem;
-           color: #888; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-  .best span {{ color: #ddd; }}
-  .charts-row {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }}
-  .chart-block {{ background: #161616; border-radius: 8px; padding: 10px; min-width: 0; }}
-  .chart-label {{ font-size: .7rem; color: #666; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }}
-  .chart-wrap {{ position: relative; height: 110px; }}
-  .no-data {{ color: #444; font-size: .8rem; padding: 16px 0; text-align: center; }}
+  html, body {{ height: 100%; }}
+  body {{ background: #0f0f0f; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }}
+
+  header {{ padding: 20px 28px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }}
+  h1 {{ font-size: 1.3rem; font-weight: 700; }}
+  .meta {{ color: #444; font-size: .75rem; margin-top: 3px; }}
+
+  .toggle {{ background: #1a1a1a; border-radius: 8px; display: flex; padding: 3px; gap: 3px; }}
+  .toggle button {{ background: transparent; border: none; color: #666; font-size: .85rem; padding: 6px 18px; border-radius: 6px; cursor: pointer; transition: all .15s; font-family: inherit; }}
+  .toggle button.active {{ background: #2a2a2a; color: #e0e0e0; }}
+
+  .chart-section {{ flex: 1; padding: 0 24px 10px; display: flex; flex-direction: column; min-height: 0; }}
+  .chart-container {{ flex: 1; background: #1a1a1a; border-radius: 14px; padding: 20px; position: relative; min-height: 380px; }}
+
+  .legend {{ display: flex; flex-wrap: wrap; gap: 10px 20px; padding: 14px 28px; flex-shrink: 0; }}
+  .legend-item {{ display: flex; align-items: center; gap: 8px; font-size: .85rem; color: #aaa; }}
+  .legend-dot {{ width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }}
+
+  .subs-row {{ display: flex; gap: 10px; padding: 4px 24px 24px; flex-wrap: wrap; flex-shrink: 0; }}
+  .subs-card {{ background: #1a1a1a; border-radius: 10px; padding: 12px 16px; flex: 1; min-width: 110px; border-top: 3px solid; }}
+  .game-name {{ font-size: .65rem; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }}
+  .subs-val {{ font-size: 1.6rem; font-weight: 700; }}
+  .subs-lbl {{ font-size: .65rem; color: #555; margin-top: 2px; }}
+
+  .no-data {{ color: #444; font-size: .9rem; text-align: center; padding: 60px; }}
 </style>
 </head>
 <body>
-<h1>📊 Pipeline Analytics</h1>
-<p class="meta">Mis à jour le {updated_at}</p>
-<div class="summary">
-  <div class="summary-stat"><div class="val">{_fmt(total_subs)}</div><div class="lbl">abonnés (total)</div></div>
-  <div class="summary-stat"><div class="val">{_fmt(total_views_all)}</div><div class="lbl">vues totales</div></div>
-  <div class="summary-stat"><div class="val">{total_videos}</div><div class="lbl">vidéos trackées</div></div>
-  <div class="summary-stat"><div class="val">{len(all_data)}</div><div class="lbl">jeux actifs</div></div>
+
+<header>
+  <div>
+    <h1>Pipeline Analytics</h1>
+    <p class="meta">Mis à jour le {updated_at}</p>
+  </div>
+  <div class="toggle">
+    <button id="btn-shorts" class="active" onclick="switchMode('shorts')">Shorts</button>
+    <button id="btn-longs" onclick="switchMode('longs')">Vidéos</button>
+  </div>
+</header>
+
+<div class="chart-section">
+  <div class="chart-container">
+    {no_data_msg}
+    <canvas id="mainChart"></canvas>
+  </div>
 </div>
-<div class="grid">
-{cards_html}
+
+<div class="legend">
+  {legend_html}
 </div>
+
+<div class="subs-row">
+  {subs_html}
+</div>
+
 <script>
-window.addEventListener('load', function() {{
-{charts_js}
-}});
+const shortsData = {json.dumps(shorts_data, ensure_ascii=False)};
+const longsData  = {json.dumps(longs_data,  ensure_ascii=False)};
+
+let currentChart = null;
+
+function buildChart(data) {{
+  if (currentChart) currentChart.destroy();
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  currentChart = new Chart(ctx, {{
+    type: 'line',
+    data: data,
+    options: {{
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {{ mode: 'index', intersect: false }},
+      plugins: {{
+        legend: {{ display: false }},
+        tooltip: {{
+          backgroundColor: '#1c1c1c',
+          borderColor: '#333',
+          borderWidth: 1,
+          titleColor: '#888',
+          bodyColor: '#e0e0e0',
+          padding: 12,
+          boxPadding: 6,
+          callbacks: {{
+            title: (items) => items[0]?.label || '',
+            label: (item) => {{
+              const v = item.parsed.y;
+              if (v === null || v === undefined) return null;
+              return '  ' + item.dataset.label + '  —  ' + v.toLocaleString('fr-FR') + ' vues';
+            }},
+            filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
+          }},
+        }},
+      }},
+      scales: {{
+        x: {{
+          ticks: {{ color: '#555', font: {{ size: 11 }} }},
+          grid: {{ color: '#1e1e1e' }},
+        }},
+        y: {{
+          ticks: {{ color: '#555', font: {{ size: 11 }} }},
+          grid: {{ color: '#1e1e1e' }},
+          beginAtZero: true,
+        }},
+      }},
+    }},
+  }});
+}}
+
+function switchMode(mode) {{
+  document.getElementById('btn-shorts').classList.toggle('active', mode === 'shorts');
+  document.getElementById('btn-longs').classList.toggle('active', mode === 'longs');
+  buildChart(mode === 'shorts' ? shortsData : longsData);
+}}
+
+window.addEventListener('load', () => buildChart(shortsData));
 </script>
 </body>
 </html>"""
