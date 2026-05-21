@@ -1,8 +1,6 @@
 name: Clip Pipeline
 
 on:
-  schedule:
-    - cron: "0 8 * * 2,4,6"  # mardi, jeudi, samedi à 8h UTC (10h Paris)
   workflow_dispatch:
     inputs:
       game:
