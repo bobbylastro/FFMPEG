@@ -90,7 +90,12 @@
     "game": "Valorant",
     "title": "Valorant Moments #2 💥 | Aces, Clutches & Highlights",
     "published_at": "2026-05-21",
-    "stats": {}
+    "stats": {
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "checked_at": "2026-05-21"
+    }
   },
   {
     "video_id": "2bIkPi2nlYs",
@@ -99,7 +104,12 @@
     "game": "Valorant",
     "title": "Insane Precision Aim Method in Valorant",
     "published_at": "2026-05-21",
-    "stats": {}
+    "stats": {
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "checked_at": "2026-05-21"
+    }
   },
   {
     "video_id": "1UnQ1dbvKIU",
@@ -108,6 +118,11 @@
     "game": "Valorant",
     "title": "Trying to Copy Pro Aim in Valorant",
     "published_at": "2026-05-21",
-    "stats": {}
+    "stats": {
+      "views": 0,
+      "likes": 0,
+      "comments": 0,
+      "checked_at": "2026-05-21"
+    }
   }
 ]
