@@ -101,7 +101,7 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
             chunk = text.split(marker)[1]
             if next_marker in chunk:
                 chunk = chunk.split(next_marker)[0]
-            title = chunk.strip().splitlines()[0].strip().strip('"').strip("'")
+            title = chunk.strip().splitlines()[0].strip().strip('"').strip("'").strip('*').strip()
             if title:
                 short_titles.append(title[:97])
             else:
