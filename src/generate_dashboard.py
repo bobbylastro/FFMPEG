@@ -7,12 +7,12 @@ ANALYTICS_DIR = "data/analytics"
 OUTPUT_PATH   = "docs/index.html"
 
 GAME_COLORS = {
-    "valorant":          "#FF4655",
-    "counter-strike-2":  "#F0A500",
-    "league-of-legends": "#C89B3C",
-    "apex-legends":      "#FC4422",
-    "rocket-league":     "#3BADF8",
-    "r6-siege":          "#FF6A00",
+    "valorant":          "#FF3B30",  # rouge vif
+    "apex-legends":      "#FF9F0A",  # orange/ambre
+    "counter-strike-2":  "#FFD60A",  # jaune vif
+    "league-of-legends": "#5CE1E6",  # cyan
+    "rocket-league":     "#0A84FF",  # bleu vif
+    "r6-siege":          "#BF5AF2",  # violet
 }
 
 
