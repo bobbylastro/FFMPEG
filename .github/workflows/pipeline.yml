@@ -50,7 +50,7 @@ jobs:
           echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
       - name: Wait (stagger jobs by 10min)
-        if: steps.gate.outputs.skip != 'true' && matrix.min_offset > 0
+        if: steps.gate.outputs.skip != 'true' && matrix.min_offset > 0 && github.event.inputs.game == ''
         run: sleep $(( ${{ matrix.min_offset }} * 60 ))
 
       - uses: actions/checkout@v4
