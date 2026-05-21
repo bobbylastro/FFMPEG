@@ -30,29 +30,6 @@ MEDAL_GAME_CATALOG = {
     "r6-siege":          ("Rainbow Six Siege",      "HAuR_DD5N"),
 }
 
-_HIGH_CONFIDENCE_DEFAULT = re.compile(
-    r"\b(ace|5\s*k|4\s*k|3\s*k|penta(kill)?|clutch|"
-    r"1\s*v\s*[2-5]|collateral|wall\s*bang|no.?scope|"
-    r"quick.?scope|flick|highlight|outplay|insane|"
-    r"triple\s*kill|quad(ra)?\s*kill|360|squad\s*wipe|"
-    r"ceiling\s*shot|aerial|defuse|retake|knife|"
-    r"headshot|carry|comeback|baron\s*steal|dragon\s*steal)\b",
-    re.IGNORECASE,
-)
-
-_HIGH_CONFIDENCE_BY_SLUG = {
-    "rocket-league": re.compile(
-        r"\b(aerial|ceiling\s*shot|musty|flick|flip\s*reset|double\s*tap|"
-        r"freestyle|insane|clutch|overtime|demo|outplay|highlight|360|"
-        r"redirect|ceiling|air\s*dribble|wall\s*shot|banger)\b",
-        re.IGNORECASE,
-    ),
-    "league-of-legends": re.compile(
-        r"\b(penta(kill)?|quadra(kill)?|ace|outplay|baron|dragon|steal|"
-        r"insane|clutch|carry|comeback|1v[2-5]|highlight|montage\b(?!.*\bedit))\b",
-        re.IGNORECASE,
-    ),
-}
 
 EDITED_PATTERNS = re.compile(
     r'\bpart\s+\d+\b'
@@ -156,8 +133,6 @@ def _fetch_game_clips(
             if item.get("orientation", "landscape") != "landscape": continue
             if item.get("sourceHeight", 1080) > item.get("sourceWidth", 1920): continue
             if EDITED_PATTERNS.search(title): continue
-            pattern = _HIGH_CONFIDENCE_BY_SLUG.get(slug, _HIGH_CONFIDENCE_DEFAULT)
-            if not pattern.search(title): continue
             clips.append({
                 "id": str(cid), "title": title, "url": url,
                 "view_count": views, "duration": duration,

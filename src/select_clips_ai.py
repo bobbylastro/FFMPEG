@@ -38,32 +38,26 @@ def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming", g
 
     priority_plays = _GAME_PLAYS.get(game_slug, "ace, clutch, outplay, insane play, highlight")
 
-    prompt = f"""You are curating a {game_name} highlights compilation for YouTube. Pick the best {n} clips a general audience will enjoy.
+    prompt = f"""You are selecting clips for a {game_name} YouTube highlights channel. Your ONLY job is to find EXPLICIT IN-GAME PLAYS. Every selected clip must show a concrete action happening in {game_name}.
 
-PRIORITY — strongly prefer clips whose title mentions these {game_name}-specific plays:
+TARGET plays for {game_name} (pick these first):
 {priority_plays}
 
-A clip PASSES only if its title contains an explicit in-game ACTION or PLAY — not just a game reference:
-- Kill count or clutch word: ace, 4k, 3k, 2k, 1v2, 1v3, 1v4, 1v5, clutch, collateral, triple, quad, penta, kill, frag, DBNO, down
-- Mechanic or action: flick, spray, peek, flank, snipe, wallbang, jumpshot, headshot, breach, rush, rotate, anchor, drone, defuse, plant
-- Outcome: retake, outplay, comeback, overtime, win, 1vX, carried, saved
-- Champion/agent/hero + action (e.g. "Yasuo pentakill", "Jett ace", "Wraith 1v3") — the character name alone is NOT enough
-- Any pro player name known in the {game_name} competitive scene + an action term
-- Qualifier + gaming term still PASSES: "almost ace", "worst 4k ever", "nearly clutched", "how lucky was that"
+A clip PASSES if its title describes a concrete play — examples by type:
+- Kill count: ace, 4k, 3k, 2k, 1v2, 1v3, 1v4, 1v5, clutch, collateral, triple kill, quad kill, penta, squad wipe
+- Mechanics: flick, spray, wallbang, no-scope, headshot, aerial, ceiling shot, defuse, retake, outplay, comeback
+- {game_name} specifics: {priority_plays}
+- Qualifiers are fine: "almost ace", "worst 4k ever", "insane clutch", "how did I hit that"
 
-A clip FAILS if ANY of the following is true:
-- Title is a song, artist, or lyric: "heavenly", "Heart Attack", "lil yachty", "Billie Jean", "bye bye", "worry"
-- Title is a lore location, region, or world name with no action: "Shurima", "The Void", "Demacia", "Noxus", "Runeterra", "Piltover"
-- Title sounds like a cinematic edit or music video: atmospheric, poetic, or lore-flavored language without a play description
-- Explicit edit/montage label: "edit", "montage", "edit.mp4", "my edit", "first 2026 edit", "#edit", "amv"
-- Completely vague with no game context: "long time no see guys", "yall im so back", "We r who we r"
-- Just a champion/agent/hero name with no action (e.g. "Yasuo", "Jinx", "Ahri" alone)
-- Training, practice or aim routine: "tutorial", "aim training", "practice", "how to", "guide", "settings", "sensitivity", "crosshair", "warmup", "routine", "tips", "tricks"
-- Technical/equipment complaint or real-life issue with no play: "mouse problem", "lag", "fps drop", "my setup", "pc issue", "stuttering", "input delay", "my hands", "my keyboard"
-- Rank promotion/reveal with no action: "rank promotion", "rank up", "new rank", "ranked up", "promotion game", "rank reveal", "hitting plat", "hitting diamond", "hitting gold"
-- Random/empty/filename: "t", "g", "clip.mp4"
+A clip FAILS — REJECT immediately — if:
+- No play described: vague titles, song names, lore words, player emotions, life updates
+- Training/tutorial: "aim training", "how to", "guide", "settings", "warmup", "tips"
+- Equipment/tech: "mouse problem", "lag", "fps drop", "my setup", "pc issue"
+- Rank ceremony: "rank up", "promotion game", "rank reveal", "hitting plat/diamond"
+- Edit/montage: "edit", "montage", "amv", "#edit"
+- Just a name with no action: character name alone, streamer name alone
 
-IMPORTANT: return FEWER than {n} clips rather than lowering the bar. Quality over quantity — never pick a FAIL clip just to fill the count.
+RULE: return FEWER than {n} if not enough clips qualify. NEVER pick a FAIL clip to fill the count. An empty result [] is better than bad clips.
 
 Candidates:
 {candidate_block}
