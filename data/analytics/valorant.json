@@ -82,5 +82,32 @@
       "comments": 0,
       "checked_at": "2026-05-21"
     }
+  },
+  {
+    "video_id": "t-6nt2lLHkQ",
+    "type": "long",
+    "episode": 2,
+    "game": "Valorant",
+    "title": "Valorant Moments #2 💥 | Aces, Clutches & Highlights",
+    "published_at": "2026-05-21",
+    "stats": {}
+  },
+  {
+    "video_id": "2bIkPi2nlYs",
+    "type": "short",
+    "episode": 2,
+    "game": "Valorant",
+    "title": "Insane Precision Aim Method in Valorant",
+    "published_at": "2026-05-21",
+    "stats": {}
+  },
+  {
+    "video_id": "1UnQ1dbvKIU",
+    "type": "short",
+    "episode": 2,
+    "game": "Valorant",
+    "title": "Trying to Copy Pro Aim in Valorant",
+    "published_at": "2026-05-21",
+    "stats": {}
   }
 ]
