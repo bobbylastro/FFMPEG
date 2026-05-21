@@ -233,7 +233,7 @@ def fetch_medal_clips(limit: int = None, slugs: list[str] = None, select: bool =
             log.warning(f"Failed to fetch Medal clips for {game_name}: {e}")
 
     if not all_clips:
-        raise RuntimeError("No Medal.tv clips found — cookies may have expired or all games failed")
+        log.warning("No Medal.tv clips found after filtering — falling back to Twitch only")
 
     log.info(f"Total: {len(all_clips)} Medal clips across {len(catalog)} games")
     return all_clips
