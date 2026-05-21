@@ -175,8 +175,8 @@ def upload_from_content(content_path: str, privacy: str = "public", game_slug: s
 def upload_shorts_from_content(content_path: str) -> list[str]:
     """
     Upload tous les Shorts depuis un content_*.json.
-    - Short J1 : publié immédiatement en public
-    - Short J2 : schedulé à midi UTC le lendemain (publish_at)
+    - Short J1 : schedulé +2h après l'upload
+    - Short J2 : schedulé +24h après l'upload
     Retourne la liste des video_ids uploadés.
     """
     import re
@@ -192,10 +192,11 @@ def upload_shorts_from_content(content_path: str) -> list[str]:
         log.info("Aucun Short à uploader.")
         return []
 
-    tomorrow_noon = (
-        datetime.now(timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
-        + timedelta(days=1)
-    ).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now = datetime.now(timezone.utc)
+    schedule = {
+        1: (now + timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        2: (now + timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    }
 
     video_ids = []
     for short in shorts:
@@ -206,7 +207,7 @@ def upload_shorts_from_content(content_path: str) -> list[str]:
 
         title      = f"{clip_title} #Shorts"[:100]
         tags       = re.findall(r"#(\w+)", description)[:15]
-        publish_at = tomorrow_noon if day == 2 else None
+        publish_at = schedule.get(day)
 
         video_id = upload_video(
             video_path=video_path,

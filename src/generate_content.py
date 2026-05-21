@@ -60,13 +60,13 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
         f"Write a punchy, SEO-optimized YouTube Shorts title for each clip below.\n"
         f"Rules: 45-60 chars, start with the action (power words: Insane, Clutch, Crazy, Perfect, etc.), "
         f"include '{game}', no player names, no hashtags.\n"
-        "Output each title under its own header SHORT_TITLE_1:, SHORT_TITLE_2:, etc.\n\n"
+        "Output each title under its own header STITLE_1:, STITLE_2:, etc.\n\n"
         f"{shorts_block}\n\n"
 
         "## TASK 3 — SHORTS DESCRIPTIONS\n"
         "Write a punchy YouTube Shorts description for each clip below.\n"
         "Rules: 2-3 lines, energetic tone, end with 5-8 hashtags including #Shorts, no player names.\n"
-        "Output each description under its own header SHORT_1:, SHORT_2:, etc.\n\n"
+        "Output each description under its own header SDESC_1:, SDESC_2:, etc.\n\n"
         f"{shorts_block}"
     )
 
@@ -95,31 +95,34 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
     # --- Parse SHORTS TITLES ---
     short_titles = []
     for i in range(len(short_clips)):
-        marker = f"SHORT_TITLE_{i+1}:"
-        next_marker = f"SHORT_TITLE_{i+2}:"
-        fallback = f"SHORT_{i+1}:"
+        marker      = f"STITLE_{i+1}:"
+        next_marker = f"STITLE_{i+2}:"
         if marker in text:
             chunk = text.split(marker)[1]
             if next_marker in chunk:
                 chunk = chunk.split(next_marker)[0]
-            elif fallback in chunk:
-                chunk = chunk.split(fallback)[0]
-            title = chunk.strip().splitlines()[0].strip()
-            short_titles.append(title[:97])
+            title = chunk.strip().splitlines()[0].strip().strip('"').strip("'")
+            if title:
+                short_titles.append(title[:97])
+            else:
+                log.warning(f"STITLE_{i+1} parsed empty — fallback to clip title")
+                short_titles.append(short_clips[i].get("title", "")[:97])
         else:
+            log.warning(f"STITLE_{i+1} marker not found in AI response — fallback to clip title")
             short_titles.append(short_clips[i].get("title", "")[:97])
 
     # --- Parse SHORTS DESCRIPTIONS ---
     short_descs = []
     for i in range(len(short_clips)):
-        marker = f"SHORT_{i+1}:"
-        next_marker = f"SHORT_{i+2}:"
+        marker      = f"SDESC_{i+1}:"
+        next_marker = f"SDESC_{i+2}:"
         if marker in text:
             chunk = text.split(marker)[1]
             if next_marker in chunk:
                 chunk = chunk.split(next_marker)[0]
             short_descs.append(chunk.strip())
         else:
+            log.warning(f"SDESC_{i+1} marker not found in AI response")
             short_descs.append("")
 
     return chapters_str, short_descs, short_titles

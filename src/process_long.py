@@ -14,8 +14,8 @@ from PIL import ImageFont
 from config.settings import OUTPUT_LONG
 
 MUSIC_DIR        = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "music"))
-CLIP_AUDIO_VOL   = 0.40   # Sons du jeu (réduits mais audibles)
-MUSIC_VOL        = 0.40   # Musique de fond
+CLIP_AUDIO_VOL   = 0.45   # Sons du jeu (réduits mais audibles)
+MUSIC_VOL        = 0.35   # Musique de fond
 
 log = logging.getLogger(__name__)
 

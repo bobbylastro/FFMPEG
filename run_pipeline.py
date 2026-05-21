@@ -42,7 +42,7 @@ twitch_candidates = fetch_twitch_clips(game_slug, game_name)
 all_candidates = medal_candidates + twitch_candidates
 print(f"\n  Medal : {len(medal_candidates)} candidats | Twitch : {len(twitch_candidates)} candidats")
 
-clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name)
+clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
 
 print(f"\n  {len(clips)} clips retenus après sélection IA combinée :\n")
 for i, c in enumerate(clips, 1):

@@ -30,6 +30,16 @@ MEDAL_GAME_CATALOG = {
     "r6-siege":          ("Rainbow Six Siege",      "HAuR_DD5N"),
 }
 
+_HIGH_CONFIDENCE = re.compile(
+    r"\b(ace|5\s*k|4\s*k|3\s*k|penta(kill)?|clutch|"
+    r"1\s*v\s*[2-5]|collateral|wall\s*bang|no.?scope|"
+    r"quick.?scope|flick|highlight|outplay|insane|"
+    r"triple\s*kill|quad(ra)?\s*kill|360|squad\s*wipe|"
+    r"ceiling\s*shot|aerial|defuse|retake|knife|"
+    r"headshot|carry|comeback|baron\s*steal|dragon\s*steal)\b",
+    re.IGNORECASE,
+)
+
 EDITED_PATTERNS = re.compile(
     r'\bpart\s+\d+\b'
     r'|\bepisode\b|\bep\.?\s*\d+\b'
@@ -132,6 +142,7 @@ def _fetch_game_clips(
             if item.get("orientation", "landscape") != "landscape": continue
             if item.get("sourceHeight", 1080) > item.get("sourceWidth", 1920): continue
             if EDITED_PATTERNS.search(title): continue
+            if not _HIGH_CONFIDENCE.search(title): continue
             clips.append({
                 "id": str(cid), "title": title, "url": url,
                 "view_count": views, "duration": duration,
