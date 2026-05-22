@@ -1,38 +1,38 @@
 {
   "valorant": {
     "subscribers": 342,
-    "total_views": 7148,
+    "total_views": 7151,
     "video_count": 5,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   },
   "counter-strike-2": {
     "subscribers": 0,
-    "total_views": 0,
+    "total_views": 1,
     "video_count": 4,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   },
   "league-of-legends": {
     "subscribers": 0,
-    "total_views": 54,
+    "total_views": 55,
     "video_count": 5,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   },
   "rocket-league": {
     "subscribers": 1,
     "total_views": 253,
     "video_count": 5,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   },
   "apex-legends": {
     "subscribers": 0,
     "total_views": 98,
     "video_count": 5,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   },
   "r6-siege": {
     "subscribers": 2,
-    "total_views": 2089,
+    "total_views": 2282,
     "video_count": 5,
-    "checked_at": "2026-05-21"
+    "checked_at": "2026-05-22"
   }
 }
