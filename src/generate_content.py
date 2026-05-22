@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 
 import anthropic
 
@@ -71,12 +72,26 @@ def generate_ai_content(clips: list[dict], short_clips: list[dict]) -> tuple[str
     )
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    msg = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    text = msg.content[0].text.strip()
+    retries = [30, 60, 120]
+    text = None
+    for attempt in range(len(retries) + 1):
+        try:
+            msg = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = msg.content[0].text.strip()
+            break
+        except anthropic.APIStatusError as e:
+            if e.status_code == 529 and attempt < len(retries):
+                wait = retries[attempt]
+                log.warning(f"API overloaded (529), retry dans {wait}s... (tentative {attempt + 1}/{len(retries)})")
+                time.sleep(wait)
+            else:
+                raise
+    if text is None:
+        raise RuntimeError("generate_ai_content: toutes les tentatives ont échoué")
 
     # --- Parse CHAPTERS ---
     chapters_str = ""
