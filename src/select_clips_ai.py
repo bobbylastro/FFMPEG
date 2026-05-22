@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import time
 
 import anthropic
 
@@ -12,8 +13,8 @@ MODEL = "claude-haiku-4-5-20251001"
 
 _GAME_PLAYS = {
     "valorant":          "ace, 4k, 3k, clutch, 1v2-5, knife kill, operator flick, Sheriff ace, spike defuse clutch, retake",
-    "counter-strike-2":  "ace, 4k, 3k, clutch, 1v2-5, AWP no-scope, deagle headshot, wallbang, collateral, knife kill",
-    "league-of-legends": "pentakill, quadrakill, baron steal, dragon steal, outplay, 1v9 carry, insane comeback, nexus destroy",
+    "marvel-rivals":     "team wipe, ultimate, clutch, 1v5, 1v6, multi-kill, POTG, MVP, combo, flank, insane mechanics, hero outplay",
+    "the-finals":        "squad wipe, cashout steal, multi-kill, clutch, 1v2, 1v3, insane shot, environmental kill, gadget play, building destruction, comeback",
     "apex-legends":      "squad wipe, 20-kill game, 3k damage, 1v3 clutch, final circle win, champion squad, revive clutch",
     "rocket-league":     "aerial goal, ceiling shot, musty flick, flip reset, double tap, overtime winner, insane save",
     "r6-siege":          "ace, 4k, 3k, clutch, 1v2-5, drone play, wallbang, operator ability play, defuse clutch, retake",
@@ -65,25 +66,39 @@ Candidates:
 Respond with ONLY a JSON array of indices (integers), e.g. [0, 3, 7].
 Return [] if truly none qualify. No explanation."""
 
-    try:
-        resp = client.messages.create(
-            model=MODEL,
-            max_tokens=512,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        raw = resp.content[0].text.strip()
-        log.debug(f"AI response: {raw}")
-        # Extraire le tableau JSON même si le modèle ajoute du texte autour
-        match = re.search(r"\[.*?\]", raw, re.DOTALL)
-        if not match:
-            raise ValueError(f"No JSON array found in response: {raw[:100]!r}")
-        indices = json.loads(match.group())
-        if not isinstance(indices, list):
-            raise ValueError("not a list")
-        indices = [int(x) for x in indices if 0 <= int(x) < len(candidates)]
-        selected = [candidates[i] for i in indices[:n]]
-        log.info(f"AI selected {len(selected)}/{len(candidates)} clips")
-        return selected
-    except Exception as e:
-        log.warning(f"AI selection failed ({e}), falling back to top-{n} by velocity")
-        return candidates[:n]
+    retries = [30, 60, 120]
+    last_error = None
+    for attempt in range(len(retries) + 1):
+        try:
+            resp = client.messages.create(
+                model=MODEL,
+                max_tokens=512,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = resp.content[0].text.strip()
+            log.debug(f"AI response: {raw}")
+            match = re.search(r"\[.*?\]", raw, re.DOTALL)
+            if not match:
+                raise ValueError(f"No JSON array found in response: {raw[:100]!r}")
+            indices = json.loads(match.group())
+            if not isinstance(indices, list):
+                raise ValueError("not a list")
+            indices = [int(x) for x in indices if 0 <= int(x) < len(candidates)]
+            selected = [candidates[i] for i in indices[:n]]
+            log.info(f"AI selected {len(selected)}/{len(candidates)} clips")
+            return selected
+        except anthropic.APIStatusError as e:
+            if e.status_code == 529 and attempt < len(retries):
+                wait = retries[attempt]
+                log.warning(f"API overloaded (529), retry dans {wait}s... (tentative {attempt + 1}/{len(retries)})")
+                time.sleep(wait)
+                last_error = e
+            else:
+                last_error = e
+                break
+        except Exception as e:
+            last_error = e
+            break
+
+    log.warning(f"AI selection failed ({last_error}), falling back to top-{n} by velocity")
+    return candidates[:n]

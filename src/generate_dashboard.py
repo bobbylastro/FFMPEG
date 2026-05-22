@@ -9,8 +9,8 @@ OUTPUT_PATH   = "docs/index.html"
 GAME_COLORS = {
     "valorant":          "#FF3B30",  # rouge vif
     "apex-legends":      "#FF9F0A",  # orange/ambre
-    "counter-strike-2":  "#FFD60A",  # jaune vif
-    "league-of-legends": "#5CE1E6",  # cyan
+    "marvel-rivals":     "#E8001C",  # rouge Marvel
+    "the-finals":        "#F0A500",  # or The Finals
     "rocket-league":     "#0A84FF",  # bleu vif
     "r6-siege":          "#BF5AF2",  # violet
 }

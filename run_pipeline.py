@@ -23,7 +23,7 @@ from config.settings import CLIPS_PER_VIDEO
 parser = argparse.ArgumentParser(description="Run the clip pipeline for one game.")
 parser.add_argument("--game", required=True,
                     choices=list(MEDAL_GAME_CATALOG.keys()),
-                    help="Game slug (e.g. valorant, counter-strike-2)")
+                    help="Game slug (e.g. valorant, the-finals)")
 parser.add_argument("--no-upload", action="store_true",
                     help="Process clips and save content JSON but skip YouTube upload")
 parser.add_argument("--upload-only", action="store_true",

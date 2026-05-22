@@ -23,8 +23,8 @@ def _used_path(slug: str) -> str:
 # slug → (display_name, category_id)
 MEDAL_GAME_CATALOG = {
     "valorant":          ("Valorant",               "fW3AZxHf_c"),
-    "counter-strike-2":  ("Counter-Strike 2",       "1giLEcuGln2"),
-    "league-of-legends": ("League of Legends",      "bQnfO2HXP"),
+    "marvel-rivals":     ("Marvel Rivals",           "1ypWQtSKBOL"),
+    "the-finals":        ("The Finals",              "1g4CjbsErJz"),
     "rocket-league":     ("Rocket League",          "adufon9HW"),
     "apex-legends":      ("Apex Legends",           "5FsRVgww4b"),
     "r6-siege":          ("Rainbow Six Siege",      "HAuR_DD5N"),

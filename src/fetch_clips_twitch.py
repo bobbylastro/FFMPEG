@@ -22,8 +22,8 @@ TWITCH_API_URL  = "https://api.twitch.tv/helix"
 # Medal slug → Twitch game name (exact match required by the API)
 TWITCH_GAME_CATALOG = {
     "valorant":          "VALORANT",
-    "counter-strike-2":  "Counter-Strike",
-    "league-of-legends": "League of Legends",
+    "marvel-rivals":     "Marvel Rivals",
+    "the-finals":        "The Finals",
     "rocket-league":     "Rocket League",
     "apex-legends":      "Apex Legends",
     "r6-siege":          "Rainbow Six Siege",
@@ -34,7 +34,9 @@ _HIGH_CONFIDENCE = re.compile(
     r"\b(ace|5\s*k|4\s*k|3\s*k|penta(kill)?|clutch|"
     r"1\s*v\s*[2-5]|collateral|wall\s*bang|no.?scope|"
     r"quick.?scope|flick|highlight|outplay|insane|"
-    r"triple\s*kill|quad\s*kill|360)\b",
+    r"triple\s*kill|quad\s*kill|360|"
+    r"team\s*wipe|wipe|ultimate|ult|mvp|potg|"
+    r"play\s*of\s*the\s*game|combo|multi.?kill|cashout)\b",
     re.IGNORECASE,
 )
 

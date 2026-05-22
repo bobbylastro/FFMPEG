@@ -16,8 +16,7 @@ COUNTER_DIR  = "data/episode_counter"
 OUTPUT_DIR   = "output/thumbnails"
 THUMB_W, THUMB_H = 1280, 720
 
-# Phrases d'accroche universelles — vraies pour toute compilation
-HEADLINES = [
+_HEADLINES_DEFAULT = [
     "BEST MOMENTS",
     "INSANE PLAYS",
     "HIGHLIGHT REEL",
@@ -28,21 +27,94 @@ HEADLINES = [
     "WEEKLY HIGHLIGHTS",
 ]
 
+GAME_HEADLINES = {
+    "valorant": [
+        "BEST MOMENTS",
+        "INSANE ACES",
+        "TOP CLUTCHES",
+        "CRACKED PLAYS",
+        "INSANE PLAYS",
+        "HIGHLIGHT REEL",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "marvel-rivals": [
+        "BEST MOMENTS",
+        "INSANE ULTIMATES",
+        "TEAM WIPES",
+        "TOP PLAYS",
+        "HERO OUTPLAYS",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "the-finals": [
+        "BEST MOMENTS",
+        "INSANE PLAYS",
+        "CASHOUT STEALS",
+        "SQUAD WIPES",
+        "TOP CLUTCHES",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "apex-legends": [
+        "BEST MOMENTS",
+        "SQUAD WIPES",
+        "INSANE PLAYS",
+        "TOP PLAYS",
+        "CRACKED PLAYS",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "rocket-league": [
+        "BEST MOMENTS",
+        "INSANE GOALS",
+        "HIGHLIGHT REEL",
+        "TOP PLAYS",
+        "CRACKED SHOTS",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "rainbow-six-siege": [
+        "BEST MOMENTS",
+        "INSANE ACES",
+        "TOP CLUTCHES",
+        "CRACKED PLAYS",
+        "INSANE PLAYS",
+        "HIGHLIGHT REEL",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+    "r6-siege": [
+        "BEST MOMENTS",
+        "INSANE ACES",
+        "TOP CLUTCHES",
+        "CRACKED PLAYS",
+        "INSANE PLAYS",
+        "HIGHLIGHT REEL",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
+}
+
 GAME_THEMES = {
     "valorant": {
         "primary":   (255, 70,  85),
         "secondary": (255, 248, 240),
         "overlay":   (10,  15,  25,  130),
     },
-    "counter-strike-2": {
-        "primary":   (240, 165,  0),
-        "secondary": (255, 255, 255),
-        "overlay":   (10,  10,  10,  140),
+    "marvel-rivals": {
+        "primary":   (220,  20,  60),
+        "secondary": (255, 215,   0),
+        "overlay":   (20,   0,   0,  140),
     },
-    "league-of-legends": {
-        "primary":   (200, 155,  60),
-        "secondary": (255, 248, 220),
-        "overlay":   (5,   5,   30,  140),
+    "the-finals": {
+        "primary":   (240, 165,   0),
+        "secondary": (255, 255, 255),
+        "overlay":   (15,  10,   0,  140),
     },
     "apex-legends": {
         "primary":   (252,  68,  34),
@@ -66,14 +138,30 @@ _FALLBACK_THEME = {
     "overlay":   (10,  10,  10,  130),
 }
 
+GAME_DISPLAY_NAMES = {
+    "valorant":          "VALORANT",
+    "marvel-rivals":     "MARVEL RIVALS",
+    "the-finals":        "THE FINALS",
+    "apex-legends":      "APEX LEGENDS",
+    "rocket-league":     "ROCKET LEAGUE",
+    "rainbow-six-siege": "RAINBOW SIX SIEGE",
+    "r6-siege":          "RAINBOW SIX SIEGE",
+}
+
 
 def _get_theme(game: str) -> dict:
     slug = game.lower().replace(" ", "-").replace(":", "").replace(".", "")
     return GAME_THEMES.get(slug, _FALLBACK_THEME)
 
 
-def _get_headline(episode: int) -> str:
-    return HEADLINES[(episode - 1) % len(HEADLINES)]
+def _get_display_name(game: str) -> str:
+    slug = game.lower().replace(" ", "-").replace(":", "").replace(".", "")
+    return GAME_DISPLAY_NAMES.get(slug, game.upper().replace("-", " "))
+
+
+def _get_headline(episode: int, game_slug: str = "") -> str:
+    headlines = GAME_HEADLINES.get(game_slug, _HEADLINES_DEFAULT)
+    return headlines[(episode - 1) % len(headlines)]
 
 
 def bump_episode(game: str) -> int:
@@ -185,12 +273,14 @@ def generate_thumbnail(clips: list[dict], game: str, episode: int = None) -> str
 
     draw = ImageDraw.Draw(img)
 
-    headline = _get_headline(episode)
-    ep_text  = f"#{episode}"
+    game_slug    = game.lower().replace(" ", "-").replace(":", "").replace(".", "")
+    headline     = _get_headline(episode, game_slug)
+    ep_text      = f"#{episode}"
+    display_name = _get_display_name(game)
 
     # Polices — headline auto-sized pour ne jamais dépasser la largeur
     MAX_W     = THUMB_W - 100
-    font_game = _auto_font(draw, game.upper(), FONT_TITLE, 100, MAX_W)
+    font_game = _auto_font(draw, display_name, FONT_TITLE, 100, MAX_W)
     font_hl   = _auto_font(draw, headline,     FONT_TITLE, 150, MAX_W)
     font_ep   = _auto_font(draw, ep_text,      FONT_TITLE, 110, MAX_W)
 
@@ -200,7 +290,7 @@ def generate_thumbnail(clips: list[dict], game: str, episode: int = None) -> str
     GAP_2    = 8
 
     # Calcul des hauteurs réelles (bbox[3] inclut l'ascender)
-    g_bb  = draw.textbbox((0, 0), game.upper(), font=font_game)
+    g_bb  = draw.textbbox((0, 0), display_name, font=font_game)
     hl_bb = draw.textbbox((0, 0), headline,     font=font_hl)
     ep_bb = draw.textbbox((0, 0), ep_text,       font=font_ep)
     g_bottom  = g_bb[3]
@@ -212,7 +302,7 @@ def generate_thumbnail(clips: list[dict], game: str, episode: int = None) -> str
 
     # Nom du jeu
     _, g_px_bottom = _draw_centered_shadowed(
-        draw, start_y, game.upper(), font_game,
+        draw, start_y, display_name, font_game,
         fill=theme["primary"], shadow_offset=4, shadow_alpha=200,
     )
 
