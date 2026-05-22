@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import re
 import requests
 from datetime import datetime, timedelta, timezone
 
@@ -28,17 +27,6 @@ TWITCH_GAME_CATALOG = {
     "apex-legends":      "Apex Legends",
     "r6-siege":          "Rainbow Six Siege",
 }
-
-# Only keep clips whose title signals a concrete high-quality play
-_HIGH_CONFIDENCE = re.compile(
-    r"\b(ace|5\s*k|4\s*k|3\s*k|penta(kill)?|clutch|"
-    r"1\s*v\s*[2-5]|collateral|wall\s*bang|no.?scope|"
-    r"quick.?scope|flick|highlight|outplay|insane|"
-    r"triple\s*kill|quad\s*kill|360|"
-    r"team\s*wipe|wipe|ultimate|ult|mvp|potg|"
-    r"play\s*of\s*the\s*game|combo|multi.?kill|cashout)\b",
-    re.IGNORECASE,
-)
 
 
 def _get_token() -> str:
@@ -147,8 +135,6 @@ def fetch_twitch_clips(
             if cid in used_ids:
                 continue
             if not (MIN_CLIP_DURATION <= duration <= MAX_CLIP_DURATION):
-                continue
-            if not _HIGH_CONFIDENCE.search(title):
                 continue
 
             created    = datetime.fromisoformat(c["created_at"].replace("Z", "+00:00"))
