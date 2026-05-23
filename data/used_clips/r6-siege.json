@@ -466,5 +466,44 @@
     "_source": "twitch",
     "_velocity": 2.1341653597899475,
     "used_at": "2026-05-21T12:01:16.224841+00:00"
+  },
+  {
+    "id": "mKr7TLV3RtbYdN62R",
+    "title": "Quick clip(s) #7 | 4K SKYSCRAPER",
+    "url": "https://cdn.medal.tv/mediac/f49eiSVz25pFom.mp4?auth=exp=1779553800~data=Mzk3MjQ2NDQzLG1LcjdUTFYzUnRiWWRONjJSLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=5cb8980d643b8b48e8a59ad52648471a4ac6c72143ba6e41b51de27cac5ce621&t=1080p&c=202621&missing",
+    "view_count": 3728,
+    "duration": 41.0667,
+    "broadcaster_name": "DZYNESSS",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 3728,
+    "_source": "medal",
+    "used_at": "2026-05-23T10:33:16.488958+00:00"
+  },
+  {
+    "id": "mKD032OMolxwFmKyT",
+    "title": "Ash ace",
+    "url": "https://cdn.medal.tv/mediac/f5uQvxAWwAikPT.mp4?auth=exp=1779553800~data=MzQxMTg4NjQ4LG1LRDAzMk9Nb2x4d0ZtS3lULEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=c0c5e6aa1a3e8057985a89ac792f546acfc8c4f32134ffa70eaa27c424d8b71a&t=1080p&c=202621&missing",
+    "view_count": 3104,
+    "duration": 33.45,
+    "broadcaster_name": "Bumb1_2",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 3104,
+    "_source": "medal",
+    "used_at": "2026-05-23T10:33:16.488958+00:00"
+  },
+  {
+    "id": "AthleticFancyLionHumbleLife-N1pUqXBKMGNq4VmI",
+    "title": "Unreal 3x flashes",
+    "url": "https://www.twitch.tv/louu/clip/AthleticFancyLionHumbleLife-N1pUqXBKMGNq4VmI",
+    "view_count": 709,
+    "duration": 40.2,
+    "broadcaster_name": "Louu",
+    "created_at": "2026-05-11T17:40:48Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 60.583324846948635,
+    "used_at": "2026-05-23T10:33:16.488958+00:00"
   }
 ]
