@@ -154,5 +154,70 @@
     "_source": "twitch",
     "_velocity": 5.198758905629992,
     "used_at": "2026-05-22T08:58:01.720308+00:00"
+  },
+  {
+    "id": "m6Qxx1PqohjvUPX_b",
+    "title": "Dirty flipping shark GETS THROWN OFF THE MAP!!!",
+    "url": "https://cdn.medal.tv/mediac/bBnIUZCzzr04Ss.mp4?auth=exp=1779550200~data=MjI5MDY1MzM5LG02UXh4MVBxb2hqdlVQWF9iLDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=235ec8f699a5d2e2cc386db74ed33bacd4c7338de495c0390214c322149b1df3&t=1080p&c=20267&missing",
+    "view_count": 10985,
+    "duration": 25.55,
+    "broadcaster_name": "0pt1c_",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 10985,
+    "_source": "medal",
+    "used_at": "2026-05-23T09:53:42.789964+00:00"
+  },
+  {
+    "id": "lZFJJFnkczhecd0S5",
+    "title": "The Ol' Web Whip!",
+    "url": "https://cdn.medal.tv/mediac/b1OmHS4rO8zQ37.mp4?auth=exp=1779550200~data=MTk0MDQxMDU3LGxaRkpKRm5rY3poZWNkMFM1LDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=fb71f62e0a818e97f915ade2e39004f26c9a5be35c1a47dcd06c7feaaccf2bbc&t=1080p&c=20265&missing",
+    "view_count": 9873,
+    "duration": 32.7333,
+    "broadcaster_name": "SirGooser",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 9873,
+    "_source": "medal",
+    "used_at": "2026-05-23T09:53:42.789964+00:00"
+  },
+  {
+    "id": "BoredInexpensiveToadSmoocherZ-nLxvCDAF_AwgZV9t",
+    "title": "LUKECOMBO IN PREVIEW",
+    "url": "https://www.twitch.tv/necros/clip/BoredInexpensiveToadSmoocherZ-nLxvCDAF_AwgZV9t",
+    "view_count": 1255,
+    "duration": 29.9,
+    "broadcaster_name": "Necros",
+    "created_at": "2026-05-13T22:12:36Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 132.29105668647574,
+    "used_at": "2026-05-23T09:53:42.789964+00:00"
+  },
+  {
+    "id": "SourCoyHippoPeanutButterJellyTime-UX0s2O855vsFltcu",
+    "title": "triple luna ..",
+    "url": "https://www.twitch.tv/xraghad0/clip/SourCoyHippoPeanutButterJellyTime-UX0s2O855vsFltcu",
+    "view_count": 845,
+    "duration": 20.4,
+    "broadcaster_name": "xraghad0",
+    "created_at": "2026-05-12T16:46:09Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 78.87348646025126,
+    "used_at": "2026-05-23T09:53:42.789964+00:00"
+  },
+  {
+    "id": "BlueZealousHippoMingLee-xJe8tnTo4QOhesCv",
+    "title": "10,000iq STRANGE",
+    "url": "https://www.twitch.tv/kingsman265_twitch/clip/BlueZealousHippoMingLee-xJe8tnTo4QOhesCv",
+    "view_count": 651,
+    "duration": 29.9,
+    "broadcaster_name": "Kingsman265_Twitch",
+    "created_at": "2026-05-14T02:45:46Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 70.02287934742301,
+    "used_at": "2026-05-23T09:53:42.789964+00:00"
   }
 ]
