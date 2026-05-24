@@ -6,10 +6,14 @@ import time
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+from googleapiclient.errors import HttpError, ResumableUploadError
 from googleapiclient.http import MediaFileUpload
 
 log = logging.getLogger(__name__)
+
+class QuotaExceededError(Exception):
+    """YouTube daily video upload quota exhausted."""
+
 
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
@@ -117,7 +121,14 @@ def upload_video(
 
     video_id = None
     while video_id is None:
-        status, response = request.next_chunk()
+        try:
+            status, response = request.next_chunk()
+        except ResumableUploadError as e:
+            if e.resp.status == 429:
+                raise QuotaExceededError(
+                    f"Quota YouTube 'Video Uploads per day' épuisé : {e}"
+                ) from e
+            raise
         if status:
             pct = int(status.progress() * 100)
             log.info(f"  Upload : {pct}%")

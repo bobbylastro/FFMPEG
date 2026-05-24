@@ -14,7 +14,7 @@ from src.process_long import build_long_video
 from src.process_short import build_tiktoks_per_game
 from src.generate_thumbnail import generate_thumbnail, bump_episode
 from src.generate_content import get_youtube_title, get_youtube_description, generate_ai_content
-from src.upload_youtube import upload_from_content, upload_shorts_from_content
+from src.upload_youtube import upload_from_content, upload_shorts_from_content, QuotaExceededError
 from src.fetch_analytics import refresh_stats, refresh_channel_stats, print_report, record_run
 from src.generate_dashboard import generate as generate_dashboard
 from config.settings import CLIPS_PER_VIDEO
@@ -125,8 +125,13 @@ else:
     print(f"\n📄  Upload depuis : {content_path}")
 
 # ── 8. Upload YouTube ─────────────────────────────────────────────────────
-video_id   = upload_from_content(content_path, privacy="public")
-short_ids  = upload_shorts_from_content(content_path)
+try:
+    video_id  = upload_from_content(content_path, privacy="public")
+    short_ids = upload_shorts_from_content(content_path)
+except QuotaExceededError as e:
+    logging.warning(str(e))
+    print(f"\n⚠️  Quota YouTube dépassé pour {game_name} — relance avec --upload-only demain.\n")
+    raise SystemExit(0)
 
 # ── 9. Enregistrement analytics ───────────────────────────────────────────
 with open(content_path, encoding="utf-8") as f:
