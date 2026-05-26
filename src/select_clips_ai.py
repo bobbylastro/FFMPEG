@@ -42,24 +42,27 @@ def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming", g
 
     priority_plays = _GAME_PLAYS.get(game_slug, "ace, clutch, outplay, insane play, highlight")
 
-    prompt = f"""You are selecting clips for a {game_name} YouTube highlights channel. Your ONLY job is to find EXPLICIT IN-GAME PLAYS. Every selected clip must show a concrete action happening in {game_name}.
+    prompt = f"""You are selecting clips for a {game_name} YouTube highlights channel. Your ONLY job is to find EXPLICIT IN-GAME PLAYS.
 
 TARGET plays for {game_name} (pick these first):
 {priority_plays}
 
-A clip PASSES if its title describes a concrete play — examples by type:
+A clip PASSES ONLY if its title unambiguously names a specific in-game action:
 - Kill count: ace, 4k, 3k, 2k, 1v2, 1v3, 1v4, 1v5, clutch, collateral, triple kill, quad kill, penta, squad wipe
-- Mechanics: flick, spray, wallbang, no-scope, headshot, aerial, ceiling shot, defuse, retake, outplay, comeback
+- Mechanics: flick, spray, wallbang, no-scope, headshot, aerial, ceiling shot, defuse, retake, outplay, comeback, prefire
 - {game_name} specifics: {priority_plays}
-- Qualifiers are fine: "almost ace", "worst 4k ever", "insane clutch", "how did I hit that"
+- Qualifiers are OK: "almost ace", "worst 4k ever", "insane clutch", "how did I hit that"
 
-A clip FAILS — REJECT immediately — if:
-- No play described: vague titles, song names, lore words, player emotions, life updates
-- Training/tutorial: "aim training", "how to", "guide", "settings", "warmup", "tips"
-- Equipment/tech: "mouse problem", "lag", "fps drop", "my setup", "pc issue"
-- Rank ceremony: "rank up", "promotion game", "rank reveal", "hitting plat/diamond"
+A clip FAILS — REJECT immediately — if ANY of these apply:
+- Vague or emotional: "bang bang", "oh my god", "sorry mate", "he's alive", "not like this", "insane", "crazy" ALONE with no play described
+- Sound/onomatopoeia with no action: "boom", "bang", "woah", "ahhh"
+- Object/item with no action: "une grenade", "the tea bag", "this gun", "my knife"
+- No play described: song names, lore words, player emotions, life updates, reactions
+- Training/tutorial: "aim training", "how to", "guide", "settings", "warmup"
+- Equipment/tech: "mouse problem", "lag", "fps drop", "my setup"
+- Rank ceremony: "rank up", "promotion game", "rank reveal"
 - Edit/montage: "edit", "montage", "amv", "#edit"
-- Just a name with no action: character name alone, streamer name alone
+- Name alone: character name, operator name, streamer name with no action
 
 RULE: return FEWER than {n} if not enough clips qualify. NEVER pick a FAIL clip to fill the count. An empty result [] is better than bad clips.
 

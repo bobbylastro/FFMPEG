@@ -47,14 +47,18 @@ if not args.upload_only:
     all_candidates = medal_candidates + twitch_candidates
     print(f"\n  Medal : {len(medal_candidates)} candidats | Twitch : {len(twitch_candidates)} candidats")
 
+    MIN_CLIPS = CLIPS_PER_VIDEO // 2  # seuil minimum acceptable
+
     try:
         clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
     except NoClipsSelectedError:
-        log.warning("Aucun clip retenu sur le pool initial — retry avec un pool Twitch élargi (50 clips)")
+        clips = []
+
+    if len(clips) < MIN_CLIPS:
+        log.warning(f"Seulement {len(clips)} clips retenus (min={MIN_CLIPS}) — retry avec pool Twitch élargi (50 clips)")
         twitch_extended = fetch_twitch_clips(game_slug, game_name, limit=50)
-        all_candidates  = twitch_extended
         print(f"\n  Retry Twitch seul : {len(twitch_extended)} candidats")
-        clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
+        clips = select_clips_ai(twitch_extended[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
 
     print(f"\n  {len(clips)} clips retenus après sélection IA combinée :\n")
     for i, c in enumerate(clips, 1):
