@@ -86,11 +86,11 @@ Return [] if truly none qualify. No explanation."""
             indices = [int(x) for x in indices if 0 <= int(x) < len(candidates)]
             selected = [candidates[i] for i in indices[:n]]
             log.info(f"AI selected {len(selected)}/{len(candidates)} clips")
-            if selected:
-                return selected
-            log.error(f"AI returned 0 clips. Raw response: {raw[:300]!r}")
-            log.error(f"Candidates titles: {[c['title'] for c in candidates]}")
-            raise ValueError(f"AI selected 0 clips out of {len(candidates)} candidates — aborting pipeline.")
+            if not selected:
+                log.error(f"AI returned 0 clips. Raw response: {raw[:300]!r}")
+                log.error(f"Candidates titles: {[c['title'] for c in candidates]}")
+                raise SystemExit("AI selected 0 clips — pas assez de clips valides pour ce jeu. Pipeline arrêté.")
+            return selected
         except anthropic.APIStatusError as e:
             if e.status_code == 529 and attempt < len(retries):
                 wait = retries[attempt]
