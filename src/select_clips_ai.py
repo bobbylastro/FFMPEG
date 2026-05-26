@@ -88,7 +88,9 @@ Return [] if truly none qualify. No explanation."""
             log.info(f"AI selected {len(selected)}/{len(candidates)} clips")
             if selected:
                 return selected
-            log.warning("AI returned 0 clips, falling back to top-N by view count")
+            log.warning(f"AI returned 0 clips. Raw response: {raw[:300]!r}")
+            log.warning(f"Candidates titles: {[c['title'] for c in candidates]}")
+            log.warning("Falling back to top-N by view count")
             return sorted(candidates, key=lambda c: c["view_count"], reverse=True)[:n]
         except anthropic.APIStatusError as e:
             if e.status_code == 529 and attempt < len(retries):
