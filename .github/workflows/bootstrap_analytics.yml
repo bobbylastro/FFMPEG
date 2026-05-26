@@ -22,8 +22,8 @@ jobs:
       - name: Run bootstrap
         env:
           YOUTUBE_TOKEN_VALORANT:          ${{ secrets.YOUTUBE_TOKEN_VALORANT }}
-          YOUTUBE_TOKEN_COUNTER_STRIKE_2:  ${{ secrets.YOUTUBE_TOKEN_COUNTER_STRIKE_2 }}
-          YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS: ${{ secrets.YOUTUBE_TOKEN_LEAGUE_OF_LEGENDS }}
+          YOUTUBE_TOKEN_MARVEL_RIVALS:     ${{ secrets.YOUTUBE_TOKEN_MARVEL_RIVALS }}
+          YOUTUBE_TOKEN_THE_FINALS:        ${{ secrets.YOUTUBE_TOKEN_THE_FINALS }}
           YOUTUBE_TOKEN_APEX_LEGENDS:      ${{ secrets.YOUTUBE_TOKEN_APEX_LEGENDS }}
           YOUTUBE_TOKEN_ROCKET_LEAGUE:     ${{ secrets.YOUTUBE_TOKEN_ROCKET_LEAGUE }}
           YOUTUBE_TOKEN_R6_SIEGE:          ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
