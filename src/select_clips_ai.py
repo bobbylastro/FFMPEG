@@ -9,6 +9,9 @@ from config.settings import ANTHROPIC_API_KEY
 
 log = logging.getLogger(__name__)
 
+class NoClipsSelectedError(Exception):
+    """L'IA n'a retenu aucun clip parmi les candidats."""
+
 MODEL = "claude-haiku-4-5-20251001"
 
 _GAME_PLAYS = {
@@ -89,7 +92,7 @@ Return [] if truly none qualify. No explanation."""
             if not selected:
                 log.error(f"AI returned 0 clips. Raw response: {raw[:300]!r}")
                 log.error(f"Candidates titles: {[c['title'] for c in candidates]}")
-                raise SystemExit("AI selected 0 clips — pas assez de clips valides pour ce jeu. Pipeline arrêté.")
+                raise NoClipsSelectedError(f"AI selected 0 clips out of {len(candidates)} candidates")
             return selected
         except anthropic.APIStatusError as e:
             if e.status_code == 529 and attempt < len(retries):

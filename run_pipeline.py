@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 
 from src.fetch_clips_medal import fetch_medal_clips, mark_clips_used, MEDAL_GAME_CATALOG
 from src.fetch_clips_twitch import fetch_twitch_clips
-from src.select_clips_ai import select_clips_ai
+from src.select_clips_ai import select_clips_ai, NoClipsSelectedError
 from src.download_clips import download_clips
 from src.process_long import build_long_video
 from src.process_short import build_tiktoks_per_game
@@ -47,7 +47,14 @@ if not args.upload_only:
     all_candidates = medal_candidates + twitch_candidates
     print(f"\n  Medal : {len(medal_candidates)} candidats | Twitch : {len(twitch_candidates)} candidats")
 
-    clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
+    try:
+        clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
+    except NoClipsSelectedError:
+        log.warning("Aucun clip retenu sur le pool initial — retry avec un pool Twitch élargi (50 clips)")
+        twitch_extended = fetch_twitch_clips(game_slug, game_name, limit=50)
+        all_candidates  = twitch_extended
+        print(f"\n  Retry Twitch seul : {len(twitch_extended)} candidats")
+        clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
 
     print(f"\n  {len(clips)} clips retenus après sélection IA combinée :\n")
     for i, c in enumerate(clips, 1):
