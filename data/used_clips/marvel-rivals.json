@@ -219,5 +219,83 @@
     "_source": "twitch",
     "_velocity": 70.02287934742301,
     "used_at": "2026-05-23T09:53:42.789964+00:00"
+  },
+  {
+    "id": "m3KSqEPFaUa87AmVN",
+    "title": "Dirty flipping shark GETS THROWN OFF THE MAP!!!",
+    "url": "https://cdn.medal.tv/mediac/blYY0VFvPxEeto.mp4?auth=exp=1779809400~data=MjI5MDY1MzM5LG0zS1NxRVBGYVVhODdBbVZOLDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=7e58f103b1f56bffe05736de51a08b983c050145d2f35da5cfecdcb843ad9cb2&t=1080p&c=20266&missing",
+    "view_count": 6908,
+    "duration": 25.5,
+    "broadcaster_name": "0pt1c_",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 6908,
+    "_source": "medal",
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
+  },
+  {
+    "id": "lTgq2BQfV7Wo_e6x6",
+    "title": "light steal lol!!",
+    "url": "https://cdn.medal.tv/mediac/avwIP7JAQYc6fD.mp4?auth=exp=1779809400~data=MjU4MjA5Mzg2LGxUZ3EyQlFmVjdXb19lNng2LDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=df08b79080af62dc6b5b6de5d7736c9b538e15d0ab4410dca75a220cb0ea0c52&t=1080p&c=20263&missing",
+    "view_count": 2388,
+    "duration": 26.55,
+    "broadcaster_name": "AcidSchmacid",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 2388,
+    "_source": "medal",
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
+  },
+  {
+    "id": "me6956Sxgj5Vn0DBW",
+    "title": "patty cake of doom",
+    "url": "https://cdn.medal.tv/mediac/ceHhM8lANRsZaH.mp4?auth=exp=1779809400~data=MTEzMjEzNzE0LG1lNjk1NlN4Z2o1Vm4wREJXLDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=9b5da66a2d40cf0aa854eb0a09ad3bca25dd21d9b0496483b7f0f2141e0af464&t=1080p&c=202610&missing",
+    "view_count": 2034,
+    "duration": 33.7333,
+    "broadcaster_name": "marisalys",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 2034,
+    "_source": "medal",
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
+  },
+  {
+    "id": "mABNorEL67D8PIUtv",
+    "title": "freja bullying",
+    "url": "https://cdn.medal.tv/mediac/ee5EG5Y-OkeBf_.mp4?auth=exp=1779809400~data=MjQwMzA2Mzc2LG1BQk5vckVMNjdEOFBJVXR2LDF5cFdRdFNLQk9MLDYzNDEwNDc0MQ~hmac=22b19e60e67e9c76a95568ca268cd0601ef4781d35da194ca2d388a3429e19f6&t=1080p&c=202618&missing",
+    "view_count": 1222,
+    "duration": 36.1833,
+    "broadcaster_name": "S3lfcursed",
+    "language": "en",
+    "_game": "Marvel Rivals",
+    "_velocity": 1222,
+    "_source": "medal",
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
+  },
+  {
+    "id": "HomelyFrailScallionUnSane-LTQUatd9aXZT_4it",
+    "title": "Dino vs Angela",
+    "url": "https://www.twitch.tv/ashlyne/clip/HomelyFrailScallionUnSane-LTQUatd9aXZT_4it",
+    "view_count": 607,
+    "duration": 25.4,
+    "broadcaster_name": "Ashlyne",
+    "created_at": "2026-05-13T21:27:17Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 48.49021134862204,
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
+  },
+  {
+    "id": "ApatheticOptimisticVelociraptorPupper-4FDH3sLIFySHPL86",
+    "title": "Don't leak this high ground strat",
+    "url": "https://www.twitch.tv/onlylegs/clip/ApatheticOptimisticVelociraptorPupper-4FDH3sLIFySHPL86",
+    "view_count": 360,
+    "duration": 23.4,
+    "broadcaster_name": "onlylegs",
+    "created_at": "2026-05-18T18:41:38Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 47.16346430777061,
+    "used_at": "2026-05-26T09:53:36.211163+00:00"
   }
 ]
