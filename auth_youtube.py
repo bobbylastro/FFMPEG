@@ -5,12 +5,16 @@ Usage :
     1. Télécharge client_secrets.json depuis Google Cloud Console
        (APIs & Services → Credentials → OAuth 2.0 Client ID → type Desktop)
     2. Place-le à la racine du projet
-    3. Lance : python auth_youtube.py
+    3. Lance : python auth_youtube.py [--secrets client_secrets.json] [--out token.json]
     4. Ouvre l'URL affichée dans ton navigateur, accepte, copie le code
     5. Colle le code dans le terminal
     6. Le fichier token.json est généré
-    7. Copie son contenu dans le secret GitHub YOUTUBE_TOKEN
+    7. Copie son contenu dans le secret GitHub YOUTUBE_TOKEN_<GAME>
+
+Pour un 2ème projet GCP :
+    python auth_youtube.py --secrets client_secrets_p2.json --out token_apex.json
 """
+import argparse
 import json
 from google_auth_oauthlib.flow import Flow
 
@@ -19,8 +23,13 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube.readonly",
 ]
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--secrets", default="client_secrets.json", help="Fichier client_secrets à utiliser")
+parser.add_argument("--out", default="token.json", help="Fichier de sortie du token")
+args = parser.parse_args()
+
 flow = Flow.from_client_secrets_file(
-    "client_secrets.json",
+    args.secrets,
     scopes=SCOPES,
     redirect_uri="urn:ietf:wg:oauth:2.0:oob",
 )
@@ -42,9 +51,9 @@ token_data = {
     "client_secret": creds.client_secret,
     "scopes":        list(creds.scopes),
 }
-with open("token.json", "w") as f:
+with open(args.out, "w") as f:
     json.dump(token_data, f, indent=2)
 
-print("\n✅ token.json généré.")
-print("   → Copie son contenu dans le secret GitHub YOUTUBE_TOKEN\n")
+print(f"\n✅ {args.out} généré.")
+print(f"   → Copie son contenu dans le secret GitHub YOUTUBE_TOKEN_<GAME>\n")
 print(json.dumps(token_data, indent=2))

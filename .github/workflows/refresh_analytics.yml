@@ -1,8 +1,6 @@
 name: Refresh Analytics Dashboard
 
 on:
-  schedule:
-    - cron: "0 * * * *"  # toutes les heures
   workflow_dispatch:
 
 jobs:
