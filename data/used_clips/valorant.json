@@ -428,5 +428,57 @@
     "_source": "twitch",
     "_velocity": 275.276491941253,
     "used_at": "2026-05-23T09:43:48.858849+00:00"
+  },
+  {
+    "id": "mJVIvRkl7C8YxOOjO",
+    "title": "Reyna 1v5 Ace Clutch on Lotus",
+    "url": "https://cdn.medal.tv/mediac/f1WYmSKSlYyBCd.mp4?auth=exp=1779809400~data=MTk2NTgxMzU5LG1KVkl2UmtsN0M4WXhPT2pPLGZXM0FaeEhmX2MsNjM0MTA0NzQx~hmac=afa7a16eaa511f7bec60604c69cf6ceb59db4100a48c0f15bffa8af190c7a3b7&t=1080p&c=202621&missing",
+    "view_count": 15533,
+    "duration": 27.3333,
+    "broadcaster_name": "TTV_S650Mustang",
+    "language": "en",
+    "_game": "Valorant",
+    "_velocity": 15533,
+    "_source": "medal",
+    "used_at": "2026-05-26T09:43:14.492089+00:00"
+  },
+  {
+    "id": "SuccessfulGrotesqueChipmunkPRChase-cUzaIjAeoTgiJ_UK",
+    "title": "yetujey insane 4k",
+    "url": "https://www.twitch.tv/valorant_emea/clip/SuccessfulGrotesqueChipmunkPRChase-cUzaIjAeoTgiJ_UK",
+    "view_count": 2339,
+    "duration": 23.9,
+    "broadcaster_name": "VALORANT_EMEA",
+    "created_at": "2026-05-16T16:59:00Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 241.2030233942681,
+    "used_at": "2026-05-26T09:43:14.492089+00:00"
+  },
+  {
+    "id": "HungryAlluringRavenFrankerZ-bbdXZ18iDcA9RHGd",
+    "title": "ACE",
+    "url": "https://www.twitch.tv/okinawapex/clip/HungryAlluringRavenFrankerZ-bbdXZ18iDcA9RHGd",
+    "view_count": 1912,
+    "duration": 43.1,
+    "broadcaster_name": "\u6c96\u7e04\u306b\u884c\u304f\u305f\u3081\u306b",
+    "created_at": "2026-05-18T04:45:19Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 232.97959290956706,
+    "used_at": "2026-05-26T09:43:14.492089+00:00"
+  },
+  {
+    "id": "WildSpinelessQuailHassaanChop-xv5LL5EeeGLNl4Cb",
+    "title": "Safia ace",
+    "url": "https://www.twitch.tv/kitty_r6/clip/WildSpinelessQuailHassaanChop-xv5LL5EeeGLNl4Cb",
+    "view_count": 2890,
+    "duration": 26.4,
+    "broadcaster_name": "Kitty_R6",
+    "created_at": "2026-05-12T13:23:47Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 208.714322518903,
+    "used_at": "2026-05-26T09:43:14.492089+00:00"
   }
 ]
