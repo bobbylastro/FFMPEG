@@ -86,7 +86,10 @@ Return [] if truly none qualify. No explanation."""
             indices = [int(x) for x in indices if 0 <= int(x) < len(candidates)]
             selected = [candidates[i] for i in indices[:n]]
             log.info(f"AI selected {len(selected)}/{len(candidates)} clips")
-            return selected
+            if selected:
+                return selected
+            log.warning("AI returned 0 clips, falling back to top-N by view count")
+            return sorted(candidates, key=lambda c: c["view_count"], reverse=True)[:n]
         except anthropic.APIStatusError as e:
             if e.status_code == 529 and attempt < len(retries):
                 wait = retries[attempt]
