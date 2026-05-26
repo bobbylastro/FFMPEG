@@ -505,5 +505,44 @@
     "_source": "twitch",
     "_velocity": 60.583324846948635,
     "used_at": "2026-05-23T10:33:16.488958+00:00"
+  },
+  {
+    "id": "mKZILqd8DO-_nomkl",
+    "title": "Kaid ace",
+    "url": "https://cdn.medal.tv/mediac/f7tF3XgMzegGG5.mp4?auth=exp=1779813000~data=MTg1NTg5ODQ4LG1LWklMcWQ4RE8tX25vbWtsLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=b65f949d6c92cf6133ee32f7ee2ab5823fc9fceb8ff6c2afc170d5d12437df5f&t=1080p&c=202621&missing",
+    "view_count": 5981,
+    "duration": 38.45,
+    "broadcaster_name": "Crispy_BabaYaga",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 5981,
+    "_source": "medal",
+    "used_at": "2026-05-26T10:33:21.767854+00:00"
+  },
+  {
+    "id": "mLQPeivtgfMkVDuyA",
+    "title": "Intense Theme Clutch | R6 3K Clip 55",
+    "url": "https://cdn.medal.tv/mediac/fcSC0VntXvekvK.mp4?auth=exp=1779813000~data=MjA3MTE2OTIzLG1MUVBlaXZ0Z2ZNa1ZEdXlBLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=ff21fa833cee804b2905f2932fb864b1c4ae7f9cb5134a51762f2dd0b0aa9d9a&t=1080p&c=202622&missing",
+    "view_count": 5247,
+    "duration": 44.9833,
+    "broadcaster_name": "RechyyX2",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 5247,
+    "_source": "medal",
+    "used_at": "2026-05-26T10:33:21.767854+00:00"
+  },
+  {
+    "id": "ResourcefulCarelessHamPrimeMe-ThrzTmxDK22_9o5r",
+    "title": "Spoit 4k Clutch against DarkZero",
+    "url": "https://www.twitch.tv/jynxzi/clip/ResourcefulCarelessHamPrimeMe-ThrzTmxDK22_9o5r",
+    "view_count": 13511,
+    "duration": 30,
+    "broadcaster_name": "Jynxzi",
+    "created_at": "2026-05-18T00:52:54Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 1607.8841510002642,
+    "used_at": "2026-05-26T10:33:21.767854+00:00"
   }
 ]
