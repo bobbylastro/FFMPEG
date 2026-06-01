@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import time
 import requests
 import yt_dlp
 
@@ -72,9 +73,20 @@ for game in GAMES:
     with open(history_path) as f:
         clips = json.load(f)
 
-    # Prend les 5 clips avec le plus de vues
-    clips_sorted = sorted(clips, key=lambda c: c.get("view_count", 0), reverse=True)
+    # Exclure les clips Medal dont l'URL est expirée
+    now = time.time()
+    valid = []
+    for c in clips:
+        if c.get("_source") == "medal":
+            m = re.search(r"exp=(\d+)", c.get("url", ""))
+            if m and int(m.group(1)) < now:
+                continue
+        valid.append(c)
+
+    # Prend les N clips avec le plus de vues parmi les URLs valides
+    clips_sorted = sorted(valid, key=lambda c: c.get("view_count", 0), reverse=True)
     selected = clips_sorted[:args.per_game]
+    log.info(f"  [{game}] {len(valid)}/{len(clips)} clips avec URL valide")
 
     out_dir = os.path.join(args.out, game)
     os.makedirs(out_dir, exist_ok=True)
