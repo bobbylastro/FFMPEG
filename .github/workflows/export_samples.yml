@@ -1,0 +1,32 @@
+name: Export Sample Clips
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_game:
+        description: "Nombre de clips par jeu"
+        required: false
+        default: "5"
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Export sample clips
+        run: python export_sample_clips.py --per-game ${{ github.event.inputs.per_game || '5' }} --out sample_clips
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-clips
+          path: sample_clips/
+          retention-days: 7
