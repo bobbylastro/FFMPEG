@@ -375,5 +375,70 @@
     "_source": "twitch",
     "_velocity": 20.791786531938214,
     "used_at": "2026-05-26T10:03:55.314941+00:00"
+  },
+  {
+    "id": "FrailGorgeousAirGuitarHumbleLife-ByIMbus9jB71rvw3",
+    "title": "decent revo shots",
+    "url": "https://www.twitch.tv/mrllamacr/clip/FrailGorgeousAirGuitarHumbleLife-ByIMbus9jB71rvw3",
+    "view_count": 75,
+    "duration": 26.5,
+    "broadcaster_name": "mrllamacr",
+    "created_at": "2026-05-24T04:06:33Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 9.09111075954964,
+    "used_at": "2026-06-01T10:06:33.180238+00:00"
+  },
+  {
+    "id": "WittyBoringNigiriPRChase-y01_sPHe6eZb7xxQ",
+    "title": "forgot i had c4 lol",
+    "url": "https://www.twitch.tv/zakkary/clip/WittyBoringNigiriPRChase-y01_sPHe6eZb7xxQ",
+    "view_count": 67,
+    "duration": 20.3,
+    "broadcaster_name": "Zakkary",
+    "created_at": "2026-05-23T20:08:33Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 7.807255015606781,
+    "used_at": "2026-06-01T10:06:33.180238+00:00"
+  },
+  {
+    "id": "ToughEnchantingPancakeGrammarKing-hgtUoAedqY6v_Jfh",
+    "title": "Big brain C4 & KS play",
+    "url": "https://www.twitch.tv/jinyuouo/clip/ToughEnchantingPancakeGrammarKing-hgtUoAedqY6v_Jfh",
+    "view_count": 80,
+    "duration": 27.4,
+    "broadcaster_name": "\u9177\u5496\u9b5a",
+    "created_at": "2026-05-19T17:51:19Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 6.310610276048491,
+    "used_at": "2026-06-01T10:06:33.180238+00:00"
+  },
+  {
+    "id": "ElegantTrappedOrcaPrimeMe-u3WlZ8RDGZ1ldHvE",
+    "title": "3.5 Piece",
+    "url": "https://www.twitch.tv/myflashie/clip/ElegantTrappedOrcaPrimeMe-u3WlZ8RDGZ1ldHvE",
+    "view_count": 48,
+    "duration": 36.8,
+    "broadcaster_name": "MyFlashie",
+    "created_at": "2026-05-24T11:03:11Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 6.029779607412754,
+    "used_at": "2026-06-01T10:06:33.180238+00:00"
+  },
+  {
+    "id": "BillowingProtectiveSandpiperCurseLit-NUS4nuf0C05bPBTP",
+    "title": "2k",
+    "url": "https://www.twitch.tv/aztracttv/clip/BillowingProtectiveSandpiperCurseLit-NUS4nuf0C05bPBTP",
+    "view_count": 28,
+    "duration": 30,
+    "broadcaster_name": "AztractTV",
+    "created_at": "2026-05-22T07:09:35Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 2.766056202097534,
+    "used_at": "2026-06-01T10:06:33.180238+00:00"
   }
 ]
