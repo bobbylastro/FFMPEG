@@ -14,13 +14,22 @@ class NoClipsSelectedError(Exception):
 
 MODEL = "claude-haiku-4-5-20251001"
 
+_GAME_CONTEXT = {
+    "valorant":      "Tactical 5v5 FPS with agents that have unique abilities. Teams attack/defend a bomb site. Round-based, one life per round.",
+    "marvel-rivals": "6v6 hero shooter with Marvel characters. Two teams fight to capture/push objectives. Heroes have powerful ultimates and combos.",
+    "the-finals":    "3-team FPS with massive environmental destruction. Teams compete to steal and hold a cashout briefcase. Gadgets and building destruction are core mechanics.",
+    "apex-legends":  "Battle royale FPS with squads of 3. Last squad standing wins. Characters have unique abilities. High movement, fast TTK.",
+    "rocket-league": "Soccer with rocket-powered cars. Players fly, boost, and spin to hit a giant ball into a goal. Aerial mechanics are the highlight.",
+    "r6-siege":      "Tactical 5v5 FPS with operator gadgets. Attackers breach a building, defenders fortify it. One life per round, heavy destruction mechanics.",
+}
+
 _GAME_PLAYS = {
-    "valorant":          "ace, 4k, 3k, clutch, 1v2-5, knife kill, operator flick, Sheriff ace, spike defuse clutch, retake",
-    "marvel-rivals":     "team wipe, ultimate, clutch, 1v5, 1v6, multi-kill, POTG, MVP, combo, flank, insane mechanics, hero outplay",
-    "the-finals":        "squad wipe, cashout steal, multi-kill, clutch, 1v2, 1v3, insane shot, environmental kill, gadget play, building destruction, comeback",
-    "apex-legends":      "squad wipe, 20-kill game, 3k damage, 1v3 clutch, final circle win, champion squad, revive clutch",
-    "rocket-league":     "aerial goal, ceiling shot, musty flick, flip reset, double tap, overtime winner, insane save",
-    "r6-siege":          "ace, 4k, 3k, clutch, 1v2-5, drone play, wallbang, operator ability play, defuse clutch, retake",
+    "valorant":      "ace, 4k, 3k, clutch, 1v2, 1v3, 1v4, 1v5, knife kill, operator flick, Sheriff ace, spike defuse clutch, retake, ability kill, util kill",
+    "marvel-rivals": "team wipe, ultimate, clutch, 1v5, 1v6, multi-kill, POTG, MVP, combo, flank, hero outplay, ability combo, ult wipe",
+    "the-finals":    "squad wipe, cashout steal, multi-kill, clutch, 1v2, 1v3, insane shot, environmental kill, gadget play, building destruction, comeback, cashout defend",
+    "apex-legends":  "squad wipe, 20-kill game, 3k damage, 4k damage, 1v3 clutch, final circle win, champion squad, revive clutch, 1v2, 1v3, no-scope, wingman shot",
+    "rocket-league": "aerial goal, ceiling shot, musty flick, flip reset, double tap, overtime winner, insane save, 360 shot, air dribble, redirect",
+    "r6-siege":      "ace, 4k, 3k, clutch, 1v2, 1v3, 1v4, 1v5, drone play, wallbang, operator ability play, defuse clutch, retake, through wall kill",
 }
 
 
@@ -41,8 +50,11 @@ def select_clips_ai(candidates: list[dict], n: int, game_name: str = "gaming", g
     candidate_block = "\n".join(lines)
 
     priority_plays = _GAME_PLAYS.get(game_slug, "ace, clutch, outplay, insane play, highlight")
+    game_context   = _GAME_CONTEXT.get(game_slug, "")
 
     prompt = f"""You are selecting clips for a {game_name} YouTube highlights channel. Your ONLY job is to find EXPLICIT IN-GAME PLAYS.
+
+Game context: {game_context}
 
 TARGET plays for {game_name} (pick these first):
 {priority_plays}
