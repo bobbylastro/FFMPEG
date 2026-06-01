@@ -1,0 +1,55 @@
+name: Website Clips
+
+on:
+  workflow_dispatch:
+    inputs:
+      games:
+        description: "Slugs des jeux séparés par des espaces (vide = tous)"
+        required: false
+        default: ""
+      per_game:
+        description: "Clips par jeu"
+        required: false
+        default: "10"
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch & select clips
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+        run: |
+          GAMES="${{ github.event.inputs.games }}"
+          PER_GAME="${{ github.event.inputs.per_game }}"
+          if [ -n "$GAMES" ]; then
+            python run_website_clips.py --per-game "$PER_GAME" --games $GAMES
+          else
+            python run_website_clips.py --per-game "$PER_GAME"
+          fi
+
+      - name: Upload clips artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-clips-${{ github.run_number }}
+          path: public/clips/
+          retention-days: 14
+
+      - name: Commit used_clips_website history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/used_clips_website/ || true
+          git diff --cached --quiet || git commit -m "chore: update website clip history [$(date +%Y-%m-%d)]"
+          git push || true
