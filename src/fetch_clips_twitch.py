@@ -74,7 +74,7 @@ def fetch_twitch_clips(
     game_slug: str,
     game_name: str,
     extra_used_ids: set | None = None,
-    limit: int = 15,
+    limit: int = 25,
     days: int = 14,
 ) -> list[dict]:
     """Fetch Twitch clips for one game, pre-filtered to high-confidence plays.
