@@ -544,5 +544,57 @@
     "_source": "twitch",
     "_velocity": 1607.8841510002642,
     "used_at": "2026-05-26T10:33:21.767854+00:00"
+  },
+  {
+    "id": "PuzzledResourcefulOrangeHoneyBadger-ka_jmXZ-2OIX6D7g",
+    "title": "spoit hits insane 4k",
+    "url": "https://www.twitch.tv/itsspoit/clip/PuzzledResourcefulOrangeHoneyBadger-ka_jmXZ-2OIX6D7g",
+    "view_count": 232,
+    "duration": 23,
+    "broadcaster_name": "itsSpoit",
+    "created_at": "2026-05-21T16:45:43Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 21.594323959382304,
+    "used_at": "2026-06-01T10:36:39.814492+00:00"
+  },
+  {
+    "id": "AlluringBetterCheesecakeWow-prJJg6hJ_Voc-eIW",
+    "title": "sledge 4k",
+    "url": "https://www.twitch.tv/exoltfps/clip/AlluringBetterCheesecakeWow-prJJg6hJ_Voc-eIW",
+    "view_count": 127,
+    "duration": 38.2,
+    "broadcaster_name": "ExoltFPS",
+    "created_at": "2026-05-25T03:30:50Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 17.407826467274376,
+    "used_at": "2026-06-01T10:36:39.814492+00:00"
+  },
+  {
+    "id": "SpunkyMagnificentCurlewNinjaGrumpy-2tJJpjwCG8G6mCzy",
+    "title": "another 4k 1 taps",
+    "url": "https://www.twitch.tv/ambir6/clip/SpunkyMagnificentCurlewNinjaGrumpy-2tJJpjwCG8G6mCzy",
+    "view_count": 121,
+    "duration": 36.4,
+    "broadcaster_name": "AmbiR6",
+    "created_at": "2026-05-22T03:00:52Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 11.72892128557515,
+    "used_at": "2026-06-01T10:36:39.814492+00:00"
+  },
+  {
+    "id": "SillyTangentialInternFunRun-HxHY44pG05ZgQMhh",
+    "title": "MY DADDY HIT A 4k",
+    "url": "https://www.twitch.tv/skittlz/clip/SillyTangentialInternFunRun-HxHY44pG05ZgQMhh",
+    "view_count": 74,
+    "duration": 37.4,
+    "broadcaster_name": "Skittlz",
+    "created_at": "2026-05-23T20:22:41Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 8.611761456091893,
+    "used_at": "2026-06-01T10:36:39.814492+00:00"
   }
 ]
