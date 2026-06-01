@@ -206,5 +206,57 @@
     "_source": "twitch",
     "_velocity": 28.96442991864268,
     "used_at": "2026-05-26T10:23:43.961118+00:00"
+  },
+  {
+    "id": "SmallSarcasticEmuDoggo-OKRMKL_4bET9otsE",
+    "title": "tounsy pinch",
+    "url": "https://www.twitch.tv/tounsyrl/clip/SmallSarcasticEmuDoggo-OKRMKL_4bET9otsE",
+    "view_count": 743,
+    "duration": 21.8,
+    "broadcaster_name": "TounsyRL",
+    "created_at": "2026-05-24T09:56:43Z",
+    "_game": "Rocket League",
+    "_source": "twitch",
+    "_velocity": 92.637058601749,
+    "used_at": "2026-06-01T10:26:35.082845+00:00"
+  },
+  {
+    "id": "CrypticSecretivePlumberRickroll-EqyWa76OMPpCLQh1",
+    "title": "Reveal double tap",
+    "url": "https://www.twitch.tv/tenacitytv/clip/CrypticSecretivePlumberRickroll-EqyWa76OMPpCLQh1",
+    "view_count": 782,
+    "duration": 28.1,
+    "broadcaster_name": "TenacityTv",
+    "created_at": "2026-05-21T13:40:33Z",
+    "_game": "Rocket League",
+    "_source": "twitch",
+    "_velocity": 71.97352480534965,
+    "used_at": "2026-06-01T10:26:35.082845+00:00"
+  },
+  {
+    "id": "BitterShortFrogKevinTurtle-0IwWCb2eP9fttA8B",
+    "title": "Juicy saves Zen's signature shot but Exotiik cleans it up to start off the match",
+    "url": "https://www.twitch.tv/rocketleague/clip/BitterShortFrogKevinTurtle-0IwWCb2eP9fttA8B",
+    "view_count": 302,
+    "duration": 26.3,
+    "broadcaster_name": "RocketLeague",
+    "created_at": "2026-05-24T17:29:07Z",
+    "_game": "Rocket League",
+    "_source": "twitch",
+    "_velocity": 39.18827829935485,
+    "used_at": "2026-06-01T10:26:35.082845+00:00"
+  },
+  {
+    "id": "ArborealDignifiedKoupreyThisIsSparta-q7wFjmKsxIpW8ufX",
+    "title": "Nass does it all himself. Catch to double tap slot.",
+    "url": "https://www.twitch.tv/rocketleague/clip/ArborealDignifiedKoupreyThisIsSparta-q7wFjmKsxIpW8ufX",
+    "view_count": 279,
+    "duration": 24,
+    "broadcaster_name": "RocketLeague",
+    "created_at": "2026-05-24T13:18:32Z",
+    "_game": "Rocket League",
+    "_source": "twitch",
+    "_velocity": 35.40427492879195,
+    "used_at": "2026-06-01T10:26:35.082845+00:00"
   }
 ]
