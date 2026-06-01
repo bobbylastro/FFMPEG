@@ -5,8 +5,22 @@ Historique séparé du pipeline YouTube dans data/used_clips_website/.
 import json
 import logging
 import os
+import re
 import requests
 from datetime import datetime, timedelta, timezone
+
+_NON_LATIN_RE = re.compile(
+    r'['
+    r'Ѐ-ӿ'   # Cyrillic
+    r'؀-ۿ'   # Arabic
+    r'ऀ-ॿ'   # Devanagari
+    r'฀-๿'   # Thai
+    r'぀-ヿ'   # Hiragana + Katakana
+    r'㐀-䶿'   # CJK Extension A
+    r'一-鿿'   # CJK Unified Ideographs
+    r'가-힯'   # Korean Hangul
+    r']'
+)
 
 from config.settings import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, MIN_CLIP_DURATION, MAX_CLIP_DURATION
 
@@ -140,6 +154,8 @@ def fetch_website_clips(
             if cid in used_ids:
                 continue
             if not (MIN_CLIP_DURATION <= duration <= MAX_CLIP_DURATION):
+                continue
+            if _NON_LATIN_RE.search(c.get("title", "")):
                 continue
 
             created    = datetime.fromisoformat(c["created_at"].replace("Z", "+00:00"))
