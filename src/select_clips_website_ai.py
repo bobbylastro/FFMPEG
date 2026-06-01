@@ -60,14 +60,15 @@ ACCEPT a clip if its title suggests ANY of these:
 - Remarkable feats: records, unusual achievements, creative plays, wild moments
 - Engaging story: comeback, revenge, last second, impossible situation
 
-REJECT a clip if its title suggests:
+REJECT a clip if ANY of these apply:
+- Title has no clear relationship to the game being played (e.g. references another game, a song, a meme with no gameplay context)
 - Purely technical/educational: settings, guides, tutorials, warmup, aim training
-- Boring/vague with no context: random names alone, one-word reactions like "lol", "omg" with nothing else
-- Non-gameplay: setup tour, IRL content, rank reveal ceremony with no gameplay
-- Spam/low effort: clickbait with no described action
+- Pure reaction with no described action: "lol", "omg", "bro", "what", "no way" alone
+- Non-gameplay: setup tour, IRL content, rank reveal with no gameplay, stream highlights reel
+- Unreadable or meaningless: random words, inside jokes with zero context, keyboard smash
 
-Be GENEROUS — if a title is ambiguous, include it. The goal is variety and engagement, not strict play quality.
-Return FEWER than {n} only if truly not enough clips qualify.
+DEFAULT TO REJECT if you cannot tell what happens in the clip from the title alone.
+Return FEWER than {n} if not enough clips qualify — quality over quantity.
 
 Candidates:
 {candidate_block}
