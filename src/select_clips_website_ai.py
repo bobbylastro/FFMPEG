@@ -52,8 +52,7 @@ def select_website_clips(candidates: list[dict], n: int, game_slug: str = "") ->
 
     prompt = f"""You are curating clips for a TikTok-style gaming website. Select the most engaging clips a viewer would want to watch.
 
-Game: {_GAME_CONTEXT.get(game_slug, game_slug)}
-{f"Context: {game_context}" if game_context else ""}
+Game: {game_slug} — {game_context}
 
 ACCEPT a clip if its title suggests ANY of these:
 - Impressive plays: kills, clutches, outplays, insane shots, combos, big moments
