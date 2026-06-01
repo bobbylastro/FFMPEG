@@ -1,17 +1,18 @@
 """
-Exporte 5 clips par jeu depuis l'historique used_clips.
+Exporte N clips par jeu en fetchant directement depuis Twitch.
 Usage : python export_sample_clips.py [--per-game 5] [--out sample_clips]
 """
 import argparse
-import json
 import logging
 import os
 import re
-import requests
 import yt_dlp
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
+
+from src.fetch_clips_website import fetch_website_clips
+from src.select_clips_website_ai import select_website_clips
 
 GAMES = [
     "valorant",
@@ -19,7 +20,7 @@ GAMES = [
     "marvel-rivals",
     "the-finals",
     "rocket-league",
-    "r6-siege",
+    "rainbow-six-siege",
 ]
 
 parser = argparse.ArgumentParser()
@@ -32,56 +33,47 @@ def sanitize(name: str) -> str:
     return re.sub(r"[^\w\-.]", "_", name)[:60]
 
 
-def download_direct(url: str, dest: str) -> None:
-    r = requests.get(url, stream=True, timeout=60, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    })
-    r.raise_for_status()
-    with open(dest, "wb") as f:
-        for chunk in r.iter_content(65536):
-            f.write(chunk)
-
-
-def download_twitch(url: str, dest: str) -> None:
+def download_twitch(url: str, dest: str) -> bool:
     ydl_opts = {
         "quiet": True,
         "no_warnings": True,
         "format": "best[ext=mp4]/best",
         "outtmpl": dest.replace(".mp4", ".%(ext)s"),
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-    # yt-dlp peut changer l'extension
-    if not os.path.exists(dest):
-        base = dest.replace(".mp4", "")
-        for f in os.listdir(os.path.dirname(dest)):
-            if f.startswith(os.path.basename(base)):
-                os.rename(os.path.join(os.path.dirname(dest), f), dest)
-                break
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        if not os.path.exists(dest):
+            base = dest.replace(".mp4", "")
+            for f in os.listdir(os.path.dirname(dest)):
+                if f.startswith(os.path.basename(base)):
+                    os.rename(os.path.join(os.path.dirname(dest), f), dest)
+                    break
+        return os.path.exists(dest)
+    except Exception as e:
+        log.warning(f"    Download failed: {e}")
+        return False
 
 
 total_ok = 0
 total_fail = 0
 
-for game in GAMES:
-    history_path = f"data/used_clips/{game}.json"
-    if not os.path.exists(history_path):
-        log.warning(f"  [{game}] Pas d'historique trouvé, skipped")
+for game_slug in GAMES:
+    log.info(f"\n  [{game_slug}] Fetch Twitch...")
+
+    candidates = fetch_website_clips(game_slug, limit=30, days=150)
+    if not candidates:
+        log.warning(f"  [{game_slug}] Aucun candidat Twitch trouvé")
         continue
 
-    with open(history_path) as f:
-        clips = json.load(f)
+    selected = select_website_clips(candidates, n=args.per_game, game_slug=game_slug)
+    if not selected:
+        log.warning(f"  [{game_slug}] IA n'a rien retenu")
+        continue
 
-    # Twitch uniquement
-    twitch_clips = [c for c in clips if c.get("_source") == "twitch"]
-    clips_sorted = sorted(twitch_clips, key=lambda c: c.get("view_count", 0), reverse=True)
-    selected = clips_sorted[:args.per_game]
-    log.info(f"  [{game}] {len(twitch_clips)} clips Twitch disponibles")
-
-    out_dir = os.path.join(args.out, game)
+    out_dir = os.path.join(args.out, game_slug)
     os.makedirs(out_dir, exist_ok=True)
 
-    log.info(f"  [{game}] {len(selected)} clips sélectionnés")
     ok = 0
     for clip in selected:
         title_safe = sanitize(clip.get("title", clip["id"]))
@@ -92,21 +84,14 @@ for game in GAMES:
             ok += 1
             continue
 
-        try:
-            source = clip.get("_source", "medal")
-            if source == "medal":
-                download_direct(clip["url"], dest)
-            else:
-                download_twitch(clip["url"], dest)
-
+        if download_twitch(clip["url"], dest):
             size_kb = os.path.getsize(dest) // 1024
-            log.info(f"    ✅ {title_safe}.mp4  ({size_kb} KB)")
+            log.info(f"    ✅  {title_safe}.mp4  ({size_kb} KB)")
             ok += 1
-        except Exception as e:
-            log.warning(f"    ❌ {clip['title'][:50]} — {e}")
+        else:
             total_fail += 1
 
     total_ok += ok
-    log.info(f"  [{game}] {ok}/{len(selected)} téléchargés\n")
+    log.info(f"  [{game_slug}] {ok}/{len(selected)} téléchargés")
 
-log.info(f"Total : {total_ok} clips téléchargés, {total_fail} échecs")
+log.info(f"\nTotal : {total_ok} clips OK, {total_fail} échecs")
