@@ -10,7 +10,7 @@ on:
       per_game:
         description: "Clips par jeu"
         required: false
-        default: "10"
+        default: "5"
 
 jobs:
   fetch:
@@ -30,6 +30,9 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           GAMES="${{ github.event.inputs.games }}"
           PER_GAME="${{ github.event.inputs.per_game }}"
