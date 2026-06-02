@@ -29,7 +29,6 @@ _GAME_CONTEXT = {
     "minecraft":         "Sandbox survival/creative game. Builds, redstone, PvP, speedruns.",
     "overwatch":         "6v6 hero shooter with diverse characters and team-based objectives.",
     "arc-raiders":       "Co-op extraction shooter. Teams fight AI and other players for loot.",
-    "tft":               "Auto-battler strategy game (Teamfight Tactics). Unit placement and synergies.",
 }
 
 
@@ -50,26 +49,26 @@ def select_website_clips(candidates: list[dict], n: int, game_slug: str = "") ->
         )
     candidate_block = "\n".join(lines)
 
-    prompt = f"""You are curating clips for a TikTok-style gaming website. Select the most engaging clips a viewer would want to watch.
+    prompt = f"""You are curating clips for a TikTok-style gaming website targeting an international English-speaking audience. Be selective — only keep clips that are genuinely worth watching.
 
 Game: {game_slug} — {game_context}
 
-ACCEPT a clip if its title suggests ANY of these:
-- Impressive plays: kills, clutches, outplays, insane shots, combos, big moments
-- Funny/unexpected: fails, trolling, unexpected outcomes, wild situations, unusual challenges
-- Remarkable feats: records, unusual achievements, creative plays, anything chaotic or memorable
-- Engaging moments: comeback, revenge, last-second action, underdog situation
-- Any title that mentions a champion/character/weapon/ability alongside a hint of action
+ACCEPT a clip if its title clearly suggests:
+- Impressive gameplay: kills, clutches, outplays, insane shots, combos, highlight moments, impressive feats
+- Funny/unexpected IN-GAME moments: fails, trolling, unexpected outcomes, chaotic situations — BUT only if the title is in English
+- Remarkable in-game achievements: records, creative plays, big comebacks, last-second action
 
-REJECT a clip ONLY if it clearly fits one of these:
-- Gibberish: only symbols/emojis, random letters, keyboard smash (e.g. "xdddddd", "yeps", "enty", "jj")
+REJECT a clip if ANY of the following is true:
+- Gibberish: only symbols/emojis, random letters, keyboard smash
 - Purely technical/educational: settings guide, tutorial, warmup, aim training
-- Non-gameplay real-world content: setup tour, hardware review, IRL-only situation
-- Bare number + noun with no implied action (e.g. "113 knife", "4k", "round 5") — a clear achievement like "1v5 ace" is fine
-- Player/streamer names + social verb only, no gameplay action described (e.g. "X goes off on Y", "X vs Y", "argument between X and Y") — social drama without gameplay
-- Pure filler reaction alone: "lol", "omg", "nice", "good vibes", "wow", "yep" with no game reference
+- Non-gameplay real-world content: IRL situations, facecam-only, people just talking, physical/IRL reactions, rank-up screen only
+- Rank milestone with no gameplay context (e.g. "new rank", "hit diamond", "peak unlocked")
+- Non-English funny/meme titles: if the title is a joke, meme, or funny comment written in a non-English language, REJECT it — non-English humor is not universal
+- Social drama without gameplay: streamer reactions, arguments, callouts, shoutouts, drama clips
+- Filler reactions with no game action: "lol", "omg", "nice", "wow" with no game-specific content
+- Vague titles with no implied action: bare number + noun, player name only, generic exclamations
 
-When in doubt and any game action or game-specific content is implied: ACCEPT.
+When in doubt, lean toward REJECTING. Only accept if the clip clearly passes the criteria above.
 Aim to return exactly {n} clips. Return fewer only if genuinely fewer than {n} qualify.
 
 Candidates:

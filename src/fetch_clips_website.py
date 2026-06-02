@@ -51,7 +51,6 @@ WEBSITE_GAME_CATALOG = {
     "minecraft":          "Minecraft",
     "overwatch":          "Overwatch 2",
     "arc-raiders":        "ARC Raiders",
-    "tft":                "Teamfight Tactics",
 }
 
 
