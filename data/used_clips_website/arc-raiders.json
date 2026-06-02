@@ -138,5 +138,61 @@
     "_source": "twitch",
     "_velocity": 6.998245090014589,
     "used_at": "2026-06-01T12:25:08.270682+00:00"
+  },
+  {
+    "id": "CrepuscularColdbloodedMeerkatStoneLightning-X9GyAynyfTJs7f5x",
+    "title": "Dirty Little Headshot",
+    "url": "https://www.twitch.tv/luceishere/clip/CrepuscularColdbloodedMeerkatStoneLightning-X9GyAynyfTJs7f5x",
+    "view_count": 1237,
+    "duration": 28,
+    "broadcaster_name": "LuceIsHere",
+    "created_at": "2026-03-04T11:17:43Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 13.758539345549712,
+    "used_at": "2026-06-02T09:05:12.150985+00:00"
+  },
+  {
+    "id": "AnimatedSmellyPorpoiseDeIlluminati-BVSoOBIXdbZNCn3D",
+    "title": "Rat got Ratted",
+    "url": "https://www.twitch.tv/cyficy/clip/AnimatedSmellyPorpoiseDeIlluminati-BVSoOBIXdbZNCn3D",
+    "view_count": 625,
+    "duration": 22.5,
+    "broadcaster_name": "Cyficy",
+    "created_at": "2026-03-07T23:59:41Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 7.235583603008383,
+    "used_at": "2026-06-02T09:05:12.150985+00:00"
+  },
+  {
+    "id": "VenomousPrettyCrabPeanutButterJellyTime-xLTlZkdSIzAoRKIE",
+    "title": "Clocked by Cloakzy",
+    "url": "https://www.twitch.tv/cloakzy/clip/VenomousPrettyCrabPeanutButterJellyTime-xLTlZkdSIzAoRKIE",
+    "view_count": 509,
+    "duration": 29.9,
+    "broadcaster_name": "cloakzy",
+    "created_at": "2026-03-08T15:24:18Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 5.936790248174608,
+    "used_at": "2026-06-02T09:05:12.150985+00:00"
+  },
+  {
+    "id": "ApatheticSuperRaccoonRlyTho-MPj9CZp-nBvLd1WQ",
+    "title": "Perfect wall usage",
+    "url": "https://www.twitch.tv/cloakzy/clip/ApatheticSuperRaccoonRlyTho-MPj9CZp-nBvLd1WQ",
+    "view_count": 398,
+    "duration": 29.9,
+    "broadcaster_name": "cloakzy",
+    "created_at": "2026-03-06T16:18:59Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 4.5382713701017625,
+    "used_at": "2026-06-02T09:05:12.150985+00:00"
   }
 ]

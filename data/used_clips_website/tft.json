@@ -138,5 +138,61 @@
     "_source": "twitch",
     "_velocity": 1.146265773260119,
     "used_at": "2026-06-01T12:25:31.130800+00:00"
+  },
+  {
+    "id": "ThankfulSmoggyDugongShazBotstix-Ulr_fwGmDWbRSG_U",
+    "title": "clemou wins game 1 s16 regional finals playins",
+    "url": "https://www.twitch.tv/dokhy/clip/ThankfulSmoggyDugongShazBotstix-Ulr_fwGmDWbRSG_U",
+    "view_count": 178,
+    "duration": 28,
+    "broadcaster_name": "Dokhy",
+    "created_at": "2026-03-06T14:39:53Z",
+    "_game": "Teamfight Tactics",
+    "_game_slug": "tft",
+    "_source": "twitch",
+    "_velocity": 2.028083503724899,
+    "used_at": "2026-06-02T09:05:26.227597+00:00"
+  },
+  {
+    "id": "GoodQuaintMonkeyStinkyCheese-lmM6ZsEDQF0n1Cuk",
+    "title": "Elia wins game 2 day 2 week 1 regional finals",
+    "url": "https://www.twitch.tv/lpgjustjohnny/clip/GoodQuaintMonkeyStinkyCheese-lmM6ZsEDQF0n1Cuk",
+    "view_count": 76,
+    "duration": 36.4,
+    "broadcaster_name": "LPGjustJohnny",
+    "created_at": "2026-03-08T15:24:16Z",
+    "_game": "Teamfight Tactics",
+    "_game_slug": "tft",
+    "_source": "twitch",
+    "_velocity": 0.8864341337766001,
+    "used_at": "2026-06-02T09:05:26.227597+00:00"
+  },
+  {
+    "id": "ObeseEagerBananaArsonNoSexy-03w1vF_WF1DxgFS8",
+    "title": "clemou wins game 2 playins s16",
+    "url": "https://www.twitch.tv/un33d/clip/ObeseEagerBananaArsonNoSexy-03w1vF_WF1DxgFS8",
+    "view_count": 76,
+    "duration": 35,
+    "broadcaster_name": "Un33D",
+    "created_at": "2026-03-06T15:33:49Z",
+    "_game": "Teamfight Tactics",
+    "_game_slug": "tft",
+    "_source": "twitch",
+    "_velocity": 0.8662929427077171,
+    "used_at": "2026-06-02T09:05:26.227597+00:00"
+  },
+  {
+    "id": "MoistReliableFalconPastaThat-JLvtfzele_l4GwEi",
+    "title": "win game 3 with rumble hero",
+    "url": "https://www.twitch.tv/toontv/clip/MoistReliableFalconPastaThat-JLvtfzele_l4GwEi",
+    "view_count": 70,
+    "duration": 26.1,
+    "broadcaster_name": "ToonTV",
+    "created_at": "2026-03-07T16:19:44Z",
+    "_game": "Teamfight Tactics",
+    "_game_slug": "tft",
+    "_source": "twitch",
+    "_velocity": 0.8073980381493061,
+    "used_at": "2026-06-02T09:05:26.227597+00:00"
   }
 ]

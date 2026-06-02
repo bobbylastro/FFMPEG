@@ -138,5 +138,47 @@
     "_source": "twitch",
     "_velocity": 6.6802402233335085,
     "used_at": "2026-06-01T12:23:29.948480+00:00"
+  },
+  {
+    "id": "MotionlessPlayfulOryxPraiseIt-Jic8DPfiXC7ZGlHp",
+    "title": "T1 faints after 1v1ing Jason",
+    "url": "https://www.twitch.tv/loltyler1/clip/MotionlessPlayfulOryxPraiseIt-Jic8DPfiXC7ZGlHp",
+    "view_count": 54703,
+    "duration": 35.2,
+    "broadcaster_name": "loltyler1",
+    "created_at": "2026-03-06T21:33:50Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 625.3279233029718,
+    "used_at": "2026-06-02T09:03:39.191265+00:00"
+  },
+  {
+    "id": "TallPowerfulPelicanVoteNay-NizwOQkajDDosv-L",
+    "title": "Tyler1 gets smoked by jason",
+    "url": "https://www.twitch.tv/loltyler1/clip/TallPowerfulPelicanVoteNay-NizwOQkajDDosv-L",
+    "view_count": 10733,
+    "duration": 30,
+    "broadcaster_name": "loltyler1",
+    "created_at": "2026-03-06T21:18:30Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 122.67750840485834,
+    "used_at": "2026-06-02T09:03:39.191265+00:00"
+  },
+  {
+    "id": "CheerfulPhilanthropicPonyM4xHeh-wETkBtnkzrYTRVh0",
+    "title": "MILIO HIT A CLIP ON EM!!",
+    "url": "https://www.twitch.tv/emiliacosplay/clip/CheerfulPhilanthropicPonyM4xHeh-wETkBtnkzrYTRVh0",
+    "view_count": 774,
+    "duration": 33.9,
+    "broadcaster_name": "emiliacosplay",
+    "created_at": "2026-03-10T03:39:00Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 9.189634849661779,
+    "used_at": "2026-06-02T09:03:39.191265+00:00"
   }
 ]
