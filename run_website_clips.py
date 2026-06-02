@@ -24,7 +24,7 @@ DAYS           = 90
 parser = argparse.ArgumentParser()
 parser.add_argument("--games", nargs="+", default=list(WEBSITE_GAME_CATALOG.keys()),
                     help="Slugs des jeux à traiter (défaut : tous)")
-parser.add_argument("--per-game", type=int, default=10,
+parser.add_argument("--per-game", type=int, default=5,
                     help="Nombre de clips à sélectionner par jeu")
 args = parser.parse_args()
 
