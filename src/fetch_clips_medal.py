@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import unicodedata
 from datetime import datetime, timezone, timedelta
 
 import requests
@@ -29,6 +30,11 @@ MEDAL_GAME_CATALOG = {
     "apex-legends":      ("Apex Legends",           "5FsRVgww4b"),
     "r6-siege":          ("Rainbow Six Siege",      "HAuR_DD5N"),
 }
+
+
+def _is_garbage_title(title: str) -> bool:
+    """True si le titre a moins de 3 lettres Unicode — émojis seuls, ponctuation, gibberish."""
+    return sum(1 for c in title if unicodedata.category(c).startswith("L")) < 3
 
 
 EDITED_PATTERNS = re.compile(
@@ -133,6 +139,7 @@ def _fetch_game_clips(
             if item.get("orientation", "landscape") != "landscape": continue
             if item.get("sourceHeight", 1080) > item.get("sourceWidth", 1920): continue
             if EDITED_PATTERNS.search(title): continue
+            if _is_garbage_title(title): continue
             clips.append({
                 "id": str(cid), "title": title, "url": url,
                 "view_count": views, "duration": duration,

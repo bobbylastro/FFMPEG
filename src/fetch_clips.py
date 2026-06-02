@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import unicodedata
 import requests
 from datetime import datetime, timedelta, timezone
 
@@ -48,6 +49,11 @@ def mark_clips_used(clips: list[dict]) -> None:
     with open(USED_CLIPS_PATH, "w") as f:
         json.dump(existing + new_entries, f, indent=2)
     log.info(f"Marked {len(clips)} clips as used ({len(existing_ids) + len(new_entries)} total in history)")
+
+
+def _is_garbage_title(title: str) -> bool:
+    """True si le titre a moins de 3 lettres Unicode — émojis seuls, ponctuation, gibberish."""
+    return sum(1 for c in title if unicodedata.category(c).startswith("L")) < 3
 
 
 def _is_latin_title(title: str) -> bool:
@@ -134,6 +140,7 @@ def _fetch_clips_for_game(token: str, game_name: str, limit: int, used_ids: set)
         if MIN_CLIP_DURATION <= c.get("duration", 0) <= MAX_CLIP_DURATION
         and c["id"] not in used_ids
         and _is_latin_title(c.get("title", ""))
+        and not _is_garbage_title(c.get("title", ""))
     ]
     log.info(f"  {game_name}: {before} → {len(clips)} after duration/latin-title/history filter")
 

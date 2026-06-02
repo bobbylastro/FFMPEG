@@ -54,6 +54,13 @@ if not args.upload_only:
     except NoClipsSelectedError:
         clips = []
 
+    if len(clips) < MIN_CLIPS and len(all_candidates) > 60:
+        logging.warning(f"Seulement {len(clips)} clips — retry batch 2 ({len(all_candidates) - 60} candidats supplémentaires)")
+        try:
+            clips = select_clips_ai(all_candidates[60:120], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
+        except NoClipsSelectedError:
+            clips = []
+
     if len(clips) < MIN_CLIPS:
         logging.warning(f"Seulement {len(clips)} clips retenus (min={MIN_CLIPS}) — retry avec pool Twitch élargi (50 clips)")
         twitch_extended = fetch_twitch_clips(game_slug, game_name, limit=50)
