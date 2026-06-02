@@ -8,6 +8,7 @@ import argparse
 import logging
 import os
 import re
+import subprocess
 import requests
 import yt_dlp
 
@@ -31,6 +32,24 @@ args = parser.parse_args()
 
 def sanitize(name: str) -> str:
     return re.sub(r"[^\w\-.]", "_", name)[:60]
+
+
+def compress_clip(src: str, dest: str) -> bool:
+    """Re-encode avec H.264 CRF 20 + faststart. Retourne False si ffmpeg échoue."""
+    cmd = [
+        "ffmpeg", "-y", "-i", src,
+        "-vf", "scale=-2:720",
+        "-c:v", "libx264", "-crf", "23", "-preset", "fast",
+        "-c:a", "aac", "-b:a", "128k",
+        "-movflags", "+faststart",
+        dest,
+    ]
+    try:
+        subprocess.run(cmd, check=True, capture_output=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        log.warning(f"    Compression failed: {e.stderr.decode()[-200:]}")
+        return False
 
 
 def download_twitch(url: str, dest: str) -> bool:
@@ -105,9 +124,22 @@ for game_slug in args.games:
 
         ok = download_twitch(clip["url"], dest)
         if ok:
+            # Compress avant upload
+            compressed = dest.replace(".mp4", "_c.mp4")
+            size_before = os.path.getsize(dest) // 1024
+            if compress_clip(dest, compressed):
+                size_after = os.path.getsize(compressed) // 1024
+                if size_after < size_before:
+                    saving = 100 - size_after * 100 // size_before
+                    log.info(f"    🗜️  {size_before} KB → {size_after} KB (-{saving}%)")
+                    os.replace(compressed, dest)
+                else:
+                    log.info(f"    🗜️  Compression ignorée (fichier déjà optimal) : {size_before} KB")
+                    os.remove(compressed)
+            else:
+                log.warning(f"    Compression échouée — upload du fichier original ({size_before} KB)")
+
             filename = os.path.basename(dest)
-            size_kb = os.path.getsize(dest) // 1024
-            log.info(f"    ✅  {filename}  ({size_kb} KB)")
             upload_clip(game_slug, dest, filename, clip.get("title", title_safe))
             downloaded.append(clip)
             total_ok += 1
