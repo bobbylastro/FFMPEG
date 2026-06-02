@@ -25,7 +25,7 @@ _GAME_CONTEXT = {
     "league-of-legends": "5v5 MOBA with champions and abilities. Strategic team fights and objectives.",
     "cs2":               "Tactical 5v5 FPS (Counter-Strike 2). Bomb plant/defuse, precise gunplay.",
     "rust":              "Open-world survival game. PvP raids, base building, resource gathering.",
-    "gta-v":             "Open-world crime game. Freemode PvP, heists, stunts, chaos.",
+    "gta-v":             "Open-world crime game. Freemode PvP, heists, stunts, chaos. GTA RP (roleplay servers) counts as gameplay — funny RP moments, unusual challenges, chaotic interactions are all valid.",
     "minecraft":         "Sandbox survival/creative game. Builds, redstone, PvP, speedruns.",
     "overwatch":         "6v6 hero shooter with diverse characters and team-based objectives.",
     "arc-raiders":       "Co-op extraction shooter. Teams fight AI and other players for loot.",
@@ -56,19 +56,21 @@ Game: {game_slug} — {game_context}
 
 ACCEPT a clip if its title suggests ANY of these:
 - Impressive plays: kills, clutches, outplays, insane shots, combos, big moments
-- Funny/unexpected: fails, trolling, unexpected outcomes, reactions, ironic situations
-- Remarkable feats: records, unusual achievements, creative plays, wild moments
-- Engaging story: comeback, revenge, last second, impossible situation
+- Funny/unexpected: fails, trolling, unexpected outcomes, wild situations, unusual challenges
+- Remarkable feats: records, unusual achievements, creative plays, anything chaotic or memorable
+- Engaging moments: comeback, revenge, last-second action, underdog situation
+- Any title that mentions a champion/character/weapon/ability alongside a hint of action
 
-REJECT a clip if ANY of these apply:
-- Title has no clear relationship to the game being played (e.g. references another game, a song, a meme with no gameplay context)
-- Purely technical/educational: settings, guides, tutorials, warmup, aim training
-- Pure reaction with no described action: "lol", "omg", "bro", "what", "no way" alone
-- Non-gameplay: setup tour, IRL content, rank reveal with no gameplay, stream highlights reel
-- Unreadable or meaningless: random words, inside jokes with zero context, keyboard smash
+REJECT a clip ONLY if it clearly fits one of these:
+- Gibberish: only symbols/emojis, random letters, keyboard smash (e.g. "xdddddd", "yeps", "enty", "jj")
+- Purely technical/educational: settings guide, tutorial, warmup, aim training
+- Non-gameplay real-world content: setup tour, hardware review, IRL-only situation
+- Bare number + noun with no implied action (e.g. "113 knife", "4k", "round 5") — a clear achievement like "1v5 ace" is fine
+- Player/streamer names + social verb only, no gameplay action described (e.g. "X goes off on Y", "X vs Y", "argument between X and Y") — social drama without gameplay
+- Pure filler reaction alone: "lol", "omg", "nice", "good vibes", "wow", "yep" with no game reference
 
-DEFAULT TO REJECT if you cannot tell what happens in the clip from the title alone.
-Return FEWER than {n} if not enough clips qualify — quality over quantity.
+When in doubt and any game action or game-specific content is implied: ACCEPT.
+Aim to return exactly {n} clips. Return fewer only if genuinely fewer than {n} qualify.
 
 Candidates:
 {candidate_block}

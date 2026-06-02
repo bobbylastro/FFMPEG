@@ -69,13 +69,17 @@ for game_slug in args.games:
     log.info(f"{'─'*50}")
 
     # 1. Fetch candidats Twitch
-    candidates = fetch_website_clips(game_slug, limit=40, days=DAYS)
+    BATCH = 40
+    candidates = fetch_website_clips(game_slug, limit=BATCH, days=DAYS)
     if not candidates:
         log.warning(f"  Aucun candidat trouvé pour {game_slug}")
         continue
 
-    # 2. Sélection IA
-    selected = select_website_clips(candidates, n=args.per_game, game_slug=game_slug)
+    # 2. Sélection IA — batch 1, retry batch 2 si 0 résultats
+    selected = select_website_clips(candidates[:BATCH], n=args.per_game, game_slug=game_slug)
+    if not selected and len(candidates) > BATCH:
+        log.info(f"  [{game_slug}] 0 sélectionnés — retry avec batch 2 ({len(candidates) - BATCH} autres clips)")
+        selected = select_website_clips(candidates[BATCH:BATCH * 2], n=args.per_game, game_slug=game_slug)
     if not selected:
         log.warning(f"  IA n'a sélectionné aucun clip pour {game_slug}")
         continue

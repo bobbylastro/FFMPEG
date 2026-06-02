@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import re
+import unicodedata
 import requests
 from datetime import datetime, timedelta, timezone
 
@@ -29,6 +30,12 @@ TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token"
 TWITCH_API_URL  = "https://api.twitch.tv/helix"
 
 log = logging.getLogger(__name__)
+
+
+def _is_garbage_title(title: str) -> bool:
+    """True si le titre a moins de 3 lettres Unicode — émojis seuls, ponctuation, gibberish."""
+    return sum(1 for c in title if unicodedata.category(c).startswith("L")) < 3
+
 
 WEBSITE_GAME_CATALOG = {
     "valorant":           "VALORANT",
@@ -155,6 +162,8 @@ def fetch_website_clips(
                 continue
             if not (MIN_CLIP_DURATION <= duration <= MAX_CLIP_DURATION):
                 continue
+            if _is_garbage_title(c.get("title", "")):
+                continue
             if _NON_LATIN_RE.search(c.get("title", "")):
                 continue
 
@@ -181,6 +190,5 @@ def fetch_website_clips(
             break
 
     candidates.sort(key=lambda c: c["_velocity"], reverse=True)
-    selected = candidates[:limit]
-    log.info(f"  [{game_slug}] {len(candidates)} candidats → {len(selected)} transmis à l'IA")
-    return selected
+    log.info(f"  [{game_slug}] {len(candidates)} candidats disponibles")
+    return candidates
