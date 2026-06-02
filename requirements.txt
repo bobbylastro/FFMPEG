@@ -2,6 +2,7 @@ python-dotenv
 requests
 yt-dlp
 anthropic
+boto3
 Pillow
 google-api-python-client
 google-auth-oauthlib

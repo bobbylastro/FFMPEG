@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 
 from src.fetch_clips_website import fetch_website_clips, mark_used, WEBSITE_GAME_CATALOG
 from src.select_clips_website_ai import select_website_clips
+from src.r2_manager import upload_clip, delete_old_clips
 
 CLIPS_BASE_DIR = "public/clips"
 DAYS           = 90
@@ -54,6 +55,9 @@ def download_twitch(url: str, dest: str) -> bool:
         log.warning(f"    Download failed: {e}")
         return False
 
+
+log.info("Suppression des clips anciens à faible engagement...")
+delete_old_clips()
 
 total_ok = 0
 total_fail = 0
@@ -101,8 +105,10 @@ for game_slug in args.games:
 
         ok = download_twitch(clip["url"], dest)
         if ok:
+            filename = os.path.basename(dest)
             size_kb = os.path.getsize(dest) // 1024
-            log.info(f"    ✅  {title_safe}.mp4  ({size_kb} KB)")
+            log.info(f"    ✅  {filename}  ({size_kb} KB)")
+            upload_clip(game_slug, dest, filename, clip.get("title", title_safe))
             downloaded.append(clip)
             total_ok += 1
         else:

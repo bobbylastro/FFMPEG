@@ -44,3 +44,17 @@ ACTION_KEYWORDS = [k.lower() for k in os.getenv("ACTION_KEYWORDS",
 OUTPUT_LONG = "output/long"
 OUTPUT_SHORTS = "output/shorts"
 LOGS_DIR = "logs"
+
+# Cloudflare R2 — Ultimate Playground
+R2_ENDPOINT   = os.getenv("R2_ENDPOINT", "https://04b6deea0b051f8adfb8273b37d9861f.r2.cloudflarestorage.com")
+R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
+R2_SECRET_KEY = os.getenv("R2_SECRET_KEY")
+R2_BUCKET     = os.getenv("R2_BUCKET", "clips")
+
+# Supabase — Ultimate Playground
+SUPABASE_URL         = os.getenv("SUPABASE_URL", "https://uahfpozqfpvemigjrzwj.supabase.co")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+
+# API d'ingest — Ultimate Playground
+INGEST_API_URL = os.getenv("INGEST_API_URL", "https://ultimate-playground.com/api/clips/ingest")
+INGEST_API_KEY = os.getenv("INGEST_API_KEY", "ingest_up_2026_secret")

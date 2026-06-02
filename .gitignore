@@ -3,6 +3,7 @@ output/long/*.mp4
 output/shorts/*.mp4
 output/thumbnails/
 logs/*.log
+public/clips/
 __pycache__/
 *.pyc
 .venv/
