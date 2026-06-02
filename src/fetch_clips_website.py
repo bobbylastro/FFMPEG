@@ -38,7 +38,7 @@ WEBSITE_GAME_CATALOG = {
     "rocket-league":      "Rocket League",
     "rainbow-six-siege":  "Rainbow Six Siege",
     "league-of-legends":  "League of Legends",
-    "cs2":                "Counter-Strike 2",
+    "cs2":                "Counter-Strike",
     "rust":               "Rust",
     "gta-v":              "Grand Theft Auto V",
     "minecraft":          "Minecraft",

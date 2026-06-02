@@ -18,7 +18,7 @@ from src.fetch_clips_website import fetch_website_clips, mark_used, WEBSITE_GAME
 from src.select_clips_website_ai import select_website_clips
 
 CLIPS_BASE_DIR = "public/clips"
-DAYS           = 150
+DAYS           = 90
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--games", nargs="+", default=list(WEBSITE_GAME_CATALOG.keys()),
