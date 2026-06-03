@@ -20,7 +20,7 @@ from src.select_clips_website_ai import select_website_clips
 from src.r2_manager import upload_clip, delete_old_clips
 
 CLIPS_BASE_DIR = "public/clips"
-DAYS           = 90
+DAYS           = 120
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--games", nargs="+", default=list(WEBSITE_GAME_CATALOG.keys()),
