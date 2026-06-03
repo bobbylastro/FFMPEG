@@ -23,6 +23,16 @@ _NON_LATIN_RE = re.compile(
     r']'
 )
 
+# Titres formatés avec underscores comme séparateurs (ex: "Who_s_your_friend")
+_UNDERSCORE_TITLE_RE = re.compile(r'\b\w+_\w+')
+
+# Questions biographiques sur une personnalité (ex: "Is Mr Wizard's Name Actually Pandolfo?")
+# Cible: "Is [Name]'s...", "What is [Name]'s...", "Who is [Name]", "What's [Name]'s real name"
+_BIO_QUESTION_RE = re.compile(
+    r"^(is\s+\w[\w\s]*'s\s+\w|what\s+(is|was)\s+\w[\w\s]*'s|what's\s+\w[\w\s]*'s|who\s+(is|was)\s+\w[\w\s]*(real|actual|true|full))",
+    re.IGNORECASE,
+)
+
 from config.settings import TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, MIN_CLIP_DURATION, MAX_CLIP_DURATION
 
 USED_CLIPS_DIR  = "data/used_clips_website"
@@ -33,8 +43,16 @@ log = logging.getLogger(__name__)
 
 
 def _is_garbage_title(title: str) -> bool:
-    """True si le titre a moins de 3 lettres Unicode — émojis seuls, ponctuation, gibberish."""
-    return sum(1 for c in title if unicodedata.category(c).startswith("L")) < 3
+    """True si le titre est inutilisable : trop court, underscores partout, ou question biographique."""
+    if sum(1 for c in title if unicodedata.category(c).startswith("L")) < 3:
+        return True
+    # Titre formaté avec underscores comme séparateurs (ex: "Who_s_your_friend")
+    if _UNDERSCORE_TITLE_RE.search(title):
+        return True
+    # Question biographique sur une personne (ex: "Is Mr Wizard's Name Actually Pandolfo?")
+    if _BIO_QUESTION_RE.match(title.strip()):
+        return True
+    return False
 
 
 WEBSITE_GAME_CATALOG = {

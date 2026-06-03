@@ -43,38 +43,44 @@ def select_website_clips(candidates: list[dict], n: int, game_slug: str = "") ->
 
     lines = []
     for i, c in enumerate(candidates):
+        velocity = round(c.get("_velocity", 0), 1)
         lines.append(
             f"{i}: title=\"{c['title']}\" | broadcaster={c['broadcaster_name']} "
-            f"| {int(c['duration'])}s | {c['view_count']} views"
+            f"| {int(c['duration'])}s | velocity={velocity} views/day"
         )
     candidate_block = "\n".join(lines)
 
-    prompt = f"""You are curating clips for a TikTok-style gaming website targeting an international English-speaking audience. Be selective — only keep clips that are genuinely worth watching.
+    prompt = f"""You are a strict quality filter for a TikTok-style gaming clip website. Your job is to REJECT bad clips, not to find good ones.
 
 Game: {game_slug} — {game_context}
 
-ACCEPT a clip if its title clearly suggests:
-- Impressive gameplay: kills, clutches, outplays, insane shots, combos, highlight moments, impressive feats
-- Funny/unexpected IN-GAME moments: fails, trolling, unexpected outcomes, chaotic situations — BUT only if the title is in English
-- Remarkable in-game achievements: records, creative plays, big comebacks, last-second action
+For each clip, ask yourself: "Is there ANY reason to reject this?" If yes — reject it. Only keep a clip if you find NO reason to reject it AND its title clearly implies genuine in-game action.
 
-REJECT a clip if ANY of the following is true:
-- Gibberish: only symbols/emojis, random letters, keyboard smash
-- Purely technical/educational: settings guide, tutorial, warmup, aim training
-- Non-gameplay real-world content: IRL situations, facecam-only, people just talking, physical/IRL reactions, rank-up screen only
-- Rank milestone with no gameplay context (e.g. "new rank", "hit diamond", "peak unlocked")
-- Non-English funny/meme titles: if the title is a joke, meme, or funny comment written in a non-English language, REJECT it — non-English humor is not universal
-- Social drama without gameplay: streamer reactions, arguments, callouts, shoutouts, drama clips
-- Filler reactions with no game action: "lol", "omg", "nice", "wow" with no game-specific content
-- Vague titles with no implied action: bare number + noun, player name only, generic exclamations
+REJECT immediately if the title:
+- Is gibberish, symbols/emojis only, random letters, or keyboard smash
+- Suggests a tutorial, guide, settings, warmup, or aim training
+- Describes real-world/IRL content: people talking, facecam, physical reactions, rank-up screen
+- Is a rank milestone with no gameplay ("new rank", "hit diamond", "peak unlocked")
+- Is a joke, meme, or humorous comment in a non-English language
+- Involves streamer drama, arguments, callouts, shoutouts, or social reactions
+- Is a filler reaction with no game-specific content ("lol", "omg", "nice", "wow")
+- Is vague with no implied action: bare number + noun, player name only, generic exclamation
+- Is a biographical or trivia question about a person ("Is [Name]'s real name X?", "Who is [Name]?")
+- Analyzes or explains rather than describes action ("Why X is broken", "How X works", "The truth about X")
+- Uses underscores as word separators ("Who_s_your_friend", "best_play_ever")
+- Is ambiguous — if you cannot tell from the title alone whether it's gameplay, REJECT it
 
-When in doubt, lean toward REJECTING. Only accept if the clip clearly passes the criteria above.
-Aim to return exactly {n} clips. Return fewer only if genuinely fewer than {n} qualify.
+Only KEEP a clip whose title unambiguously describes:
+- A gameplay highlight: kills, clutches, outplays, insane shots, combos, impressive feats
+- A funny/unexpected IN-GAME moment in English
+- A remarkable in-game achievement: record, comeback, last-second action
+
+Return exactly {n} clips if that many qualify. Return fewer if not enough pass. Never lower your bar to hit the target count.
 
 Candidates:
 {candidate_block}
 
-Respond with ONLY a JSON array of indices, e.g. [0, 3, 7]. No explanation."""
+Respond with ONLY a JSON array of accepted indices, e.g. [0, 3, 7]. No explanation."""
 
     retries = [30, 60]
     for attempt in range(len(retries) + 1):
