@@ -110,5 +110,47 @@
     "_source": "twitch",
     "_velocity": 7.935270499581346,
     "used_at": "2026-06-02T20:45:40.145000+00:00"
+  },
+  {
+    "id": "RelievedCrunchyAdminPartyTime-H-lmFAIlfqvdb_wD",
+    "title": "Dave Suddenly Sees The Whole Battlefield",
+    "url": "https://www.twitch.tv/bazza/clip/RelievedCrunchyAdminPartyTime-H-lmFAIlfqvdb_wD",
+    "view_count": 895,
+    "duration": 38,
+    "broadcaster_name": "Bazza",
+    "created_at": "2026-03-11T23:32:09Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 10.734761518611663,
+    "used_at": "2026-06-03T08:32:26.438336+00:00"
+  },
+  {
+    "id": "SquareKitschyBaboonPeanutButterJellyTime-eJih5ntR2VgdkKBj",
+    "title": "to me you're still one of us",
+    "url": "https://www.twitch.tv/mikfoolery/clip/SquareKitschyBaboonPeanutButterJellyTime-eJih5ntR2VgdkKBj",
+    "view_count": 628,
+    "duration": 36,
+    "broadcaster_name": "mikfoolery",
+    "created_at": "2026-03-12T00:03:42Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 7.534303225382925,
+    "used_at": "2026-06-03T08:32:26.438336+00:00"
+  },
+  {
+    "id": "HonestResoluteTapirWoofer-sW9TOYqaUpx_Ym9Y",
+    "title": "serie of unfortunate events",
+    "url": "https://www.twitch.tv/sifurp/clip/HonestResoluteTapirWoofer-sW9TOYqaUpx_Ym9Y",
+    "view_count": 638,
+    "duration": 32.6,
+    "broadcaster_name": "sifuRP",
+    "created_at": "2026-03-08T15:40:17Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 7.358564402345146,
+    "used_at": "2026-06-03T08:32:26.438336+00:00"
   }
 ]
