@@ -19,8 +19,9 @@ SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.readonly",
 ]
-TOKEN_PATH    = "token.json"
+TOKEN_PATH      = "token.json"
 CATEGORY_GAMING = "20"
+SITE_FOOTER     = "\n\n👉 More clips → https://ultimate-playground.com/"
 
 
 def _get_credentials(game_slug: str = None) -> Credentials:
@@ -168,7 +169,7 @@ def upload_from_content(content_path: str, privacy: str = "public", game_slug: s
     video_id = upload_video(
         video_path=yt["video"],
         title=yt["title"],
-        description=yt["description"],
+        description=yt["description"] + SITE_FOOTER,
         thumbnail_path=yt.get("thumbnail"),
         tags=tags,
         privacy=privacy,
@@ -223,7 +224,7 @@ def upload_shorts_from_content(content_path: str) -> list[str]:
         video_id = upload_video(
             video_path=video_path,
             title=title,
-            description=description,
+            description=description + SITE_FOOTER,
             tags=tags,
             game_slug=game_slug,
             publish_at=publish_at,

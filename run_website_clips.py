@@ -98,14 +98,22 @@ for game_slug in args.games:
         log.warning(f"  Aucun candidat trouvé pour {game_slug}")
         continue
 
-    # 2. Sélection IA — batch 1, retry batch 2 si 0 résultats
-    selected = select_website_clips(candidates[:BATCH], n=args.per_game, game_slug=game_slug)
-    if not selected and len(candidates) > BATCH:
-        log.info(f"  [{game_slug}] 0 sélectionnés — retry avec batch 2 ({len(candidates) - BATCH} autres clips)")
-        selected = select_website_clips(candidates[BATCH:BATCH * 2], n=args.per_game, game_slug=game_slug)
+    # 2. Sélection IA — boucle par batch jusqu'à avoir args.per_game clips
+    selected = []
+    offset = 0
+    while len(selected) < args.per_game and offset < len(candidates):
+        needed = args.per_game - len(selected)
+        batch  = candidates[offset:offset + BATCH]
+        new    = select_website_clips(batch, n=needed, game_slug=game_slug)
+        selected.extend(new)
+        offset += BATCH
+        if not new:
+            break  # l'IA ne trouve rien dans ce batch, inutile de continuer
     if not selected:
         log.warning(f"  IA n'a sélectionné aucun clip pour {game_slug}")
         continue
+    if len(selected) < args.per_game:
+        log.warning(f"  [{game_slug}] Seulement {len(selected)}/{args.per_game} clips trouvés après {offset // BATCH} batch(es)")
 
     # 3. Téléchargement
     out_dir = os.path.join(CLIPS_BASE_DIR, game_slug)
