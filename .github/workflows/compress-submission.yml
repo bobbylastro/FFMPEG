@@ -10,6 +10,10 @@ on:
   schedule:
     - cron: "0 4 * * *"
 
+concurrency:
+  group: compress-submission
+  cancel-in-progress: false
+
 jobs:
   compress:
     runs-on: ubuntu-latest
