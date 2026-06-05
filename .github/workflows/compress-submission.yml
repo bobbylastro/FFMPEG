@@ -1,0 +1,117 @@
+name: Compress Submission
+
+on:
+  workflow_dispatch:
+    inputs:
+      r2_key:
+        description: "Clé R2 du clip (ex: pending-compression/valorant/abc-123.mp4)"
+        required: true
+        type: string
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  compress:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+
+      - name: Compress & ingest clip(s)
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ACCOUNT_ID:         ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET:             ${{ secrets.R2_BUCKET_NAME }}
+          INGEST_API_KEY:        ${{ secrets.INGEST_API_KEY }}
+          R2_KEY_INPUT:          ${{ github.event.inputs.r2_key }}
+        run: |
+          R2_EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+
+          compress_clip() {
+            local r2_key="$1"
+            echo "▶ Processing: $r2_key"
+
+            # Parse key: pending-compression/{game}/{uuid}.ext → {game}/{uuid}.mp4
+            local stripped="${r2_key#pending-compression/}"
+            local game="${stripped%%/*}"
+            local basename="${stripped#*/}"
+            local uuid="${basename%.*}"
+            local ext="${basename##*.}"
+            local new_key="${game}/${uuid}.mp4"
+            local input_file="/tmp/input_${uuid}.${ext}"
+            local output_file="/tmp/output_${uuid}.mp4"
+
+            # 1. Download
+            echo "  ↓ Downloading..."
+            aws s3 cp "s3://${R2_BUCKET}/${r2_key}" "$input_file" \
+              --endpoint-url "$R2_EP" --no-progress \
+              || { echo "  ✗ Download failed"; return 1; }
+
+            # 2. Compress to 720p
+            echo "  ⚙ Compressing to 720p..."
+            ffmpeg -i "$input_file" \
+              -vf "scale=-2:720" \
+              -c:v libx264 -crf 23 -preset medium \
+              -c:a aac -b:a 128k \
+              -movflags +faststart \
+              "$output_file" -y
+
+            if [ ! -f "$output_file" ]; then
+              echo "  ✗ FFmpeg failed"
+              rm -f "$input_file"
+              return 1
+            fi
+
+            # 3. Upload compressed
+            echo "  ↑ Uploading → ${new_key}..."
+            aws s3 cp "$output_file" "s3://${R2_BUCKET}/${new_key}" \
+              --endpoint-url "$R2_EP" \
+              --content-type "video/mp4" \
+              --no-progress \
+              || { echo "  ✗ Upload failed"; rm -f "$input_file" "$output_file"; return 1; }
+
+            # 4. Notify API
+            echo "  📡 Notifying ingest API..."
+            http_code=$(curl -s -o /tmp/api_resp.json -w "%{http_code}" \
+              -X POST "https://ultimate-playground.com/api/clips/ingest/compress" \
+              -H "x-ingest-key: ${INGEST_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"old_key\":\"${r2_key}\",\"new_key\":\"${new_key}\"}")
+            if [[ "$http_code" == 2* ]]; then
+              echo "  ✓ API OK ($http_code)"
+            else
+              echo "  ⚠ API returned $http_code: $(cat /tmp/api_resp.json)"
+            fi
+
+            # 5. Delete original
+            echo "  🗑 Deleting original..."
+            aws s3 rm "s3://${R2_BUCKET}/${r2_key}" \
+              --endpoint-url "$R2_EP" \
+              || echo "  ⚠ Delete failed (non-fatal)"
+
+            rm -f "$input_file" "$output_file"
+            echo "  ✓ Done: ${r2_key} → ${new_key}"
+          }
+
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            compress_clip "$R2_KEY_INPUT"
+          else
+            echo "=== Cron: listing pending clips ==="
+            keys=$(aws s3 ls "s3://${R2_BUCKET}/pending-compression/" \
+              --endpoint-url "$R2_EP" --recursive \
+              | awk '{print $4}' | grep -v '^$')
+            if [ -z "$keys" ]; then
+              echo "No pending clips."
+              exit 0
+            fi
+            count=$(echo "$keys" | wc -l)
+            echo "Found $count clip(s) to process."
+            while IFS= read -r key; do
+              [ -z "$key" ] && continue
+              compress_clip "$key" || echo "⚠ Failed: $key (continuing)"
+            done <<< "$keys"
+          fi
