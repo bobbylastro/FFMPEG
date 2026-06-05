@@ -440,5 +440,83 @@
     "_source": "twitch",
     "_velocity": 2.766056202097534,
     "used_at": "2026-06-01T10:06:33.180238+00:00"
+  },
+  {
+    "id": "mPS0JxmnXq6dR6gUH",
+    "title": "W clutch in ranked :P",
+    "url": "https://cdn.medal.tv/mediac/fA8amM4Gl6KtWr.mp4?auth=exp=1780677000~data=NDIzODI5OCxtUFMwSnhtblhxNmRSNmdVSCwxZzRDamJzRXJKeiw2MzQxMDQ3NDE~hmac=d08a20059cdf72a5fcc93231cf4ab0e931f9ca725ab65e6a2e8c656818f72391&t=1080p&c=202623&missing",
+    "view_count": 432,
+    "duration": 32.1333,
+    "broadcaster_name": "Grimzei",
+    "language": "en",
+    "_game": "The Finals",
+    "_velocity": 432,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "AntsyClearWolverinePipeHype-t5sa0YYlPgtwM63A",
+    "title": "wipeando al otro team \ud83d\ude2e\u200d\ud83d\udca8\ud83d\ude2e\u200d\ud83d\udca8",
+    "url": "https://www.twitch.tv/xhayabusa001/clip/AntsyClearWolverinePipeHype-t5sa0YYlPgtwM63A",
+    "view_count": 41,
+    "duration": 35.1,
+    "broadcaster_name": "xhayabusa001",
+    "created_at": "2026-05-29T06:06:19Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 5.720994708972332,
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "CoyTenaciousMushroomUnSane-zASwSx4QOIfAbEAx",
+    "title": "hs thru grid",
+    "url": "https://www.twitch.tv/aztracttv/clip/CoyTenaciousMushroomUnSane-zASwSx4QOIfAbEAx",
+    "view_count": 39,
+    "duration": 24.2,
+    "broadcaster_name": "AztractTV",
+    "created_at": "2026-05-29T07:47:07Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 5.495600358292442,
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "ProtectiveCovertDinosaurPJSalt-fEmVMInaMceqH5AL",
+    "title": "1v3",
+    "url": "https://www.twitch.tv/phltf/clip/ProtectiveCovertDinosaurPJSalt-fEmVMInaMceqH5AL",
+    "view_count": 31,
+    "duration": 41.9,
+    "broadcaster_name": "PHLTF",
+    "created_at": "2026-05-28T11:14:16Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 3.8980297006679727,
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "PlausibleEnticingGalagoOhMyDog-MubW-o6CYTB8vkqG",
+    "title": "HOLY READ",
+    "url": "https://www.twitch.tv/lamp/clip/PlausibleEnticingGalagoOhMyDog-MubW-o6CYTB8vkqG",
+    "view_count": 40,
+    "duration": 28.1,
+    "broadcaster_name": "lamp",
+    "created_at": "2026-05-25T23:52:39Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 3.8365342389633077,
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "RelievedBlushingTruffleCharlieBitMe-YwerWGYrmiV46N_5",
+    "title": "Sub-optimal scrim 3 piece",
+    "url": "https://www.twitch.tv/honourful/clip/RelievedBlushingTruffleCharlieBitMe-YwerWGYrmiV46N_5",
+    "view_count": 32,
+    "duration": 23.2,
+    "broadcaster_name": "Honourful",
+    "created_at": "2026-05-26T22:07:19Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 3.368656065945241,
+    "used_at": "2026-06-05T10:06:50.398014+00:00"
   }
 ]
