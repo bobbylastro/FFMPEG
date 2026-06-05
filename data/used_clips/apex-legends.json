@@ -271,5 +271,44 @@
     "_source": "twitch",
     "_velocity": 138.37516354130477,
     "used_at": "2026-06-01T10:17:12.984355+00:00"
+  },
+  {
+    "id": "mmogZ7ZX38zpmUsWL",
+    "title": "loba 3k push",
+    "url": "https://cdn.medal.tv/mediac/cXcV0AFI3L24eM.mp4?auth=exp=1780677000~data=NzI5Njc3MzAsbW1vZ1o3WlgzOHpwbVVzV0wsNUZzUlZnd3c0Yiw2MzQxMDQ3NDE~hmac=1284b90bc3bb3db1c8562809ef269ab9b3ba539baad3af2e3a833c2c142a07d1&t=1080p&c=202613&missing",
+    "view_count": 3122,
+    "duration": 31.8,
+    "broadcaster_name": "ItzyMinerva",
+    "language": "en",
+    "_game": "Apex Legends",
+    "_velocity": 3122,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:16:54.662945+00:00"
+  },
+  {
+    "id": "mOBEzSufd2Ci9dfO7",
+    "title": "Clean \"1v3\"",
+    "url": "https://cdn.medal.tv/mediac/fsFwhdKeOxPRkD.mp4?auth=exp=1780677000~data=MTU1MDkwNjYsbU9CRXpTdWZkMkNpOWRmTzcsNUZzUlZnd3c0Yiw2MzQxMDQ3NDE~hmac=2ae9da1b04f21d19a7c0640cea5efda62a0107a1e31fb55a726c1cddce353686&t=1080p&c=202622&missing",
+    "view_count": 1320,
+    "duration": 30.0,
+    "broadcaster_name": "AJ36788",
+    "language": "en",
+    "_game": "Apex Legends",
+    "_velocity": 1320,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:16:54.662945+00:00"
+  },
+  {
+    "id": "CovertPhilanthropicBatPJSugar-ttU2RnHXosFrg9qt",
+    "title": "\u30d7\u30ed\u3092\u30bd\u30ed\u30673\u30bf\u30c6\u3059\u308b\u30e6\u30ea\u30fc\u30b9",
+    "url": "https://www.twitch.tv/euriece/clip/CovertPhilanthropicBatPJSugar-ttU2RnHXosFrg9qt",
+    "view_count": 2576,
+    "duration": 40.2,
+    "broadcaster_name": "Euriece",
+    "created_at": "2026-05-26T13:45:24Z",
+    "_game": "Apex Legends",
+    "_source": "twitch",
+    "_velocity": 261.39598963652895,
+    "used_at": "2026-06-05T10:16:54.662945+00:00"
   }
 ]
