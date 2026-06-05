@@ -558,5 +558,57 @@
     "_source": "twitch",
     "_velocity": 237.61081394759552,
     "used_at": "2026-06-01T09:46:30.125053+00:00"
+  },
+  {
+    "id": "mO6cM0TqeosGBynpf",
+    "title": "Ace",
+    "url": "https://cdn.medal.tv/mediac/fpB1P2yK9NRzSl.mp4?auth=exp=1780673400~data=Mjc0MjYxMDMsbU82Y00wVHFlb3NHQnlucGYsZlczQVp4SGZfYyw2MzQxMDQ3NDE~hmac=04ce0ae0194dfe2346f0a123e8455e62b3e5c6f683413a1bc075ddcb190839e4&t=1080p&c=202622&missing",
+    "view_count": 1255,
+    "duration": 37.6167,
+    "broadcaster_name": "Geniux",
+    "language": "en",
+    "_game": "Valorant",
+    "_velocity": 1255,
+    "_source": "medal",
+    "used_at": "2026-06-05T09:46:55.631816+00:00"
+  },
+  {
+    "id": "SparklyTameDumplingsBlargNaut-C8ok18S9MBseLtAb",
+    "title": "ACE",
+    "url": "https://www.twitch.tv/archangel_hs/clip/SparklyTameDumplingsBlargNaut-C8ok18S9MBseLtAb",
+    "view_count": 7177,
+    "duration": 31.8,
+    "broadcaster_name": "archangel_hs",
+    "created_at": "2026-05-28T09:38:45Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 896.5366503849036,
+    "used_at": "2026-06-05T09:46:55.631816+00:00"
+  },
+  {
+    "id": "AmorphousEndearingApeTheRinger-8uqvTzH3g1HXvl-L",
+    "title": "1v4 11-12",
+    "url": "https://www.twitch.tv/ethos/clip/AmorphousEndearingApeTheRinger-8uqvTzH3g1HXvl-L",
+    "view_count": 2184,
+    "duration": 41.7,
+    "broadcaster_name": "ethos",
+    "created_at": "2026-05-27T09:34:06Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 242.4381785483365,
+    "used_at": "2026-06-05T09:46:55.631816+00:00"
+  },
+  {
+    "id": "GlamorousHappySrirachaSeemsGood-pak5LxjbY17VuXix",
+    "title": "aace",
+    "url": "https://www.twitch.tv/aaceful/clip/GlamorousHappySrirachaSeemsGood-pak5LxjbY17VuXix",
+    "view_count": 1609,
+    "duration": 22.9,
+    "broadcaster_name": "Aaceful",
+    "created_at": "2026-05-26T11:03:45Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 161.76986780074913,
+    "used_at": "2026-06-05T09:46:55.631816+00:00"
   }
 ]
