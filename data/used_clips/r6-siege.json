@@ -596,5 +596,70 @@
     "_source": "twitch",
     "_velocity": 8.611761456091893,
     "used_at": "2026-06-01T10:36:39.814492+00:00"
+  },
+  {
+    "id": "mMxtLiEhyIIWc-Ffl",
+    "title": "azami 4k",
+    "url": "https://cdn.medal.tv/mediac/fgTDLnyHsFRvso.mp4?auth=exp=1780677000~data=MjgwNTc3NTY3LG1NeHRMaUVoeUlJV2MtRmZsLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=344047eb95e0510837da0122c392efc98e26426c682415b5d69fe3415d54fe75&t=1080p&c=202622&missing",
+    "view_count": 6156,
+    "duration": 32.05,
+    "broadcaster_name": "usbisu12",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 6156,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:36:56.260653+00:00"
+  },
+  {
+    "id": "mNQwo1VfAiiFNZA4T",
+    "title": "Clean Ace ig",
+    "url": "https://cdn.medal.tv/mediac/fona6fcH8GUKp6.mp4?auth=exp=1780677000~data=MjcwMzY0MjMxLG1OUXdvMVZmQWlpRk5aQTRULEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=36c425b496390ac75de8cd377a5e955c10f5d10d60341fb60d4d89e6a8c55cba&t=1080p&c=202622&missing",
+    "view_count": 4788,
+    "duration": 39.85,
+    "broadcaster_name": "Austriacraft",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 4788,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:36:56.260653+00:00"
+  },
+  {
+    "id": "mOYCMntBon1wY8dE2",
+    "title": "mute ace",
+    "url": "https://cdn.medal.tv/mediac/fv3sMHZ5aDsJdk.mp4?auth=exp=1780677000~data=MTg1NTg5ODQ4LG1PWUNNbnRCb24xd1k4ZEUyLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=8ec3cc6a881da913af5083c1904d32ac99dee9c498624ebc12628309f3bd10f6&t=1080p&c=202623&missing",
+    "view_count": 3875,
+    "duration": 40.3167,
+    "broadcaster_name": "Crispy_BabaYaga",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 3875,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:36:56.260653+00:00"
+  },
+  {
+    "id": "mNPeMXf1IR0oXZ2NI",
+    "title": "dok 3k",
+    "url": "https://cdn.medal.tv/mediac/fojW3pyaGNBDFv.mp4?auth=exp=1780677000~data=MjgwNTc3NTY3LG1OUGVNWGYxSVIwb1haMk5JLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=66ee1e9aa2402a3bdef418aa3021d76d3b0ed294fcd6c3cc6fd4c078f48d748b&t=1080p&c=202622&missing",
+    "view_count": 2891,
+    "duration": 20.45,
+    "broadcaster_name": "usbisu12",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 2891,
+    "_source": "medal",
+    "used_at": "2026-06-05T10:36:56.260653+00:00"
+  },
+  {
+    "id": "NeighborlyObliviousCiderKreygasm-QVk4dh5xA7bSvBsT",
+    "title": "MINGO 1V3 !!!!!!!!!!!",
+    "url": "https://www.twitch.tv/mingo/clip/NeighborlyObliviousCiderKreygasm-QVk4dh5xA7bSvBsT",
+    "view_count": 1170,
+    "duration": 42.6,
+    "broadcaster_name": "Mingo",
+    "created_at": "2026-05-26T07:10:16Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 115.35005278490355,
+    "used_at": "2026-06-05T10:36:56.260653+00:00"
   }
 ]
