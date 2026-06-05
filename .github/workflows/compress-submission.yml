@@ -24,12 +24,11 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_ACCOUNT_ID:         ${{ secrets.R2_ACCOUNT_ID }}
           R2_BUCKET:             ${{ secrets.R2_BUCKET_NAME }}
           INGEST_API_KEY:        ${{ secrets.INGEST_API_KEY }}
           R2_KEY_INPUT:          ${{ github.event.inputs.r2_key }}
         run: |
-          R2_EP="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          R2_EP="https://04b6deea0b051f8adfb8273b37d9861f.r2.cloudflarestorage.com"
 
           compress_clip() {
             local r2_key="$1"
