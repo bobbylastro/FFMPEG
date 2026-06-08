@@ -518,5 +518,57 @@
     "_source": "twitch",
     "_velocity": 3.368656065945241,
     "used_at": "2026-06-05T10:06:50.398014+00:00"
+  },
+  {
+    "id": "LuckyArtsyCodKeyboardCat-E4hPZug7KlEUDYo1",
+    "title": "2v3 against no hours",
+    "url": "https://www.twitch.tv/normalize/clip/LuckyArtsyCodKeyboardCat-E4hPZug7KlEUDYo1",
+    "view_count": 282,
+    "duration": 36.9,
+    "broadcaster_name": "normalize",
+    "created_at": "2026-05-31T01:33:24Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 33.747789098153696,
+    "used_at": "2026-06-08T10:06:33.549675+00:00"
+  },
+  {
+    "id": "RepleteFuriousAlmondHassanChop-7DwHVlvLz0569nrn",
+    "title": "Massive RPG wipe",
+    "url": "https://www.twitch.tv/syncrove/clip/RepleteFuriousAlmondHassanChop-7DwHVlvLz0569nrn",
+    "view_count": 44,
+    "duration": 26.3,
+    "broadcaster_name": "Syncrove",
+    "created_at": "2026-05-31T10:09:10Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 5.501419493131185,
+    "used_at": "2026-06-08T10:06:33.549675+00:00"
+  },
+  {
+    "id": "LittleCheerfulMosquitoWow-R0HTpqkvdvG0uWK6",
+    "title": "1 vs 3",
+    "url": "https://www.twitch.tv/donkrage/clip/LittleCheerfulMosquitoWow-R0HTpqkvdvG0uWK6",
+    "view_count": 43,
+    "duration": 30,
+    "broadcaster_name": "donkrage",
+    "created_at": "2026-05-30T12:34:45Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 4.83317874515364,
+    "used_at": "2026-06-08T10:06:33.549675+00:00"
+  },
+  {
+    "id": "MotionlessDarkReindeerTebowing-bUtl8eFGzTCa-uP3",
+    "title": "Common team wipe",
+    "url": "https://www.twitch.tv/syncrove/clip/MotionlessDarkReindeerTebowing-bUtl8eFGzTCa-uP3",
+    "view_count": 38,
+    "duration": 25.2,
+    "broadcaster_name": "Syncrove",
+    "created_at": "2026-05-31T11:37:47Z",
+    "_game": "The Finals",
+    "_source": "twitch",
+    "_velocity": 4.788067251205563,
+    "used_at": "2026-06-08T10:06:33.549675+00:00"
   }
 ]
