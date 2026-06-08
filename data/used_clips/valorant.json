@@ -610,5 +610,31 @@
     "_source": "twitch",
     "_velocity": 161.76986780074913,
     "used_at": "2026-06-05T09:46:55.631816+00:00"
+  },
+  {
+    "id": "mCF6gPkGm8UQ6Gya7",
+    "title": "EZ RAD ACE ",
+    "url": "https://cdn.medal.tv/mediac/ekN4bttEozioyo.mp4?auth=exp=1780932600~data=MjAwNTE2Mzk0LG1DRjZnUGtHbThVUTZHeWE3LGZXM0FaeEhmX2MsNjM0MTA0NzQx~hmac=d8daa9741e4aff504d1ff42744a54b2f6716325f6106be914c1efdfde6b48b4d&t=1080p&c=202618&missing",
+    "view_count": 414,
+    "duration": 21.7833,
+    "broadcaster_name": "Nality",
+    "language": "en",
+    "_game": "Valorant",
+    "_velocity": 414,
+    "_source": "medal",
+    "used_at": "2026-06-08T09:46:47.740293+00:00"
+  },
+  {
+    "id": "CourteousPlayfulOrcaDoritosChip-V2hRHrDZDuC9Tapa",
+    "title": "ACE",
+    "url": "https://www.twitch.tv/okinawapex/clip/CourteousPlayfulOrcaDoritosChip-V2hRHrDZDuC9Tapa",
+    "view_count": 2123,
+    "duration": 31.5,
+    "broadcaster_name": "\u6c96\u7e04\u306b\u884c\u304f\u305f\u3081\u306b",
+    "created_at": "2026-05-25T16:23:06Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 154.68821781713706,
+    "used_at": "2026-06-08T09:46:47.740293+00:00"
   }
 ]
