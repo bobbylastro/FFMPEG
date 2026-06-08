@@ -661,5 +661,31 @@
     "_source": "twitch",
     "_velocity": 115.35005278490355,
     "used_at": "2026-06-05T10:36:56.260653+00:00"
+  },
+  {
+    "id": "mQoPaT7XsG0fDmlfX",
+    "title": "ACE cookiemiga is so back",
+    "url": "https://cdn.medal.tv/mediac/fDfkyLhwJCZ9Rz.mp4?auth=exp=1780936200~data=MzU3Mzc0NzgsbVFvUGFUN1hzRzBmRG1sZlgsSEF1Ul9ERDVOLDYzNDEwNDc0MQ~hmac=845c8f48baa309e31d3eee48c064f48c9fac1f99859b305eecc426604154cd9f&t=1080p&c=202623&missing",
+    "view_count": 1895,
+    "duration": 41.2667,
+    "broadcaster_name": "Co0ki3Ninja",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 1895,
+    "_source": "medal",
+    "used_at": "2026-06-08T10:36:39.398030+00:00"
+  },
+  {
+    "id": "ThankfulSpicyTruffleCoolCat-Q4Z7FysKfb2CsR_p",
+    "title": "KIYOSHI GIGA BRAIN CLUTCH",
+    "url": "https://www.twitch.tv/rainbow6bravo/clip/ThankfulSpicyTruffleCoolCat-Q4Z7FysKfb2CsR_p",
+    "view_count": 153,
+    "duration": 31.6,
+    "broadcaster_name": "Rainbow6Bravo",
+    "created_at": "2026-05-31T12:24:15Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 19.305969147301052,
+    "used_at": "2026-06-08T10:36:39.398030+00:00"
   }
 ]
