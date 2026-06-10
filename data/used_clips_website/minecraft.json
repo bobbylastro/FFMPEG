@@ -572,5 +572,47 @@
     "_source": "twitch",
     "_velocity": 4.945429734404462,
     "used_at": "2026-06-04T09:43:36.412024+00:00"
+  },
+  {
+    "id": "ArtsyKnottyFennelBlargNaut-9rkzayiYi2_uGAq3",
+    "title": "Forsen goes for Gold and finds Diamonds",
+    "url": "https://www.twitch.tv/forsen/clip/ArtsyKnottyFennelBlargNaut-9rkzayiYi2_uGAq3",
+    "view_count": 25922,
+    "duration": 25.2,
+    "broadcaster_name": "forsen",
+    "created_at": "2026-02-15T20:31:42Z",
+    "_game": "Minecraft",
+    "_game_slug": "minecraft",
+    "_source": "twitch",
+    "_velocity": 226.05225247704374,
+    "used_at": "2026-06-10T12:41:44.985716+00:00"
+  },
+  {
+    "id": "ProtectiveSpoopyLouseHoneyBadger-jIN9dZ5dH9nLBIVs",
+    "title": "SUB 30!",
+    "url": "https://www.twitch.tv/juicy/clip/ProtectiveSpoopyLouseHoneyBadger-jIN9dZ5dH9nLBIVs",
+    "view_count": 6302,
+    "duration": 35,
+    "broadcaster_name": "Juicy",
+    "created_at": "2026-02-14T05:01:38Z",
+    "_game": "Minecraft",
+    "_game_slug": "minecraft",
+    "_source": "twitch",
+    "_velocity": 54.17883647375806,
+    "used_at": "2026-06-10T12:41:44.985716+00:00"
+  },
+  {
+    "id": "CooperativeCleanMelonCoolStoryBro-E9WHC3KGCmx8mNDH",
+    "title": "ludwig's first zero attempt",
+    "url": "https://www.twitch.tv/ludwig/clip/CooperativeCleanMelonCoolStoryBro-E9WHC3KGCmx8mNDH",
+    "view_count": 1781,
+    "duration": 24.6,
+    "broadcaster_name": "Ludwig",
+    "created_at": "2026-02-16T05:33:23Z",
+    "_game": "Minecraft",
+    "_game_slug": "minecraft",
+    "_source": "twitch",
+    "_velocity": 15.582288268277253,
+    "used_at": "2026-06-10T12:41:44.985716+00:00"
   }
 ]

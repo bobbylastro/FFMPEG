@@ -614,5 +614,47 @@
     "_source": "twitch",
     "_velocity": 4.873820540974626,
     "used_at": "2026-06-04T09:31:16.404514+00:00"
+  },
+  {
+    "id": "SleepyDeadButterflySwiftRage-Lo9a2dbjnrqMo0FM",
+    "title": "PENTAAA",
+    "url": "https://www.twitch.tv/scarlettpls/clip/SleepyDeadButterflySwiftRage-Lo9a2dbjnrqMo0FM",
+    "view_count": 1584,
+    "duration": 21.8,
+    "broadcaster_name": "Scarlettpls",
+    "created_at": "2026-02-14T00:17:36Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 13.595416735017116,
+    "used_at": "2026-06-10T12:33:01.702323+00:00"
+  },
+  {
+    "id": "CloudyToughRedpandaHotPokket-3Wk8zQ9urK4BUT5-",
+    "title": "Cleanest BOMBA",
+    "url": "https://www.twitch.tv/thebausffs/clip/CloudyToughRedpandaHotPokket-3Wk8zQ9urK4BUT5-",
+    "view_count": 993,
+    "duration": 21.7,
+    "broadcaster_name": "Thebausffs",
+    "created_at": "2026-02-13T16:54:22Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 8.500427413258393,
+    "used_at": "2026-06-10T12:33:01.702323+00:00"
+  },
+  {
+    "id": "BlushingJollyOctopusThisIsSparta-wiHnjeK1Sj38sMm_",
+    "title": "530 AD 7 ITEMS JINX HAHA",
+    "url": "https://www.twitch.tv/sydios/clip/BlushingJollyOctopusThisIsSparta-wiHnjeK1Sj38sMm_",
+    "view_count": 655,
+    "duration": 27.4,
+    "broadcaster_name": "Sydios",
+    "created_at": "2026-02-15T22:18:05Z",
+    "_game": "League of Legends",
+    "_game_slug": "league-of-legends",
+    "_source": "twitch",
+    "_velocity": 5.715888440929065,
+    "used_at": "2026-06-10T12:33:01.702323+00:00"
   }
 ]

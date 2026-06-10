@@ -432,5 +432,47 @@
     "_source": "twitch",
     "_velocity": 5.769021805680845,
     "used_at": "2026-06-04T09:41:11.289169+00:00"
+  },
+  {
+    "id": "ManlyHungryDadOhMyDog-NWsXKkYNxnmKV23m",
+    "title": "Love accidentally blows up Wrangler",
+    "url": "https://www.twitch.tv/gamermagoo/clip/ManlyHungryDadOhMyDog-NWsXKkYNxnmKV23m",
+    "view_count": 3038,
+    "duration": 25.8,
+    "broadcaster_name": "GamerMagoo",
+    "created_at": "2026-02-12T06:14:06Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 25.687674256209174,
+    "used_at": "2026-06-10T12:40:13.727448+00:00"
+  },
+  {
+    "id": "PlausibleCulturedBeefDoritosChip-8v-tmni-GN7eJ_er",
+    "title": "the perfect bait n switch",
+    "url": "https://www.twitch.tv/summit1g/clip/PlausibleCulturedBeefDoritosChip-8v-tmni-GN7eJ_er",
+    "view_count": 2192,
+    "duration": 42,
+    "broadcaster_name": "summit1g",
+    "created_at": "2026-02-14T23:08:34Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 18.968113726518634,
+    "used_at": "2026-06-10T12:40:13.727448+00:00"
+  },
+  {
+    "id": "ResilientBitterArmadilloNotLikeThis-JTJlnp3y0jUAJ7G5",
+    "title": "''WHAT A SAVE''",
+    "url": "https://www.twitch.tv/kydra/clip/ResilientBitterArmadilloNotLikeThis-JTJlnp3y0jUAJ7G5",
+    "view_count": 1772,
+    "duration": 21.3,
+    "broadcaster_name": "KYDRA",
+    "created_at": "2026-02-11T23:02:58Z",
+    "_game": "Grand Theft Auto V",
+    "_game_slug": "gta-v",
+    "_source": "twitch",
+    "_velocity": 14.94522936858662,
+    "used_at": "2026-06-10T12:40:13.727448+00:00"
   }
 ]

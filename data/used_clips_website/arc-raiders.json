@@ -460,5 +460,47 @@
     "_source": "twitch",
     "_velocity": 5.171087483306176,
     "used_at": "2026-06-04T09:49:54.411349+00:00"
+  },
+  {
+    "id": "GoldenSnappyRuffCoolCat-NO7JpjsdouzyfGTS",
+    "title": "movement on 3 raiders!!!",
+    "url": "https://www.twitch.tv/shinyatheninja/clip/GoldenSnappyRuffCoolCat-NO7JpjsdouzyfGTS",
+    "view_count": 3447,
+    "duration": 20.1,
+    "broadcaster_name": "ShinyaTheNinja",
+    "created_at": "2026-02-12T16:38:03Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 29.252077344376975,
+    "used_at": "2026-06-10T12:46:40.953045+00:00"
+  },
+  {
+    "id": "FancyDaintyLouseSmoocherZ-yAXwq84cWDanHqr1",
+    "title": "bye bye Matriarch",
+    "url": "https://www.twitch.tv/theburntpeanut/clip/FancyDaintyLouseSmoocherZ-yAXwq84cWDanHqr1",
+    "view_count": 1727,
+    "duration": 30,
+    "broadcaster_name": "TheBurntPeanut",
+    "created_at": "2026-02-14T03:15:36Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 14.83740142532783,
+    "used_at": "2026-06-10T12:46:40.953045+00:00"
+  },
+  {
+    "id": "TastyCulturedLlamaWTRuck-5xuYKNoNuMha_v_2",
+    "title": "STRETCH N FLYYYYYYYYYY",
+    "url": "https://www.twitch.tv/theburntpeanut/clip/TastyCulturedLlamaWTRuck-5xuYKNoNuMha_v_2",
+    "view_count": 1114,
+    "duration": 37.7,
+    "broadcaster_name": "TheBurntPeanut",
+    "created_at": "2026-02-14T02:52:42Z",
+    "_game": "ARC Raiders",
+    "_game_slug": "arc-raiders",
+    "_source": "twitch",
+    "_velocity": 9.569546501190471,
+    "used_at": "2026-06-10T12:46:40.953045+00:00"
   }
 ]

@@ -530,5 +530,47 @@
     "_source": "twitch",
     "_velocity": 0.9809313541656957,
     "used_at": "2026-06-04T09:22:57.268068+00:00"
+  },
+  {
+    "id": "MotionlessFurryQuelea4Head-jL2-6j0RhdshVHSi",
+    "title": "Fair and balanced Elsa Ult",
+    "url": "https://www.twitch.tv/flats/clip/MotionlessFurryQuelea4Head-jL2-6j0RhdshVHSi",
+    "view_count": 602,
+    "duration": 42.2,
+    "broadcaster_name": "Flats",
+    "created_at": "2026-02-16T21:42:04Z",
+    "_game": "Marvel Rivals",
+    "_game_slug": "marvel-rivals",
+    "_source": "twitch",
+    "_velocity": 5.298649730837865,
+    "used_at": "2026-06-10T12:27:37.831279+00:00"
+  },
+  {
+    "id": "LovelyAgileCakeTheRinger-DcSmVPihpg2hpR4S",
+    "title": "Tim getting portal'ed off the map",
+    "url": "https://www.twitch.tv/timthetatman/clip/LovelyAgileCakeTheRinger-DcSmVPihpg2hpR4S",
+    "view_count": 559,
+    "duration": 25.9,
+    "broadcaster_name": "TimTheTatman",
+    "created_at": "2026-02-11T23:02:52Z",
+    "_game": "Marvel Rivals",
+    "_game_slug": "marvel-rivals",
+    "_source": "twitch",
+    "_velocity": 4.71500217052107,
+    "used_at": "2026-06-10T12:27:37.831279+00:00"
+  },
+  {
+    "id": "BillowingMushyClintWow-rxAervcB6o65ucMn",
+    "title": "New Elsa Tech?!",
+    "url": "https://www.twitch.tv/flats/clip/BillowingMushyClintWow-rxAervcB6o65ucMn",
+    "view_count": 242,
+    "duration": 22.4,
+    "broadcaster_name": "Flats",
+    "created_at": "2026-02-16T21:32:32Z",
+    "_game": "Marvel Rivals",
+    "_game_slug": "marvel-rivals",
+    "_source": "twitch",
+    "_velocity": 2.1298977559838366,
+    "used_at": "2026-06-10T12:27:37.831279+00:00"
   }
 ]
