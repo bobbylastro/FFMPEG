@@ -1077,5 +1077,44 @@
     "_source": "twitch",
     "_velocity": 21.743484555999395,
     "used_at": "2026-06-08T09:56:32.615719+00:00"
+  },
+  {
+    "id": "NimblePlacidShallotFailFish-pKEZlOs6Wrn_dxge",
+    "title": "djswang glaze on Widow 4k :D",
+    "url": "https://www.twitch.tv/zazzastack/clip/NimblePlacidShallotFailFish-pKEZlOs6Wrn_dxge",
+    "view_count": 912,
+    "duration": 20.7,
+    "broadcaster_name": "zazzastack",
+    "created_at": "2026-06-05T02:32:06Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 124.78973760868168,
+    "used_at": "2026-06-12T09:56:28.704507+00:00"
+  },
+  {
+    "id": "FastTrappedPlumberKlappa-hdmjdvR68_HZbC6I",
+    "title": "getting thor ult value",
+    "url": "https://www.twitch.tv/idrawyuni/clip/FastTrappedPlumberKlappa-hdmjdvR68_HZbC6I",
+    "view_count": 186,
+    "duration": 21.3,
+    "broadcaster_name": "idrawyuni",
+    "created_at": "2026-06-03T17:13:24Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 21.388435156269967,
+    "used_at": "2026-06-12T09:56:28.704507+00:00"
+  },
+  {
+    "id": "SaltyZanyAsparagusDerp-HlQlA9ISib529p_l",
+    "title": "4K Spiderman \ud83d\udd77",
+    "url": "https://www.twitch.tv/efigietv/clip/SaltyZanyAsparagusDerp-HlQlA9ISib529p_l",
+    "view_count": 116,
+    "duration": 23.2,
+    "broadcaster_name": "EfigieTV",
+    "created_at": "2026-06-03T13:11:39Z",
+    "_game": "Marvel Rivals",
+    "_source": "twitch",
+    "_velocity": 13.086202467486457,
+    "used_at": "2026-06-12T09:56:28.704507+00:00"
   }
 ]
