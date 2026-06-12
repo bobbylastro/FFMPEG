@@ -687,5 +687,57 @@
     "_source": "twitch",
     "_velocity": 19.305969147301052,
     "used_at": "2026-06-08T10:36:39.398030+00:00"
+  },
+  {
+    "id": "mQcpgXRjGPrGnSRMH",
+    "title": "already dropping aces in ranked this szn.",
+    "url": "https://cdn.medal.tv/mediac/fBNGWVoGAPw_Yz.mp4?auth=exp=1781281800~data=MjYyMjQ5OTk0LG1RY3BnWFJqR1ByR25TUk1ILEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=60403e18f9e7d069be49d79e2cfa0257cfb5bc1e99cceffb87370c9ba943617f&t=1080p&c=202623&missing",
+    "view_count": 5210,
+    "duration": 27.3,
+    "broadcaster_name": "malikeththughunter",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 5210,
+    "_source": "medal",
+    "used_at": "2026-06-12T10:36:38.650723+00:00"
+  },
+  {
+    "id": "mRy6EB2IWNAoYz3sL",
+    "title": "smg12 3k",
+    "url": "https://cdn.medal.tv/mediac/fJXhTjnrpEjybh.mp4?auth=exp=1781281800~data=MTMzNjM2MjY4LG1SeTZFQjJJV05Bb1l6M3NMLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=33c8ce7083404e9c46766b3c6a1be7e5d547665eabc7ee445d3b5b847a338b93&t=1080p&c=202623&missing",
+    "view_count": 3382,
+    "duration": 36.2,
+    "broadcaster_name": "B3rnan",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 3382,
+    "_source": "medal",
+    "used_at": "2026-06-12T10:36:38.650723+00:00"
+  },
+  {
+    "id": "mST6SgrDmixUwY0f0",
+    "title": "ashh 3k",
+    "url": "https://cdn.medal.tv/mediac/fRKVA2hWF9JJYv.mp4?auth=exp=1781281800~data=MjgwNTc3NTY3LG1TVDZTZ3JEbWl4VXdZMGYwLEhBdVJfREQ1Tiw2MzQxMDQ3NDE~hmac=cea7d2b0cadce83d87b84476e7ac9992d1edfc1ddedd44712f76e22f5c16d53a&t=1080p&c=202624&missing",
+    "view_count": 2440,
+    "duration": 25.7667,
+    "broadcaster_name": "usbisu12",
+    "language": "en",
+    "_game": "Rainbow Six Siege",
+    "_velocity": 2440,
+    "_source": "medal",
+    "used_at": "2026-06-12T10:36:38.650723+00:00"
+  },
+  {
+    "id": "HorribleFamousDolphinSuperVinlin-ITBoAvX0C4WG350p",
+    "title": "Nova Doka 3k",
+    "url": "https://www.twitch.tv/nerdengenheiro/clip/HorribleFamousDolphinSuperVinlin-ITBoAvX0C4WG350p",
+    "view_count": 394,
+    "duration": 36.5,
+    "broadcaster_name": "NerdEngenheiro",
+    "created_at": "2026-06-02T17:45:50Z",
+    "_game": "Rainbow Six Siege",
+    "_source": "twitch",
+    "_velocity": 40.61225892342078,
+    "used_at": "2026-06-12T10:36:38.650723+00:00"
   }
 ]
