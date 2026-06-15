@@ -766,5 +766,70 @@
     "_source": "twitch",
     "_velocity": 125.94577206620863,
     "used_at": "2026-06-12T09:46:42.859187+00:00"
+  },
+  {
+    "id": "RenownedDreamySheepMoreCowbell-KkUwEnUaCcwD__z9",
+    "title": "ACE",
+    "url": "https://www.twitch.tv/lftoxy_val/clip/RenownedDreamySheepMoreCowbell-KkUwEnUaCcwD__z9",
+    "view_count": 8161,
+    "duration": 34.2,
+    "broadcaster_name": "LFToxy_val",
+    "created_at": "2026-06-06T06:42:28Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 894.0991595459857,
+    "used_at": "2026-06-15T09:46:59.376845+00:00"
+  },
+  {
+    "id": "PatientOpenGalagoWoofer-7iKBwrTarp7Zr2cB",
+    "title": "sayo ace",
+    "url": "https://www.twitch.tv/valorant/clip/PatientOpenGalagoWoofer-7iKBwrTarp7Zr2cB",
+    "view_count": 1861,
+    "duration": 26.7,
+    "broadcaster_name": "VALORANT",
+    "created_at": "2026-06-06T16:42:31Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 213.63976874746768,
+    "used_at": "2026-06-15T09:46:59.376845+00:00"
+  },
+  {
+    "id": "DeadFrailLobsterSoonerLater-XFJ4xTGyx9Cf4iJU",
+    "title": "1v5 ace!",
+    "url": "https://www.twitch.tv/misuqt/clip/DeadFrailLobsterSoonerLater-XFJ4xTGyx9Cf4iJU",
+    "view_count": 1376,
+    "duration": 42,
+    "broadcaster_name": "misuqt",
+    "created_at": "2026-06-08T05:19:21Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 191.50076966146136,
+    "used_at": "2026-06-15T09:46:59.376845+00:00"
+  },
+  {
+    "id": "FilthySteamyBottleTheRinger-HmucEiBhx5AKdpnW",
+    "title": "4K",
+    "url": "https://www.twitch.tv/okinawapex/clip/FilthySteamyBottleTheRinger-HmucEiBhx5AKdpnW",
+    "view_count": 1058,
+    "duration": 33.8,
+    "broadcaster_name": "\u6c96\u7e04\u306b\u884c\u304f\u305f\u3081\u306b",
+    "created_at": "2026-06-05T16:37:56Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 108.91372035168747,
+    "used_at": "2026-06-15T09:46:59.376845+00:00"
+  },
+  {
+    "id": "PoorClumsyGoldfishSSSsss-UjzzQ9Q0mpjta40-",
+    "title": "ACE",
+    "url": "https://www.twitch.tv/aaceful/clip/PoorClumsyGoldfishSSSsss-UjzzQ9Q0mpjta40-",
+    "view_count": 961,
+    "duration": 40.4,
+    "broadcaster_name": "Aaceful",
+    "created_at": "2026-06-06T11:08:08Z",
+    "_game": "Valorant",
+    "_source": "twitch",
+    "_velocity": 107.45663740229145,
+    "used_at": "2026-06-15T09:46:59.376845+00:00"
   }
 ]
