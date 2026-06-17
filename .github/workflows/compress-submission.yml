@@ -7,8 +7,6 @@ on:
         description: "Clé R2 du clip (ex: pending-compression/valorant/abc-123.mp4)"
         required: true
         type: string
-  schedule:
-    - cron: "0 4 * * *"
 
 concurrency:
   group: compress-submission
@@ -100,21 +98,4 @@ jobs:
             echo "  ✓ Done: ${r2_key} → ${new_key}"
           }
 
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            compress_clip "$R2_KEY_INPUT"
-          else
-            echo "=== Cron: listing pending clips ==="
-            keys=$(aws s3 ls "s3://${R2_BUCKET}/pending-compression/" \
-              --endpoint-url "$R2_EP" --recursive \
-              | awk '{print $4}' | grep -v '^$')
-            if [ -z "$keys" ]; then
-              echo "No pending clips."
-              exit 0
-            fi
-            count=$(echo "$keys" | wc -l)
-            echo "Found $count clip(s) to process."
-            while IFS= read -r key; do
-              [ -z "$key" ] && continue
-              compress_clip "$key" || echo "⚠ Failed: $key (continuing)"
-            done <<< "$keys"
-          fi
+          compress_clip "$R2_KEY_INPUT"
