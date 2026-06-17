@@ -7,14 +7,14 @@ Usage : python show_analytics.py [--refresh]
 import sys
 import logging
 
-from src.fetch_clips_medal import MEDAL_GAME_CATALOG
+from src.fetch_clips_twitch import TWITCH_GAME_CATALOG
 from src.fetch_analytics import refresh_stats, print_report
 
 logging.basicConfig(level=logging.WARNING)
 
 do_refresh = "--refresh" in sys.argv
 
-for slug, (name, _) in MEDAL_GAME_CATALOG.items():
+for slug, name in TWITCH_GAME_CATALOG.items():
     if do_refresh:
         print(f"Fetching stats for {name}...")
         refresh_stats(slug)

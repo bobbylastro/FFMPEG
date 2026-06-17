@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-from src.fetch_clips_medal import fetch_medal_clips, mark_clips_used, MEDAL_GAME_CATALOG
-from src.fetch_clips_twitch import fetch_twitch_clips
+from src.fetch_clips_twitch import fetch_twitch_clips, mark_clips_used, TWITCH_GAME_CATALOG
 from src.select_clips_ai import select_clips_ai, NoClipsSelectedError
 from src.download_clips import download_clips
 from src.process_long import build_long_video
@@ -22,7 +21,7 @@ from config.settings import CLIPS_PER_VIDEO
 # ── Args ───────────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser(description="Run the clip pipeline for one game.")
 parser.add_argument("--game", required=True,
-                    choices=list(MEDAL_GAME_CATALOG.keys()),
+                    choices=list(TWITCH_GAME_CATALOG.keys()),
                     help="Game slug (e.g. valorant, the-finals)")
 parser.add_argument("--no-upload", action="store_true",
                     help="Process clips and save content JSON but skip YouTube upload")
@@ -31,7 +30,7 @@ parser.add_argument("--upload-only", action="store_true",
 args = parser.parse_args()
 
 game_slug = args.game
-game_name = MEDAL_GAME_CATALOG[game_slug][0]   # ex. "Valorant"
+game_name = TWITCH_GAME_CATALOG[game_slug]   # ex. "VALORANT"
 
 print(f"\n🎮  Game : {game_name}  ({game_slug})\n")
 
@@ -40,45 +39,44 @@ if not args.upload_only:
     refresh_stats(game_slug)
     print_report(game_slug, game_name)
 
-    # ── 1. Fetch candidates (Medal + Twitch) puis sélection IA combinée ────────
-    medal_candidates  = fetch_medal_clips(slugs=[game_slug], select=False)
-    twitch_candidates = fetch_twitch_clips(game_slug, game_name)
-
-    all_candidates = medal_candidates + twitch_candidates
-    print(f"\n  Medal : {len(medal_candidates)} candidats | Twitch : {len(twitch_candidates)} candidats")
-
+    # ── 1. Fetch candidates (Twitch, expansion progressive si besoin) ────────────
     MIN_CLIPS = 6
 
-    try:
-        clips = select_clips_ai(all_candidates[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
-    except NoClipsSelectedError:
-        clips = []
+    def _fetch_twitch(days: int, limit: int = 80) -> list[dict]:
+        candidates = fetch_twitch_clips(game_slug, game_name, limit=limit, days=days)
+        print(f"  Twitch ({days}j) : {len(candidates)} candidats")
+        return candidates
+
+    all_candidates = _fetch_twitch(days=14)
+
+    for expand_days in (30, 60):
+        if len(all_candidates) >= MIN_CLIPS * 5:
+            break
+        logging.warning(f"Seulement {len(all_candidates)} candidats — extension à {expand_days} jours")
+        seen_ids = {c["id"] for c in all_candidates}
+        more = _fetch_twitch(days=expand_days)
+        all_candidates += [c for c in more if c["id"] not in seen_ids]
+
+    def _ai_select(pool: list[dict]) -> list[dict]:
+        try:
+            return select_clips_ai(pool, CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
+        except NoClipsSelectedError:
+            return []
+
+    clips = _ai_select(all_candidates[:60])
 
     if len(clips) < MIN_CLIPS and len(all_candidates) > 60:
-        logging.warning(f"Seulement {len(clips)} clips — retry batch 2 ({len(all_candidates) - 60} candidats supplémentaires)")
-        try:
-            clips = select_clips_ai(all_candidates[60:120], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
-        except NoClipsSelectedError:
-            clips = []
+        logging.warning(f"Seulement {len(clips)} clips — retry batch 2")
+        extra = _ai_select(all_candidates[60:120])
+        seen_ids = {c["id"] for c in clips}
+        clips += [c for c in extra if c["id"] not in seen_ids]
 
     if len(clips) < MIN_CLIPS:
-        logging.warning(f"Seulement {len(clips)} clips retenus (min={MIN_CLIPS}) — retry avec pool Twitch élargi (50 clips)")
-        twitch_extended = fetch_twitch_clips(game_slug, game_name, limit=50)
-        # Merge : clips déjà retenus + nouveaux candidats Twitch non encore vus
-        seen_ids = {c["id"] for c in all_candidates}
-        new_twitch = [c for c in twitch_extended if c["id"] not in seen_ids]
-        retry_pool = all_candidates + new_twitch
-        print(f"\n  Retry pool élargi : {len(retry_pool)} candidats ({len(new_twitch)} nouveaux Twitch)")
-        try:
-            clips = select_clips_ai(retry_pool[:60], CLIPS_PER_VIDEO, game_name=game_name, game_slug=game_slug)
-        except NoClipsSelectedError:
-            clips = []
-        if len(clips) < MIN_CLIPS:
-            logging.warning(f"Toujours seulement {len(clips)} clips après retry — on continue avec ce qu'on a")
+        logging.warning(f"Toujours seulement {len(clips)} clips — on continue avec ce qu'on a")
 
     print(f"\n  {len(clips)} clips retenus après sélection IA combinée :\n")
     for i, c in enumerate(clips, 1):
-        source = c.get("_source", "medal")
+        source = c.get("_source", "twitch")
         print(f"{i:2}. [{source:<6}] [{c['_game']:<25}] {int(c['duration']):>3}s | {c['view_count']:>7} views | {c['title']}")
 
     downloaded = download_clips(clips)

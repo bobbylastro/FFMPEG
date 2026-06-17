@@ -74,10 +74,6 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         run: pip install -r requirements.txt
 
-      - name: Restore Medal cookies
-        if: steps.gate.outputs.skip != 'true'
-        run: echo "${{ secrets.MEDAL_COOKIES }}" | base64 -d > medal_cookies.txt
-
       - name: Run pipeline — ${{ matrix.game }} (process only)
         if: steps.gate.outputs.skip != 'true'
         env:

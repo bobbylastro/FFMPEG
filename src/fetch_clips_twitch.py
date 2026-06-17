@@ -15,18 +15,19 @@ USED_CLIPS_DIR = "data/used_clips"
 
 log = logging.getLogger(__name__)
 
+# Twitch slug → display name (used by run_pipeline.py)
+TWITCH_GAME_CATALOG = {
+    "valorant":      "VALORANT",
+    "marvel-rivals": "Marvel Rivals",
+    "the-finals":    "The Finals",
+    "rocket-league": "Rocket League",
+    "apex-legends":  "Apex Legends",
+    "r6-siege":      "Rainbow Six Siege",
+}
+
 TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token"
 TWITCH_API_URL  = "https://api.twitch.tv/helix"
 
-# Medal slug → Twitch game name (exact match required by the API)
-TWITCH_GAME_CATALOG = {
-    "valorant":          "VALORANT",
-    "marvel-rivals":     "Marvel Rivals",
-    "the-finals":        "The Finals",
-    "rocket-league":     "Rocket League",
-    "apex-legends":      "Apex Legends",
-    "r6-siege":          "Rainbow Six Siege",
-}
 
 
 def _get_token() -> str:
@@ -150,6 +151,7 @@ def fetch_twitch_clips(
                 "broadcaster_name": c.get("broadcaster_name", ""),
                 "created_at":       c.get("created_at", ""),
                 "_game":            game_name,
+                "_game_slug":       game_slug,
                 "_source":          "twitch",
                 "_velocity":        velocity,
             })
@@ -159,9 +161,32 @@ def fetch_twitch_clips(
             break
 
     candidates.sort(key=lambda c: c["_velocity"], reverse=True)
-    selected = candidates[:limit]
-    log.info(
-        f"  [Twitch/{game_name}] {len(candidates)} candidats high-confidence "
-        f"→ {len(selected)} transmis à l'IA"
-    )
-    return selected
+    log.info(f"  [Twitch/{game_name}] {len(candidates)} candidats")
+    return candidates
+
+
+def mark_clips_used(clips: list[dict]) -> None:
+    """Sauvegarde les clips utilisés dans data/used_clips/{slug}.json."""
+    os.makedirs(USED_CLIPS_DIR, exist_ok=True)
+    name_to_slug = {v: k for k, v in TWITCH_GAME_CATALOG.items()}
+
+    by_slug: dict[str, list] = {}
+    for clip in clips:
+        slug = clip.get("_game_slug") or name_to_slug.get(clip.get("_game", ""), "unknown")
+        by_slug.setdefault(slug, []).append(clip)
+
+    now = datetime.now(timezone.utc).isoformat()
+    for slug, slug_clips in by_slug.items():
+        path = os.path.join(USED_CLIPS_DIR, f"{slug}.json")
+        existing: list = []
+        if os.path.exists(path):
+            with open(path) as f:
+                existing = json.load(f)
+        existing_ids = {c if isinstance(c, str) else c["id"] for c in existing}
+        new_entries = [
+            {**{k: v for k, v in c.items() if k != "local_path"}, "used_at": now}
+            for c in slug_clips if c["id"] not in existing_ids
+        ]
+        with open(path, "w") as f:
+            json.dump(existing + new_entries, f, indent=2)
+        log.info(f"  [{slug}] {len(new_entries)} clips ajoutés à l'historique")
