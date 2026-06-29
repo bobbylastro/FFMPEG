@@ -1046,5 +1046,61 @@
     "_source": "twitch",
     "_velocity": 5.409455421637127,
     "used_at": "2026-06-26T10:36:31.010095+00:00"
+  },
+  {
+    "id": "CrowdedDifferentFriseeWoofer-ivRLJNzgDxSBCj_Y",
+    "title": "3k of spawn peak",
+    "url": "https://www.twitch.tv/itsspoit/clip/CrowdedDifferentFriseeWoofer-ivRLJNzgDxSBCj_Y",
+    "view_count": 142,
+    "duration": 30,
+    "broadcaster_name": "itsSpoit",
+    "created_at": "2026-06-20T00:23:22Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 15.065614953672798,
+    "used_at": "2026-06-29T10:36:19.465206+00:00"
+  },
+  {
+    "id": "SpoopyAgitatedHerringTBTacoRight-g4jx3RoXyMRzXzLO",
+    "title": "spoit 4k",
+    "url": "https://www.twitch.tv/itsspoit/clip/SpoopyAgitatedHerringTBTacoRight-g4jx3RoXyMRzXzLO",
+    "view_count": 58,
+    "duration": 30,
+    "broadcaster_name": "itsSpoit",
+    "created_at": "2026-06-20T22:50:49Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 6.831780248931625,
+    "used_at": "2026-06-29T10:36:19.465206+00:00"
+  },
+  {
+    "id": "DeadRichAdminJebaited-SFzl9Ha76pVfKBqT",
+    "title": "Marley hits a NASTY FLICK to win the round!",
+    "url": "https://www.twitch.tv/meatymarley/clip/DeadRichAdminJebaited-SFzl9Ha76pVfKBqT",
+    "view_count": 58,
+    "duration": 38.5,
+    "broadcaster_name": "MeatyMarley",
+    "created_at": "2026-06-20T14:40:03Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 6.5681113142110625,
+    "used_at": "2026-06-29T10:36:19.465206+00:00"
+  },
+  {
+    "id": "SullenPreciousNarwhalOSfrog-jxW2JYaaruXnkX9U",
+    "title": "4K VIGIL PARTE 1",
+    "url": "https://www.twitch.tv/kappabone/clip/SullenPreciousNarwhalOSfrog-jxW2JYaaruXnkX9U",
+    "view_count": 47,
+    "duration": 30,
+    "broadcaster_name": "KappaBone",
+    "created_at": "2026-06-21T16:22:09Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 6.056973877507587,
+    "used_at": "2026-06-29T10:36:19.465206+00:00"
   }
 ]
