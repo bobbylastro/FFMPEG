@@ -1930,5 +1930,33 @@
     "_source": "twitch",
     "_velocity": 12.164566946950183,
     "used_at": "2026-07-06T09:56:29.532856+00:00"
+  },
+  {
+    "id": "SassyTriangularOtterNotATK-uNG5zQO2mJ71n918",
+    "title": "THOR 5K",
+    "url": "https://www.twitch.tv/picknroll/clip/SassyTriangularOtterNotATK-uNG5zQO2mJ71n918",
+    "view_count": 280,
+    "duration": 22.4,
+    "broadcaster_name": "PickNRoll",
+    "created_at": "2026-07-03T02:33:07Z",
+    "_game": "Marvel Rivals",
+    "_game_slug": "marvel-rivals",
+    "_source": "twitch",
+    "_velocity": 38.3163568629175,
+    "used_at": "2026-07-10T09:56:15.264268+00:00"
+  },
+  {
+    "id": "BoringThirstyShieldFUNgineer-5v0OuVhQWWrKJ-qw",
+    "title": "6 man jeff ult",
+    "url": "https://www.twitch.tv/loldonatello/clip/BoringThirstyShieldFUNgineer-5v0OuVhQWWrKJ-qw",
+    "view_count": 144,
+    "duration": 25,
+    "broadcaster_name": "loldonatello",
+    "created_at": "2026-06-29T22:48:27Z",
+    "_game": "Marvel Rivals",
+    "_game_slug": "marvel-rivals",
+    "_source": "twitch",
+    "_velocity": 13.761978218806648,
+    "used_at": "2026-07-10T09:56:15.264268+00:00"
   }
 ]
