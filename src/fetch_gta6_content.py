@@ -7,8 +7,14 @@ import requests
 
 log = logging.getLogger(__name__)
 
-HEADERS    = {"User-Agent": "GTA6ContentBot/1.0 (automated content pipeline)"}
-REDDIT_BASE = "https://www.reddit.com"
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/125.0.0.0 Safari/537.36"
+    )
+}
+REDDIT_BASE = "https://old.reddit.com"
 
 GTA6_KEYWORDS = {"gta 6", "gta6", "gta vi", "grand theft auto 6", "grand theft auto vi"}
 
@@ -28,8 +34,41 @@ def _is_gta6_relevant(title: str, subreddit: str) -> bool:
     return any(kw in title.lower() for kw in GTA6_KEYWORDS)
 
 
-def fetch_reddit_posts(limit: int = 15) -> list[dict]:
+MOCK_POSTS = [
+    {
+        "title": "GTA 6 map is reportedly 3x bigger than GTA 5 — here's what we know",
+        "body": "Multiple leakers have confirmed the map will feature Vice City, a large surrounding state, and possibly a second city. The map is said to include swamps, suburbs, highways and a massive downtown area.",
+        "score": 12400, "comments": 847, "flair": "Theory", "url": "", "subreddit": "GTA6",
+    },
+    {
+        "title": "The female protagonist Lucia's backstory — fan theories compiled",
+        "body": "Based on the trailers, many fans believe Lucia is a criminal who got out of prison and is trying to start fresh with her partner Jason. The relationship dynamic seems central to the story.",
+        "score": 8900, "comments": 612, "flair": "Discussion", "url": "", "subreddit": "GTA6",
+    },
+    {
+        "title": "GTA 6 economy system explained — social media, influencers and stocks",
+        "body": "Leaks suggest the game will feature a deep in-game social media system, a streaming platform parody, and a stock market. Players might be able to manipulate stocks like in GTA 5.",
+        "score": 7300, "comments": 504, "flair": "Leak", "url": "", "subreddit": "GTA6",
+    },
+    {
+        "title": "Every detail hidden in the GTA 6 trailers — frame by frame analysis",
+        "body": "Fans have spotted: alligators in swamps, a GPS with a huge road network, female cop NPCs, a much more detailed crowd AI, and what appears to be a drug lab mission.",
+        "score": 15600, "comments": 1200, "flair": "Analysis", "url": "", "subreddit": "GTA6",
+    },
+    {
+        "title": "Will GTA 6 have the most realistic driving physics ever?",
+        "body": "Based on the trailer footage, car handling looks significantly improved over GTA 5. Some insiders claim there are multiple driving physics modes. Motorcycles also look completely revamped.",
+        "score": 5200, "comments": 389, "flair": "Discussion", "url": "", "subreddit": "GTA6",
+    },
+]
+
+
+def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
     """Retourne les meilleurs posts GTA 6 de Reddit, dédupliqués et triés par score."""
+    if mock:
+        log.info("Mode mock — utilisation des posts test intégrés")
+        return MOCK_POSTS[:limit]
+
     seen_titles: set[str] = set()
     posts: list[dict] = []
 

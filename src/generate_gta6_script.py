@@ -63,8 +63,12 @@ Return ONLY this JSON (no other text):
 {{
   "long_en": "...",
   "short_en": "...",
-  "tiktok_fr": "..."
-}}"""
+  "tiktok_fr": "...",
+  "thumbnail_title": "..."
+}}
+
+thumbnail_title: 5-7 words MAX, ALL CAPS, punchy clickbait for the YouTube thumbnail.
+Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIEST GTA 6 THEORY""""
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     resp = client.messages.create(
@@ -79,7 +83,7 @@ Return ONLY this JSON (no other text):
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 

@@ -10,6 +10,7 @@ Assemble les vidéos GTA 6 avec FFmpeg :
 import glob
 import json
 import logging
+import math
 import os
 import shutil
 import subprocess
@@ -48,11 +49,10 @@ def _build_base_video(
     vertical: bool,
     trailers: list[str],
 ) -> None:
-    """Génère la vidéo de base : trailer en boucle + audio TTS + overlay sombre."""
+    """Génère la vidéo de base : trailer concaténé + audio TTS + overlay sombre."""
     w, h = (1080, 1920) if vertical else (1920, 1080)
 
     if vertical:
-        # 16:9 → 9:16 : scale sur la hauteur puis crop centré sur la largeur
         scale = f"scale=-1:{h},crop={w}:{h}"
     else:
         scale = (
@@ -62,29 +62,39 @@ def _build_base_video(
 
     vf = (
         f"{scale},"
-        f"fps=30,"
-        f"drawbox=x=0:y=0:w=iw:h=ih:color=black@0.45:t=fill,"  # overlay sombre
+        f"fps=24,"
+        f"drawbox=x=0:y=0:w=iw:h=ih:color=black@0.45:t=fill,"
         f"format=yuv420p"
     )
 
-    # Concaténer tous les trailers si durée insuffisante (via -stream_loop sur le premier)
-    # On utilise -stream_loop -1 pour boucler proprement
+    # Calculer combien de boucles du trailer sont nécessaires pour couvrir l'audio
     trailer = trailers[0]
+    trailer_dur = _get_audio_duration(trailer)
+    loops = math.ceil(duration / trailer_dur) + 1
+
+    # Fichier concat : trailer répété N fois
+    concat_file = output_path + ".concat.txt"
+    with open(concat_file, "w") as f:
+        for _ in range(loops):
+            f.write(f"file '{trailer}'\n")
 
     cmd = [
         "ffmpeg", "-y",
-        "-stream_loop", "-1",
-        "-i", trailer,
+        "-f", "concat", "-safe", "0", "-i", concat_file,
         "-i", audio_path,
         "-vf", vf,
-        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "aac", "-b:a", "192k",
-        "-t", str(duration),
         "-map", "0:v", "-map", "1:a",
-        "-movflags", "+faststart",
+        "-shortest",
         output_path,
     ]
     result = subprocess.run(cmd, capture_output=True)
+    try:
+        os.remove(concat_file)
+    except OSError:
+        pass
+
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         raise RuntimeError(f"Base video failed: {result.stderr.decode()[-600:]}")
 
@@ -114,7 +124,7 @@ def _burn_subtitles(input_path: str, srt_path: str, output_path: str, vertical: 
         "ffmpeg", "-y",
         "-i", input_path,
         "-vf", sub_filter,
-        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "copy",
         "-movflags", "+faststart",
         output_path,

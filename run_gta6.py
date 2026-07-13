@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("--topic",   default="", help="Angle/sujet à privilégier (optionnel)")
 parser.add_argument("--no-long", action="store_true", help="Passer la vidéo longue")
+parser.add_argument("--mock",    action="store_true", help="Utiliser des posts test (sans Reddit)")
 args = parser.parse_args()
 
 date_str = datetime.now().strftime("%Y-%m-%d")
@@ -32,7 +33,7 @@ os.makedirs("output/gta6", exist_ok=True)
 from src.fetch_gta6_content import fetch_reddit_posts
 
 log.info("Scraping Reddit (r/GTA6, r/GTA, r/GTASeries)...")
-posts = fetch_reddit_posts(limit=15)
+posts = fetch_reddit_posts(limit=15, mock=args.mock)
 
 if not posts:
     log.error("Aucun post Reddit trouvé — vérifier la connexion ou les subreddits")
@@ -79,7 +80,14 @@ with tempfile.TemporaryDirectory() as tmp:
     log.info("  Montage TikTok FR...")
     paths["tiktok"] = build_tiktok_fr(audio_tiktok, date_str)
 
-# ── 4. Résumé ─────────────────────────────────────────────────────────────────
+# ── 4. Miniature ──────────────────────────────────────────────────────────────
+from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
+
+log.info("\nGénération de la miniature...")
+thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
+paths["thumbnail"] = thumb_path
+
+# ── 5. Résumé ─────────────────────────────────────────────────────────────────
 lines = [
     "",
     "━" * 50,
@@ -90,5 +98,6 @@ if "long" in paths:
     lines.append(f"📺  YouTube long  → {paths['long']}")
 lines.append(f"▶️   YouTube Short → {paths['short']}")
 lines.append(f"🎵  TikTok FR     → {paths['tiktok']}  (poster manuellement)")
+lines.append(f"🖼️   Miniature     → {paths['thumbnail']}")
 lines.append("━" * 50)
 log.info("\n".join(lines))

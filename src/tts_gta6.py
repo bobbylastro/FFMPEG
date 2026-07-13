@@ -26,8 +26,8 @@ def _fmt_srt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
-def _words_to_srt(words: list[dict], path: str, chunk_size: int = 7) -> None:
-    """Regroupe les mots en blocs et écrit le fichier SRT."""
+def _words_to_srt(words: list[dict], path: str, chunk_size: int = 1) -> None:
+    """Écrit le fichier SRT (1 phrase par carte de sous-titre)."""
     if not words:
         return
 
@@ -61,7 +61,7 @@ async def _synthesize(
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
             audio_chunks.append(chunk["data"])
-        elif chunk["type"] == "WordBoundary":
+        elif chunk["type"] == "SentenceBoundary":
             words.append({
                 "word":     chunk["text"],
                 "start":    chunk["offset"]   / 10_000_000,
