@@ -67,12 +67,3 @@ def download_clips(clips: list[dict]) -> list[dict]:
     log.info(f"Downloaded {len(downloaded)}/{len(clips)} clips")
     return downloaded
 
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    from src.fetch_clips import fetch_top_clips
-    clips = fetch_top_clips(limit=3)
-    downloaded = download_clips(clips)
-    for d in downloaded:
-        size = os.path.getsize(d["local_path"]) // 1024
-        print(f"  {d['local_path']} ({size} KB)")
