@@ -43,20 +43,23 @@ Reddit content:
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 
 LONG_EN (~420 words, ~3 minutes spoken at 140 wpm):
-- Hook: start with a bold statement or question that grabs attention immediately
-- Cover 2-3 theories or news items from the posts
+- Hook: bold statement or question in the first sentence
+- Cover 2-3 different GTA 6 theories or news points (general theme: "what we know about GTA 6")
+- Transition naturally between topics
 - Conversational YouTube tone, enthusiastic
 - End with "Subscribe for more GTA 6 coverage" and a question for comments
 
-SHORT_EN (~140 words, ~55 seconds spoken):
+SHORT_EN (~240 words, ~75-85 seconds spoken — MINIMUM 75 SEC, MAXIMUM 90 SEC):
 - Hook in the very first sentence
-- Focus on ONE interesting theory or piece of news
-- End with a short punchy call to action
+- Pick ONE specific theory from the posts and go deep on it
+- Build tension, give details, end with a question or twist
+- Keep going — do NOT end under 75 seconds. Add details, analogies, or build-up to fill the time.
 
-TIKTOK_FR (~140 words, ~55 seconds spoken):
-- Same topic as SHORT_EN but in natural, casual French
+TIKTOK_FR (~240 words, ~75-85 seconds spoken — MINIMUM 75 SEC, MAXIMUM 90 SEC):
+- SAME theory as SHORT_EN but in natural, casual French
 - Hook in the first sentence in French
-- Modern French internet slang is welcome
+- Modern French internet tone (pas trop formel, dynamique)
+- Keep going — do NOT end under 75 seconds. Add details or build-up to fill the time.
 - End with a question to engage viewers
 
 Return ONLY this JSON (no other text):
@@ -68,7 +71,8 @@ Return ONLY this JSON (no other text):
 }}
 
 thumbnail_title: 5-7 words MAX, ALL CAPS, punchy clickbait for the YouTube thumbnail.
-Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIEST GTA 6 THEORY""""
+Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIEST GTA 6 THEORY"
+"""
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     resp = client.messages.create(

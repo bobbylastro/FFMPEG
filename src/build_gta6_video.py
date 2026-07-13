@@ -60,12 +60,7 @@ def _build_base_video(
             f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2"
         )
 
-    vf = (
-        f"{scale},"
-        f"fps=24,"
-        f"drawbox=x=0:y=0:w=iw:h=ih:color=black@0.45:t=fill,"
-        f"format=yuv420p"
-    )
+    vf = f"{scale},fps=24,format=yuv420p"
 
     # Calculer combien de boucles du trailer sont nécessaires pour couvrir l'audio
     trailer = trailers[0]
@@ -85,8 +80,8 @@ def _build_base_video(
         "-vf", vf,
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "aac", "-b:a", "192k",
-        "-map", "0:v", "-map", "1:a",
-        "-shortest",
+        "-map", "0:v:0", "-map", "1:a:0",
+        "-t", str(duration),
         output_path,
     ]
     result = subprocess.run(cmd, capture_output=True)
@@ -96,7 +91,7 @@ def _build_base_video(
         pass
 
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise RuntimeError(f"Base video failed: {result.stderr.decode()[-600:]}")
+        raise RuntimeError(f"Base video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
 
 
 def _burn_subtitles(input_path: str, srt_path: str, output_path: str, vertical: bool) -> None:

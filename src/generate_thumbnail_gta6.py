@@ -1,31 +1,33 @@
 """
 Génère une miniature YouTube pour les vidéos GTA 6 pre-launch.
   - Background : frame cinématique extraite du trailer
+  - Logo       : assets/Grand_Theft_Auto_VI_logo.svg (WebP RGBA)
   - Titre      : accroche courte générée par l'IA (5-7 mots max)
-  - Style      : Vice City — néon rose/teal sur fond sombre
+  - Style      : Vice City — néon rose/teal, gradient sombre en bas
 """
 import logging
 import os
 import subprocess
 import tempfile
+import textwrap
 
-from PIL import Image, ImageDraw, ImageFont, ImageStat
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageStat
 
 log = logging.getLogger(__name__)
 
 _ASSETS    = os.path.join(os.path.dirname(__file__), "..", "assets", "fonts")
 FONT_TITLE = os.path.abspath(os.path.join(_ASSETS, "RussoOne-Regular.ttf"))
 FONT_SUB   = os.path.abspath(os.path.join(_ASSETS, "Montserrat-ExtraBold.ttf"))
+LOGO_PATH  = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "Grand_Theft_Auto_VI_logo.svg"))
 
 TRAILERS_DIR = os.path.abspath("assets/gta6_trailers")
 OUTPUT_DIR   = "output/gta6"
 THUMB_W, THUMB_H = 1280, 720
 
-# Palette Vice City / GTA VI
 NEON_PINK  = (255,  60, 120)
 NEON_TEAL  = (  0, 210, 210)
-DARK_BG    = ( 10,   5,  20, 145)   # overlay sombre violacé
 WHITE      = (255, 255, 255)
+BLACK      = (  0,   0,   0)
 
 
 def _get_duration(path: str) -> float:
@@ -41,10 +43,8 @@ def _frame_sharpness(img: Image.Image) -> float:
     return sum(ImageStat.Stat(img).stddev)
 
 
-def _best_trailer_frame(trailer_path: str, n: int = 10) -> Image.Image:
-    """Extrait la frame la plus nette/contrastée du trailer."""
+def _best_trailer_frame(trailer_path: str, n: int = 12) -> Image.Image:
     duration = _get_duration(trailer_path)
-    # Échantillons entre 10% et 85% du trailer (évite intro et générique fin)
     timestamps = [duration * (0.10 + 0.75 * i / (n - 1)) for i in range(n)]
 
     best_img, best_score = None, -1.0
@@ -67,21 +67,20 @@ def _best_trailer_frame(trailer_path: str, n: int = 10) -> Image.Image:
     return best_img
 
 
-def _auto_font(draw: ImageDraw, text: str, font_path: str,
+def _auto_font(draw: ImageDraw.Draw, text: str, font_path: str,
                start_size: int, max_width: int) -> ImageFont.FreeTypeFont:
     size = start_size
-    while size > 32:
+    while size > 28:
         font = ImageFont.truetype(font_path, size)
         bb = draw.textbbox((0, 0), text, font=font)
         if (bb[2] - bb[0]) <= max_width:
             return font
-        size -= 6
+        size -= 4
     return ImageFont.truetype(font_path, size)
 
 
-def _draw_text_with_outline(draw: ImageDraw, x: int, y: int, text: str,
-                             font: ImageFont.FreeTypeFont, fill, outline,
-                             outline_w: int = 4) -> None:
+def _draw_outlined(draw: ImageDraw.Draw, x: int, y: int, text: str,
+                   font: ImageFont.FreeTypeFont, fill, outline, outline_w: int = 5) -> None:
     for dx in range(-outline_w, outline_w + 1):
         for dy in range(-outline_w, outline_w + 1):
             if dx != 0 or dy != 0:
@@ -89,14 +88,46 @@ def _draw_text_with_outline(draw: ImageDraw, x: int, y: int, text: str,
     draw.text((x, y), text, font=font, fill=fill)
 
 
+def _add_gradient_overlay(img: Image.Image) -> Image.Image:
+    """Dégradé sombre en bas (pour la lisibilité du titre) et légère teinte en haut."""
+    overlay = Image.new("RGBA", (THUMB_W, THUMB_H), (0, 0, 0, 0))
+    draw    = ImageDraw.Draw(overlay)
+
+    # Gradient bas : de transparent à noir opaque sur la moitié basse
+    grad_start = THUMB_H // 2
+    for y in range(grad_start, THUMB_H):
+        alpha = int(200 * (y - grad_start) / (THUMB_H - grad_start))
+        draw.line([(0, y), (THUMB_W, y)], fill=(0, 0, 0, alpha))
+
+    # Légère teinte uniforme pour faire ressortir le logo
+    draw.rectangle([(0, 0), (THUMB_W, THUMB_H)], fill=(0, 0, 0, 55))
+
+    return Image.alpha_composite(img.convert("RGBA"), overlay)
+
+
+def _wrap_title(title: str, draw: ImageDraw.Draw, font: ImageFont.FreeTypeFont,
+                max_w: int) -> list[str]:
+    """Découpe le titre en 1 ou 2 lignes selon la largeur dispo."""
+    words = title.split()
+    lines: list[str] = []
+    current = ""
+    for w in words:
+        test = (current + " " + w).strip()
+        bb = draw.textbbox((0, 0), test, font=font)
+        if bb[2] - bb[0] > max_w and current:
+            lines.append(current)
+            current = w
+        else:
+            current = test
+    if current:
+        lines.append(current)
+    return lines[:2]
+
+
 def generate_thumbnail_gta6(title_line: str, date_str: str,
                              trailer_index: int = 0) -> str:
-    """
-    Génère une miniature 1280×720 pour une vidéo GTA 6.
-
-    title_line : accroche courte (≤ 7 mots), ex. "GTA 6 MAP IS 3X BIGGER?"
-    """
     import glob
+
     trailers = sorted(
         glob.glob(os.path.join(TRAILERS_DIR, "*.mp4"))
         + glob.glob(os.path.join(TRAILERS_DIR, "*.mov"))
@@ -105,60 +136,64 @@ def generate_thumbnail_gta6(title_line: str, date_str: str,
         raise FileNotFoundError(f"Aucun trailer dans {TRAILERS_DIR}")
     trailer = trailers[trailer_index % len(trailers)]
 
-    # 1. Frame cinématique du trailer
+    # 1. Background cinématique
     bg = _best_trailer_frame(trailer)
     bg = bg.resize((THUMB_W, THUMB_H), Image.LANCZOS)
 
-    # 2. Overlay sombre
-    overlay = Image.new("RGBA", (THUMB_W, THUMB_H), DARK_BG)
-    img = Image.alpha_composite(bg.convert("RGBA"), overlay).convert("RGB")
-    draw = ImageDraw.Draw(img)
+    # 2. Gradient overlay
+    img = _add_gradient_overlay(bg).convert("RGB")
 
-    MAX_W = THUMB_W - 80
+    # 3. Logo GTA VI (WebP RGBA)
+    logo_img = Image.open(LOGO_PATH).convert("RGBA")
+    logo_target_w = 520
+    logo_ratio    = logo_target_w / logo_img.width
+    logo_h        = int(logo_img.height * logo_ratio)
+    logo_img      = logo_img.resize((logo_target_w, logo_h), Image.LANCZOS)
 
-    # 3. "GTA VI" en petit en haut
-    sub_text = "GTA VI"
-    font_sub = _auto_font(draw, sub_text, FONT_SUB, 60, MAX_W)
-    sub_bb   = draw.textbbox((0, 0), sub_text, font=font_sub)
-    sub_w    = sub_bb[2] - sub_bb[0]
-    sub_x    = (THUMB_W - sub_w) // 2
-    sub_y    = 55
-    _draw_text_with_outline(draw, sub_x, sub_y, sub_text, font_sub,
-                            fill=NEON_TEAL, outline=(0, 0, 0), outline_w=3)
+    # Centrer le logo — haut de l'image avec un peu d'espace
+    logo_x = (THUMB_W - logo_target_w) // 2
+    logo_y = 28
+    img.paste(logo_img, (logo_x, logo_y), logo_img)
 
-    # Trait sous "GTA VI"
-    line_y = sub_y + (sub_bb[3] - sub_bb[1]) + 10
-    bar_w  = min(sub_w + 40, 300)
-    draw.rectangle(
-        [((THUMB_W - bar_w) // 2, line_y), ((THUMB_W + bar_w) // 2, line_y + 5)],
-        fill=NEON_PINK,
+    # 4. Titre principal — zone basse (sous le logo)
+    draw      = ImageDraw.Draw(img)
+    title_up  = title_line.upper()
+    MAX_W     = THUMB_W - 120
+    font_hl   = _auto_font(draw, title_up, FONT_TITLE, 110, MAX_W)
+    lines     = _wrap_title(title_up, draw, font_hl, MAX_W)
+
+    # Calculer la hauteur totale du bloc titre
+    line_h   = font_hl.getbbox("A")[3] + 8
+    total_h  = len(lines) * line_h
+    # Positionner le titre juste au-dessus du badge, centré verticalement dans la zone basse
+    title_zone_top = logo_y + logo_h + 20
+    title_y_start  = title_zone_top + max(0, (THUMB_H - 60 - title_zone_top - total_h) // 2)
+
+    for i, line in enumerate(lines):
+        bb    = draw.textbbox((0, 0), line, font=font_hl)
+        lw    = bb[2] - bb[0]
+        lx    = (THUMB_W - lw) // 2
+        ly    = title_y_start + i * line_h
+        _draw_outlined(draw, lx, ly, line, font_hl, fill=WHITE, outline=BLACK, outline_w=6)
+
+    # 5. Badge "THEORY" en bas à gauche — style pill rose néon
+    font_badge = ImageFont.truetype(FONT_SUB, 34)
+    badge_text = "THEORY"
+    bb_b = draw.textbbox((0, 0), badge_text, font=font_badge)
+    bw, bh = bb_b[2] - bb_b[0], bb_b[3] - bb_b[1]
+    pad_x, pad_y = 22, 10
+    bx = 48
+    by = THUMB_H - bh - 2 * pad_y - 38
+    draw.rounded_rectangle(
+        [(bx, by), (bx + bw + 2 * pad_x, by + bh + 2 * pad_y)],
+        radius=8, fill=NEON_PINK,
     )
+    draw.text((bx + pad_x, by + pad_y), badge_text, font=font_badge, fill=WHITE)
 
-    # 4. Titre principal (grand, centré, 2 lignes si besoin)
-    title_up = title_line.upper()
-    font_hl  = _auto_font(draw, title_up, FONT_TITLE, 130, MAX_W)
-    hl_bb    = draw.textbbox((0, 0), title_up, font=font_hl)
-    hl_w     = hl_bb[2] - hl_bb[0]
-    hl_h     = hl_bb[3] - hl_bb[1]
-    hl_x     = (THUMB_W - hl_w) // 2
-    hl_y     = line_y + 20
-    _draw_text_with_outline(draw, hl_x, hl_y, title_up, font_hl,
-                            fill=WHITE, outline=(0, 0, 0), outline_w=5)
-
-    # 5. Bandeau "THEORY" ou "NEWS" en bas
-    tag_text = "THEORY"
-    font_tag = ImageFont.truetype(FONT_SUB, 38)
-    tag_bb   = draw.textbbox((0, 0), tag_text, font=font_tag)
-    tag_w    = tag_bb[2] - tag_bb[0]
-    tag_h    = tag_bb[3] - tag_bb[1]
-    pad_x, pad_y = 18, 8
-    rect_x = (THUMB_W - tag_w - 2 * pad_x) // 2
-    rect_y = THUMB_H - tag_h - 2 * pad_y - 40
-    draw.rectangle(
-        [(rect_x, rect_y), (rect_x + tag_w + 2 * pad_x, rect_y + tag_h + 2 * pad_y)],
-        fill=NEON_PINK,
-    )
-    draw.text((rect_x + pad_x, rect_y + pad_y), tag_text, font=font_tag, fill=WHITE)
+    # 6. Trait néon teal sous le logo (séparateur visuel)
+    sep_y = logo_y + logo_h + 8
+    draw.rectangle([(logo_x + 40, sep_y), (logo_x + logo_target_w - 40, sep_y + 3)],
+                   fill=NEON_TEAL)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     out_path = os.path.join(OUTPUT_DIR, f"{date_str}_thumbnail.jpg")
