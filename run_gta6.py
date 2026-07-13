@@ -23,8 +23,8 @@ log = logging.getLogger(__name__)
 parser = argparse.ArgumentParser()
 parser.add_argument("--topic",   default="", help="Angle/sujet à privilégier (optionnel)")
 parser.add_argument("--no-long", action="store_true", help="Passer la vidéo longue")
-parser.add_argument("--mock",    action="store_true", help="Utiliser des posts test (sans Reddit)")
-parser.add_argument("--news",    action="store_true", help="Utiliser les flux RSS gaming (pas Reddit)")
+parser.add_argument("--mock",    action="store_true", help="Utiliser le cache local (sans appel réseau)")
+parser.add_argument("--reddit",  action="store_true", help="Forcer le scraping Reddit (bloqué en datacenter)")
 args = parser.parse_args()
 
 date_str = datetime.now().strftime("%Y-%m-%d")
@@ -33,15 +33,15 @@ os.makedirs("output/gta6", exist_ok=True)
 # ── 1. Scraping Reddit ────────────────────────────────────────────────────────
 from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts
 
-if args.news:
-    log.info("Collecte des flux RSS gaming (GameSpot, IGN, RPS, PCGamer…)...")
-    posts = fetch_news_posts(limit=15)
-elif args.mock:
-    log.info("Scraping Reddit (mode mock)...")
+if args.mock:
+    log.info("Mode mock — chargement du cache local...")
     posts = fetch_reddit_posts(limit=15, mock=True)
-else:
+elif args.reddit:
     log.info("Scraping Reddit (r/GTA6, r/GTA, r/GTASeries)...")
     posts = fetch_reddit_posts(limit=15, mock=False)
+else:
+    log.info("Collecte des flux RSS gaming (GameSpot, IGN, RPS, PCGamer…)...")
+    posts = fetch_news_posts(limit=15)
 
 if not posts:
     log.error("Aucun post Reddit trouvé — vérifier la connexion ou les subreddits")
