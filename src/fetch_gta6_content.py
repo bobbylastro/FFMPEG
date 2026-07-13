@@ -2,6 +2,7 @@
 Scrape Reddit (r/GTA6, r/GTA, r/GTASeries) pour les théories et news GTA 6.
 Utilise PRAW (OAuth) avec les credentials REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
 """
+import json
 import logging
 import os
 
@@ -66,10 +67,30 @@ def _make_reddit() -> praw.Reddit:
     )
 
 
+POSTS_CACHE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_last_posts.json")
+
+
+def _save_posts_cache(posts: list[dict]) -> None:
+    os.makedirs(os.path.dirname(os.path.abspath(POSTS_CACHE)), exist_ok=True)
+    with open(POSTS_CACHE, "w", encoding="utf-8") as f:
+        json.dump(posts, f, indent=2, ensure_ascii=False)
+
+
+def _load_posts_cache() -> list[dict]:
+    if os.path.exists(POSTS_CACHE):
+        with open(POSTS_CACHE, encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
 def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
     """Retourne les meilleurs posts GTA 6 de Reddit, dédupliqués et triés par score."""
     if mock:
-        log.info("Mode mock — utilisation des posts test intégrés")
+        cached = _load_posts_cache()
+        if cached:
+            log.info(f"Mode mock — {len(cached[:limit])} posts du dernier vrai scrap")
+            return cached[:limit]
+        log.info("Mode mock — utilisation des posts test intégrés (pas de cache)")
         return MOCK_POSTS[:limit]
 
     reddit = _make_reddit()
@@ -136,5 +157,8 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
             continue
 
     posts.sort(key=lambda x: x["score"], reverse=True)
-    log.info(f"Reddit: {len(posts)} posts GTA 6 collectés")
-    return posts[:limit]
+    result = posts[:limit]
+    log.info(f"Reddit: {len(result)} posts GTA 6 collectés")
+    if result:
+        _save_posts_cache(result)
+    return result

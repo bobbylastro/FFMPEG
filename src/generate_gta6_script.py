@@ -151,9 +151,13 @@ shots: visual timeline for SHORT_EN and TIKTOK_FR (6-8 entries).
 - pct: 0-100, percentage into the script where this visual starts
 - trailer: "T1" or "T2"
 - ts: timestamp in seconds from the TRAILER VISUAL CATALOG above
-Choose visuals that MATCH what's being said at that moment. Make it feel directed, not random.
-First shot always at pct=0. The Reddit post image (if available) will auto-display for the first 10s,
-so start trailer shots at pct matching roughly ~10s into the audio.
+Rules:
+- Choose visuals that MATCH what's being said at each moment — make it feel directed
+- EVERY shot must use a DIFFERENT timestamp (minimum 10s gap between any two shots from the same trailer)
+- Alternate between T1 and T2 as much as possible for visual variety
+- Spread shots evenly across the full runtime — avoid clustering them together
+- First shot at pct=0. The Reddit post image (if available) shows for the first ~10s,
+  so ideally start trailer shots at pct ≈ 13% (≈10s in an 80s video)
 """
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)

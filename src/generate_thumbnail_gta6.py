@@ -155,24 +155,18 @@ def generate_thumbnail_gta6(title_line: str, date_str: str,
     logo_y = 28
     img.paste(logo_img, (logo_x, logo_y), logo_img)
 
-    # 4. Titre principal — zone basse, texte jaune avec glow rose
-    draw      = ImageDraw.Draw(img)
-    title_up  = title_line.upper()
-    MAX_W     = THUMB_W - 100
+    # 4. Titre principal — Russo One, blanc éclatant avec halo orange
+    draw     = ImageDraw.Draw(img)
+    title_up = title_line.upper()
+    MAX_W    = THUMB_W - 80
 
-    # Police Bebas Neue (impactante, condensée, parfaite pour thumbnails gaming)
-    FONT_BEBAS = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "BebasNeue-Regular.otf")
-    )
-    font_hl = _auto_font(draw, title_up, FONT_BEBAS, 140, MAX_W)
+    font_hl = _auto_font(draw, title_up, FONT_TITLE, 148, MAX_W)
     lines   = _wrap_title(title_up, draw, font_hl, MAX_W)
 
-    line_h        = int(font_hl.getbbox("A")[3] * 1.1) + 4
-    total_h       = len(lines) * line_h
-    title_zone_top = logo_y + logo_h + 16
-    title_y_start  = title_zone_top + max(10, (THUMB_H - 70 - title_zone_top - total_h) // 2)
-
-    YELLOW = (255, 220, 0)
+    line_h         = int(font_hl.getbbox("A")[3] * 1.15) + 4
+    total_h        = len(lines) * line_h
+    title_zone_top = logo_y + logo_h + 20
+    title_y_start  = title_zone_top + max(10, (THUMB_H - 60 - title_zone_top - total_h) // 2)
 
     for i, line in enumerate(lines):
         bb = draw.textbbox((0, 0), line, font=font_hl)
@@ -180,16 +174,27 @@ def generate_thumbnail_gta6(title_line: str, date_str: str,
         lx = (THUMB_W - lw) // 2
         ly = title_y_start + i * line_h
 
-        # Glow neon rose derrière le texte (blur layer)
-        glow_layer = Image.new("RGBA", (THUMB_W, THUMB_H), (0, 0, 0, 0))
-        gd = ImageDraw.Draw(glow_layer)
-        gd.text((lx, ly), line, font=font_hl, fill=(255, 60, 120, 180))
-        glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(radius=14))
-        img = Image.alpha_composite(img.convert("RGBA"), glow_layer).convert("RGB")
-        draw = ImageDraw.Draw(img)
+        # Halo orange large (couche 1 — très diffus)
+        for radius, color, alpha in [
+            (28, (255, 100,  0), 120),
+            (14, (255, 180, 30), 160),
+            ( 6, (255, 220, 80), 200),
+        ]:
+            glow = Image.new("RGBA", (THUMB_W, THUMB_H), (0, 0, 0, 0))
+            gd = ImageDraw.Draw(glow)
+            gd.text((lx, ly), line, font=font_hl, fill=(*color, alpha))
+            glow = glow.filter(ImageFilter.GaussianBlur(radius=radius))
+            img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
+            draw = ImageDraw.Draw(img)
 
-        # Texte jaune avec contour fin
-        _draw_outlined(draw, lx, ly, line, font_hl, fill=YELLOW, outline=BLACK, outline_w=3)
+        # Ombre portée (profondeur)
+        _draw_outlined(draw, lx + 3, ly + 4, line, font_hl,
+                       fill=(0, 0, 0, 0), outline=(0, 0, 0), outline_w=0)
+        draw.text((lx + 3, ly + 4), line, font=font_hl, fill=(20, 10, 0))
+
+        # Texte blanc pur (core)
+        _draw_outlined(draw, lx, ly, line, font_hl,
+                       fill=WHITE, outline=(255, 140, 0), outline_w=2)
 
     # 5. Badge en bas à gauche
     font_badge = ImageFont.truetype(FONT_SUB, 34)
