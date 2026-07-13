@@ -94,6 +94,11 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
 GTA 6 launches November 19, 2026 — it is NOT yet released.
 Based on the Reddit posts below, pick the MOST interesting, surprising, or insane angle.
 Don't just describe theories — make it feel like breaking news or an exclusive reveal.
+
+IMPORTANT — Choose an angle that is VISUALLY ILLUSTRATABLE with general trailer footage:
+- Prefer broad, visual topics: the map size, Vice City aesthetics, Lucia's story, the world's richness, crime/heist vibes, Florida atmosphere, open world scale
+- Avoid hyper-specific angles that hinge on a single precise trailer moment (e.g. "a 3-second POV driving shot reveals physics", "one frame shows X detail") — these are impossible to illustrate without that exact moment
+- The best angles are ones where ANY scenic, action, or character shot from the trailer naturally fits the narration
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
