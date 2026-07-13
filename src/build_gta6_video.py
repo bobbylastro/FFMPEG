@@ -164,6 +164,113 @@ def _build_mixed_video(
         raise RuntimeError(f"Mixed video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
 
 
+def _build_shot_video(
+    shots: list[dict],
+    audio_path: str,
+    duration: float,
+    output_path: str,
+    vertical: bool,
+    trailers: list[str],
+    image_path: str | None = None,
+    image_duration: float = 10.0,
+) -> None:
+    """Montage dynamique : clips du trailer sélectionnés par l'IA + image Reddit optionnelle."""
+    scale = _scale_filter(vertical)
+
+    # Résoudre T1/T2 → fichier trailer
+    trailer_map: dict[str, str] = {}
+    for t in trailers:
+        name = os.path.basename(t)
+        if "Trailer 1" in name or (len(trailers) == 1):
+            trailer_map["T1"] = t
+            trailer_map.setdefault("T2", t)
+        elif "Trailer 2" in name:
+            trailer_map["T2"] = t
+    if not trailer_map:
+        trailer_map = {"T1": trailers[0], "T2": trailers[-1]}
+
+    shots_sorted = sorted(shots, key=lambda x: float(x["pct"]))
+    image_clip_dur = min(image_duration, duration) if (image_path and os.path.exists(image_path)) else 0.0
+
+    with tempfile.TemporaryDirectory() as tmp:
+        segments: list[str] = []
+
+        # Segment image Reddit (10s)
+        if image_clip_dur > 0:
+            img_clip = os.path.join(tmp, "img.mp4")
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-loop", "1", "-t", str(image_clip_dur), "-i", image_path,
+                "-vf", scale,
+                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+                "-an", img_clip,
+            ], capture_output=True)
+            if os.path.exists(img_clip) and os.path.getsize(img_clip) > 0:
+                segments.append(img_clip)
+
+        # Segments trailer selon le shot list
+        for i, shot in enumerate(shots_sorted):
+            t_start = float(shot["pct"]) / 100.0 * duration
+            t_end   = float(shots_sorted[i + 1]["pct"]) / 100.0 * duration if i + 1 < len(shots_sorted) else duration
+
+            # Rogner ce qui est couvert par l'image
+            if image_clip_dur > 0:
+                if t_end <= image_clip_dur:
+                    continue
+                if t_start < image_clip_dur:
+                    t_start = image_clip_dur
+
+            clip_dur = t_end - t_start
+            if clip_dur < 0.3:
+                continue
+
+            trailer_file = trailer_map.get(str(shot.get("trailer", "T1")), trailers[0])
+            ts = max(float(shot.get("ts", TRAILER_INPOINT)), TRAILER_INPOINT)
+
+            clip_path = os.path.join(tmp, f"clip_{i:02d}.mp4")
+            subprocess.run([
+                "ffmpeg", "-y",
+                "-ss", str(ts), "-i", trailer_file,
+                "-t", str(clip_dur),
+                "-vf", scale,
+                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+                "-an", clip_path,
+            ], capture_output=True)
+
+            if os.path.exists(clip_path) and os.path.getsize(clip_path) > 0:
+                segments.append(clip_path)
+
+        if not segments:
+            log.warning("Shot list vide ou invalide — fallback trailer en boucle")
+            _build_base_video(audio_path, duration, output_path, vertical, trailers)
+            return
+
+        # Concat segments vidéo + audio
+        concat_file = output_path + ".shots.txt"
+        with open(concat_file, "w") as f:
+            for seg in segments:
+                f.write(f"file '{seg}'\n")
+
+        result = subprocess.run([
+            "ffmpeg", "-y",
+            "-f", "concat", "-safe", "0", "-i", concat_file,
+            "-i", audio_path,
+            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+            "-c:a", "aac", "-b:a", "192k",
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-t", str(duration),
+            output_path,
+        ], capture_output=True)
+
+        try:
+            os.remove(concat_file)
+        except OSError:
+            pass
+
+    if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+        raise RuntimeError(f"Shot video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
+
+
 _FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "fonts"))
 
 
@@ -212,15 +319,19 @@ def build_video(
     output_path: str,
     vertical: bool = False,
     image_path: str | None = None,
+    shots: list[dict] | None = None,
 ) -> str:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     duration = _get_audio_duration(audio_path)
 
     with tempfile.TemporaryDirectory() as tmp:
         base = os.path.join(tmp, "base.mp4")
-
         trailers = _get_trailers()
-        if image_path and os.path.exists(image_path):
+
+        if shots:
+            log.info(f"Montage dynamique : {len(shots)} shots IA")
+            _build_shot_video(shots, audio_path, duration, base, vertical, trailers, image_path)
+        elif image_path and os.path.exists(image_path):
             log.info(f"Fond image Reddit (10s) + trailer : {os.path.basename(image_path)}")
             _build_mixed_video(image_path, audio_path, duration, base, vertical, trailers)
         else:
@@ -242,9 +353,10 @@ def build_long_en(audio_path: str, srt_path: str, date_str: str) -> str:
 
 
 def build_short_en(audio_path: str, srt_path: str, date_str: str,
-                   image_path: str | None = None) -> str:
+                   image_path: str | None = None,
+                   shots: list[dict] | None = None) -> str:
     out = os.path.join(OUTPUT_DIR, f"{date_str}_short_en.mp4")
-    return build_video(audio_path, srt_path, out, vertical=True, image_path=image_path)
+    return build_video(audio_path, srt_path, out, vertical=True, image_path=image_path, shots=shots)
 
 
 _BEBAS = os.path.abspath(
@@ -288,15 +400,16 @@ def _add_tiktok_hook(input_path: str, hook_text: str, output_path: str) -> None:
         shutil.copy(input_path, output_path)
 
 
-def build_tiktok_fr(audio_path: str, date_str: str, hook_text: str = "") -> str:
+def build_tiktok_fr(audio_path: str, date_str: str, hook_text: str = "",
+                    shots: list[dict] | None = None) -> str:
     out = os.path.join(OUTPUT_DIR, f"{date_str}_tiktok_fr.mp4")
     if hook_text:
         tmp = out + ".raw.mp4"
-        build_video(audio_path, None, tmp, vertical=True)
+        build_video(audio_path, None, tmp, vertical=True, shots=shots)
         _add_tiktok_hook(tmp, hook_text, out)
         try:
             os.remove(tmp)
         except OSError:
             pass
         return out
-    return build_video(audio_path, None, out, vertical=True)
+    return build_video(audio_path, None, out, vertical=True, shots=shots)

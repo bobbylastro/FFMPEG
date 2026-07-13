@@ -44,13 +44,16 @@ for p in posts[:5]:
     log.info(f"    [{p['score']:>6}] {p['title'][:70]}")
 
 # ── 2. Génération des scripts IA ──────────────────────────────────────────────
-from src.generate_gta6_script import generate_scripts, load_topic_history, save_topic
+from src.generate_gta6_script import generate_scripts, load_topic_history, save_topic, load_trailer_catalog
 
 log.info("\nGénération des scripts (Claude Haiku)...")
 history = load_topic_history()
 if history:
     log.info(f"  {len(history)} sujets déjà couverts en mémoire")
-scripts = generate_scripts(posts, topic=args.topic, history=history)
+catalog = load_trailer_catalog()
+if catalog:
+    log.info(f"  Catalogue trailer : {len(catalog)} moments visuels disponibles")
+scripts = generate_scripts(posts, topic=args.topic, history=history, catalog=catalog)
 
 # Enregistrer le sujet dans l'historique
 save_topic(scripts, date_str)
@@ -96,14 +99,20 @@ with tempfile.TemporaryDirectory() as tmp:
             except Exception as e:
                 log.warning(f"  Image téléchargement échoué ({img_url}): {e}")
 
+    shots = scripts.get("shots") or []
+    if shots:
+        log.info(f"  Shot list IA : {len(shots)} plans visuels")
+
     log.info("  Montage short EN...")
-    paths["short"] = build_short_en(audio_short, ass_short, date_str, image_path=image_short)
+    paths["short"] = build_short_en(audio_short, ass_short, date_str,
+                                    image_path=image_short, shots=shots)
 
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)
     log.info("  Montage TikTok FR...")
     paths["tiktok"] = build_tiktok_fr(audio_tiktok, date_str,
-                                       hook_text=scripts.get("tiktok_hook", ""))
+                                       hook_text=scripts.get("tiktok_hook", ""),
+                                       shots=shots)
 
 # ── 4. Miniature ──────────────────────────────────────────────────────────────
 from src.generate_thumbnail_gta6 import generate_thumbnail_gta6

@@ -16,7 +16,24 @@ from config.settings import ANTHROPIC_API_KEY
 log = logging.getLogger(__name__)
 MODEL = "claude-haiku-4-5-20251001"
 
-TOPICS_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_topics.json")
+TOPICS_FILE   = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_topics.json")
+CATALOG_FILE  = os.path.join(os.path.dirname(__file__), "..", "assets", "trailer_catalog.json")
+
+
+def load_trailer_catalog() -> list[dict]:
+    if not os.path.exists(CATALOG_FILE):
+        return []
+    with open(CATALOG_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _format_catalog(catalog: list[dict]) -> str:
+    """Catalogue compact pour le prompt : [trailer · ts] description."""
+    lines = []
+    for e in catalog:
+        trailer_short = "T1" if "Trailer 1" in e["trailer"] else "T2"
+        lines.append(f"[{trailer_short} t={e['ts']:.0f}s] {e['description']}")
+    return "\n".join(lines)
 
 
 def load_topic_history() -> list[dict]:
@@ -52,13 +69,18 @@ def _build_context(posts: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | None = None) -> dict:
+def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | None = None,
+                     catalog: list[dict] | None = None) -> dict:
     """
     Retourne {"long_en": str, "short_en": str, "tiktok_fr": str}.
     topic optionnel pour orienter le script sur un angle spécifique.
     """
     context = _build_context(posts)
     topic_hint = f"\nFocus specifically on this angle: {topic}\n" if topic else ""
+
+    catalog_block = ""
+    if catalog:
+        catalog_block = f"\nTRAILER VISUAL CATALOG — use these timestamps to assign visuals:\n{_format_catalog(catalog)}\n"
 
     history_block = ""
     if history:
@@ -72,7 +94,7 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
 GTA 6 launches November 19, 2026 — it is NOT yet released.
 Based on the Reddit posts below, pick the MOST interesting, surprising, or insane angle.
 Don't just describe theories — make it feel like breaking news or an exclusive reveal.
-{topic_hint}{history_block}
+{topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
 
@@ -106,7 +128,13 @@ Return ONLY this JSON (no other text):
   "tiktok_fr": "...",
   "thumbnail_title": "...",
   "tiktok_hook": "...",
-  "short_post_index": 0
+  "short_post_index": 0,
+  "shots": [
+    {{"pct": 0,  "trailer": "T1", "ts": 14}},
+    {{"pct": 20, "trailer": "T1", "ts": 35}},
+    {{"pct": 50, "trailer": "T2", "ts": 45}},
+    {{"pct": 75, "trailer": "T2", "ts": 120}}
+  ]
 }}
 
 thumbnail_title: 5-7 words MAX, ALL CAPS, punchy clickbait for the YouTube thumbnail.
@@ -117,13 +145,21 @@ It must stop the scroll instantly. Use urgency, surprise, or a provocative quest
 Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT CACHÉ ?"
 
 short_post_index: integer — the index (0-7) of the [POST N] that SHORT_EN focuses on.
-Used to show the post's image as background video. Pick the post with the most visual/image potential.
+Used to show the post's image as background video when available.
+
+shots: visual timeline for SHORT_EN and TIKTOK_FR (6-8 entries).
+- pct: 0-100, percentage into the script where this visual starts
+- trailer: "T1" or "T2"
+- ts: timestamp in seconds from the TRAILER VISUAL CATALOG above
+Choose visuals that MATCH what's being said at that moment. Make it feel directed, not random.
+First shot always at pct=0. The Reddit post image (if available) will auto-display for the first 10s,
+so start trailer shots at pct matching roughly ~10s into the audio.
 """
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=2500,
+        max_tokens=4000,
         messages=[{"role": "user", "content": prompt}],
     )
 
@@ -133,7 +169,7 @@ Used to show the post's image as background video. Pick the post with the most v
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index", "shots"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 
