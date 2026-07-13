@@ -69,11 +69,16 @@ Return ONLY this JSON (no other text):
   "long_en": "...",
   "short_en": "...",
   "tiktok_fr": "...",
-  "thumbnail_title": "..."
+  "thumbnail_title": "...",
+  "tiktok_hook": "..."
 }}
 
 thumbnail_title: 5-7 words MAX, ALL CAPS, punchy clickbait for the YouTube thumbnail.
 Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIEST GTA 6 THEORY"
+
+tiktok_hook: 4-5 words MAX, ALL CAPS, French teaser shown at the top of the TikTok for 3 seconds.
+It must stop the scroll instantly. Use urgency, surprise, or a provocative question.
+Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT CACHÉ ?"
 """
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -89,7 +94,7 @@ Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIE
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 

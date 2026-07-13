@@ -170,6 +170,56 @@ def build_short_en(audio_path: str, srt_path: str, date_str: str) -> str:
     return build_video(audio_path, srt_path, out, vertical=True)
 
 
-def build_tiktok_fr(audio_path: str, date_str: str) -> str:
+_BEBAS = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "BebasNeue-Regular.otf")
+)
+
+
+def _add_tiktok_hook(input_path: str, hook_text: str, output_path: str) -> None:
+    """Overlay texte d'accroche centré en haut, visible les 3 premières secondes."""
+    import tempfile
+    font_esc = _BEBAS.replace(":", "\\:")
+
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
+        f.write(hook_text.upper())
+        txt_file = f.name
+    txt_esc = txt_file.replace(":", "\\:")
+
+    drawtext = (
+        f"drawtext=fontfile={font_esc}:textfile={txt_esc}:"
+        f"fontcolor=white:fontsize=85:"
+        f"x=(w-text_w)/2:y=110:"
+        f"box=1:boxcolor=0x000000@0.65:boxborderw=22:"
+        f"enable='between(t,0,3)'"
+    )
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", input_path,
+        "-vf", drawtext,
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+        "-c:a", "copy",
+        output_path,
+    ]
+    result = subprocess.run(cmd, capture_output=True)
+    try:
+        os.unlink(txt_file)
+    except OSError:
+        pass
+
+    if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+        log.warning(f"Hook overlay failed: {result.stderr.decode()[-300:]}")
+        shutil.copy(input_path, output_path)
+
+
+def build_tiktok_fr(audio_path: str, date_str: str, hook_text: str = "") -> str:
     out = os.path.join(OUTPUT_DIR, f"{date_str}_tiktok_fr.mp4")
+    if hook_text:
+        tmp = out + ".raw.mp4"
+        build_video(audio_path, None, tmp, vertical=True)
+        _add_tiktok_hook(tmp, hook_text, out)
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        return out
     return build_video(audio_path, None, out, vertical=True)

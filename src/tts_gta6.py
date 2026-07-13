@@ -11,7 +11,7 @@ import edge_tts
 log = logging.getLogger(__name__)
 
 VOICE_EN = "en-US-GuyNeural"
-VOICE_FR = "fr-FR-HenriNeural"
+VOICE_FR = "fr-FR-RemyMultilingualNeural"
 RATE_EN  = "+8%"
 RATE_FR  = "+5%"
 
@@ -56,7 +56,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Bebas Neue,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,4,0,3,6,0,2,40,40,{margin_v},1
+Style: Default,Bebas Neue,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,10,0,2,0,0,{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -100,8 +100,8 @@ def _words_to_ass(sentences: list[dict], path: str,
     chunks = _split_into_word_groups(sentences, max_words)
 
     res_x, res_y = (1080, 1920) if vertical else (1920, 1080)
-    font_size     = 80 if vertical else 58
-    margin_v      = 240 if vertical else 80
+    font_size     = 160 if vertical else 80
+    margin_v      = 220 if vertical else 80
 
     header = _ASS_HEADER.format(
         res_x=res_x, res_y=res_y, font_size=font_size, margin_v=margin_v

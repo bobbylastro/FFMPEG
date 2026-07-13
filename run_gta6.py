@@ -78,7 +78,8 @@ with tempfile.TemporaryDirectory() as tmp:
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)
     log.info("  Montage TikTok FR...")
-    paths["tiktok"] = build_tiktok_fr(audio_tiktok, date_str)
+    paths["tiktok"] = build_tiktok_fr(audio_tiktok, date_str,
+                                       hook_text=scripts.get("tiktok_hook", ""))
 
 # ── 4. Miniature ──────────────────────────────────────────────────────────────
 from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
