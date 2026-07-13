@@ -1,10 +1,15 @@
 """
-Scrape Reddit (r/GTA6, r/GTA, r/GTASeries) pour les théories et news GTA 6.
-Utilise PRAW (OAuth) avec les credentials REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
+Scrape Reddit (r/GTA6, r/GTA, r/GTASeries) ou les flux RSS gaming pour les news GTA 6.
+Reddit : PRAW OAuth avec REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
+News    : flux RSS gaming (GameSpot, RPS, PCGamer, Push Square…) + og:image fallback.
 """
+import html
 import json
 import logging
 import os
+import re
+import urllib.request
+import xml.etree.ElementTree as ET
 
 import praw
 
@@ -159,6 +164,144 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
     posts.sort(key=lambda x: x["score"], reverse=True)
     result = posts[:limit]
     log.info(f"Reddit: {len(result)} posts GTA 6 collectés")
+    if result:
+        _save_posts_cache(result)
+    return result
+
+
+# ── News RSS ──────────────────────────────────────────────────────────────────
+
+_NEWS_SOURCES = [
+    # (nom, flux RSS)
+    ("GameSpot",    "https://www.gamespot.com/feeds/news/"),
+    ("IGN",         "https://feeds.ign.com/ign/all"),
+    ("GamesRadar",  "https://www.gamesradar.com/rss/"),
+    ("PCGamer",     "https://www.pcgamer.com/rss/"),
+    ("Eurogamer",   "https://www.eurogamer.net/feed"),
+    ("RPS",         "https://www.rockpapershotgun.com/feed"),
+    ("VG247",       "https://www.vg247.com/feed"),
+    ("Push Square", "https://www.pushsquare.com/feeds/latest"),
+    ("Kotaku",      "https://kotaku.com/rss"),
+    ("Destructoid", "https://www.destructoid.com/feed/"),
+    ("VGC",         "https://www.videogameschronicle.com/feed/"),
+    # Google News pour le volume (titre + description, pas d'image directe)
+    ("Google News", "https://news.google.com/rss/search?q=GTA+6+grand+theft+auto&hl=en-US&gl=US&ceid=US:en"),
+]
+
+_MEDIA_NS = {"media": "http://search.yahoo.com/mrss/"}
+
+_GTA6_ONLY = {"gta 6", "gta6", "gta vi", "grand theft auto 6", "grand theft auto vi"}
+_GTA6_EXCLUDE = {"gta 5", "gta5", "gta v ", " gta v,", "gta iv", "gta 4", "red dead"}
+
+
+def _is_gta6_news(title: str, body: str = "") -> bool:
+    text = (title + " " + body).lower()
+    if not any(k in text for k in _GTA6_ONLY):
+        return False
+    if any(k in text for k in _GTA6_EXCLUDE):
+        return False
+    return True
+
+
+def _clean_html(raw: str) -> str:
+    """Supprime les balises HTML et décode les entités."""
+    cleaned = re.sub(r"<[^>]+>", " ", raw)
+    return html.unescape(cleaned).strip()
+
+
+def _feed_image(item: ET.Element) -> str:
+    """Extrait l'image depuis les tags media: ou enclosure du flux RSS."""
+    for tag in ("media:thumbnail", "media:content"):
+        node = item.find(tag, _MEDIA_NS)
+        if node is not None:
+            url = node.get("url", "")
+            if url:
+                return url
+    enc = item.find("enclosure")
+    if enc is not None and "image" in enc.get("type", ""):
+        return enc.get("url", "")
+    return ""
+
+
+def _og_image(url: str, timeout: int = 6) -> str:
+    """Fetch l'URL et extrait og:image (fallback quand le flux n'a pas d'image)."""
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120",
+            "Accept": "text/html",
+        })
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw_html = resp.read(80000).decode("utf-8", errors="ignore")
+        for pat in [
+            r'property=["\']og:image["\']\s*content=["\']([^"\']+)',
+            r'content=["\']([^"\']+)["\']\s*property=["\']og:image',
+        ]:
+            m = re.search(pat, raw_html)
+            if m:
+                return m.group(1).strip()
+    except Exception:
+        pass
+    return ""
+
+
+def fetch_news_posts(limit: int = 15) -> list[dict]:
+    """
+    Collecte des articles GTA 6 depuis des flux RSS gaming + Google News.
+    Retourne dans le même format que fetch_reddit_posts().
+    """
+    seen: set[str] = set()
+    articles: list[dict] = []
+
+    for source_name, feed_url in _NEWS_SOURCES:
+        try:
+            req = urllib.request.Request(feed_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                xml_data = resp.read()
+            root = ET.fromstring(xml_data)
+
+            items = root.findall(".//item")
+            gta6_count = 0
+            for item in items:
+                title = _clean_html(item.findtext("title", ""))
+                desc  = _clean_html(item.findtext("description", ""))[:600]
+                link  = item.findtext("link", "").strip()
+
+                if not title or not _is_gta6_news(title, desc):
+                    continue
+                # Déduplication par titre normalisé
+                key = re.sub(r"\W+", "", title.lower())[:60]
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                image_url = _feed_image(item)
+
+                # Fallback og:image uniquement pour les sources gaming (pas Google News)
+                if not image_url and link.startswith("http") and source_name != "Google News":
+                    image_url = _og_image(link)
+
+                articles.append({
+                    "title":     title,
+                    "body":      desc,
+                    "score":     0,
+                    "comments":  0,
+                    "flair":     source_name,
+                    "url":       link,
+                    "subreddit": "news",
+                    "image_url": image_url,
+                })
+                gta6_count += 1
+
+            if gta6_count:
+                log.info(f"  {source_name}: {gta6_count} articles GTA 6")
+
+        except Exception as e:
+            log.warning(f"News fetch failed ({source_name}): {e}")
+
+    # Trier : articles avec image en premier, puis par source (Google News en dernier)
+    articles.sort(key=lambda x: (0 if x["image_url"] else 1, x["flair"] == "Google News"))
+    result = articles[:limit]
+    log.info(f"News: {len(result)} articles GTA 6 collectés ({sum(1 for a in result if a['image_url'])} avec image)")
     if result:
         _save_posts_cache(result)
     return result

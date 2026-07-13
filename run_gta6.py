@@ -24,16 +24,24 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--topic",   default="", help="Angle/sujet à privilégier (optionnel)")
 parser.add_argument("--no-long", action="store_true", help="Passer la vidéo longue")
 parser.add_argument("--mock",    action="store_true", help="Utiliser des posts test (sans Reddit)")
+parser.add_argument("--news",    action="store_true", help="Utiliser les flux RSS gaming (pas Reddit)")
 args = parser.parse_args()
 
 date_str = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("output/gta6", exist_ok=True)
 
 # ── 1. Scraping Reddit ────────────────────────────────────────────────────────
-from src.fetch_gta6_content import fetch_reddit_posts
+from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts
 
-log.info("Scraping Reddit (r/GTA6, r/GTA, r/GTASeries)...")
-posts = fetch_reddit_posts(limit=15, mock=args.mock)
+if args.news:
+    log.info("Collecte des flux RSS gaming (GameSpot, IGN, RPS, PCGamer…)...")
+    posts = fetch_news_posts(limit=15)
+elif args.mock:
+    log.info("Scraping Reddit (mode mock)...")
+    posts = fetch_reddit_posts(limit=15, mock=True)
+else:
+    log.info("Scraping Reddit (r/GTA6, r/GTA, r/GTASeries)...")
+    posts = fetch_reddit_posts(limit=15, mock=False)
 
 if not posts:
     log.error("Aucun post Reddit trouvé — vérifier la connexion ou les subreddits")
@@ -100,9 +108,17 @@ with tempfile.TemporaryDirectory() as tmp:
             import urllib.request
             img_url  = post["image_url"]
             img_ext  = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
+            if img_ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+                img_ext = ".jpg"
             img_path = os.path.join(tmp, f"post_image{img_ext}")
             try:
-                urllib.request.urlretrieve(img_url, img_path)
+                req = urllib.request.Request(img_url, headers={
+                    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+                    "Referer": post.get("url", img_url),
+                })
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    with open(img_path, "wb") as f:
+                        f.write(resp.read())
                 image_short = img_path
                 log.info(f"  Image fond (remote) : {post['title'][:60]}")
             except Exception as e:
