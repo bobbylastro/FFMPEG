@@ -12,12 +12,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 GAMES = {
-    "valorant":      "YOUTUBE_TOKEN_VALORANT",
-    "marvel-rivals": "YOUTUBE_TOKEN_MARVEL_RIVALS",
-    "the-finals":    "YOUTUBE_TOKEN_THE_FINALS",
-    "apex-legends":  "YOUTUBE_TOKEN_APEX_LEGENDS",
-    "rocket-league": "YOUTUBE_TOKEN_ROCKET_LEAGUE",
-    "r6-siege":      "YOUTUBE_TOKEN_R6_SIEGE",
+    "r6-siege": "YOUTUBE_TOKEN_R6_SIEGE",
 }
 
 ok = True

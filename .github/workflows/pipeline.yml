@@ -21,18 +21,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - game: valorant
-            min_offset: 0
-          - game: marvel-rivals
-            min_offset: 10
-          - game: the-finals
-            min_offset: 20
-          - game: apex-legends
-            min_offset: 30
-          - game: rocket-league
-            min_offset: 40
           - game: r6-siege
-            min_offset: 50
+            min_offset: 0
 
     steps:
       - id: gate
@@ -77,15 +67,10 @@ jobs:
       - name: Run pipeline — ${{ matrix.game }} (process only)
         if: steps.gate.outputs.skip != 'true'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-          YOUTUBE_TOKEN_VALORANT:          ${{ secrets.YOUTUBE_TOKEN_VALORANT }}
-          YOUTUBE_TOKEN_MARVEL_RIVALS:     ${{ secrets.YOUTUBE_TOKEN_MARVEL_RIVALS }}
-          YOUTUBE_TOKEN_THE_FINALS:        ${{ secrets.YOUTUBE_TOKEN_THE_FINALS }}
-          YOUTUBE_TOKEN_APEX_LEGENDS:      ${{ secrets.YOUTUBE_TOKEN_APEX_LEGENDS }}
-          YOUTUBE_TOKEN_ROCKET_LEAGUE:     ${{ secrets.YOUTUBE_TOKEN_ROCKET_LEAGUE }}
-          YOUTUBE_TOKEN_R6_SIEGE:          ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
+          YOUTUBE_TOKEN_R6_SIEGE: ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
         run: python run_pipeline.py --game ${{ matrix.game }} --no-upload
 
       - name: Commit used clips history
@@ -107,15 +92,10 @@ jobs:
       - name: Upload to YouTube — ${{ matrix.game }}
         if: steps.gate.outputs.skip != 'true'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
           TWITCH_CLIENT_ID:     ${{ secrets.TWITCH_CLIENT_ID }}
           TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-          YOUTUBE_TOKEN_VALORANT:          ${{ secrets.YOUTUBE_TOKEN_VALORANT }}
-          YOUTUBE_TOKEN_MARVEL_RIVALS:     ${{ secrets.YOUTUBE_TOKEN_MARVEL_RIVALS }}
-          YOUTUBE_TOKEN_THE_FINALS:        ${{ secrets.YOUTUBE_TOKEN_THE_FINALS }}
-          YOUTUBE_TOKEN_APEX_LEGENDS:      ${{ secrets.YOUTUBE_TOKEN_APEX_LEGENDS }}
-          YOUTUBE_TOKEN_ROCKET_LEAGUE:     ${{ secrets.YOUTUBE_TOKEN_ROCKET_LEAGUE }}
-          YOUTUBE_TOKEN_R6_SIEGE:          ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
+          YOUTUBE_TOKEN_R6_SIEGE: ${{ secrets.YOUTUBE_TOKEN_R6_SIEGE }}
         run: python run_pipeline.py --game ${{ matrix.game }} --upload-only
 
       - name: Upload outputs
