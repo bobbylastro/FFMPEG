@@ -134,6 +134,7 @@ Return ONLY this JSON (no other text):
   "thumbnail_title": "...",
   "tiktok_hook": "...",
   "short_post_index": 0,
+  "use_post_image": true,
   "shots": [
     {{"pct": 0,  "trailer": "T1", "ts": 14}},
     {{"pct": 20, "trailer": "T1", "ts": 35}},
@@ -150,7 +151,12 @@ It must stop the scroll instantly. Use urgency, surprise, or a provocative quest
 Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT CACHÉ ?"
 
 short_post_index: integer — the index (0-7) of the [POST N] that SHORT_EN focuses on.
-Used to show the post's image as background video when available.
+The post may have an image — use_post_image tells whether to show it.
+
+use_post_image: boolean — true ONLY if the post's image would genuinely illustrate the narration
+(e.g. a map screenshot when talking about map size, a screenshot of the game when describing gameplay).
+Set to false for generic promotional images, article thumbnails, or images unrelated to the narration angle.
+When false, the video goes straight to trailer footage from the first second.
 
 shots: visual timeline for SHORT_EN and TIKTOK_FR (6-8 entries).
 - pct: 0-100, percentage into the script where this visual starts
@@ -161,8 +167,8 @@ Rules:
 - EVERY shot must use a DIFFERENT timestamp (minimum 10s gap between any two shots from the same trailer)
 - Alternate between T1 and T2 as much as possible for visual variety
 - Spread shots evenly across the full runtime — avoid clustering them together
-- First shot at pct=0. The Reddit post image (if available) shows for the first ~10s,
-  so ideally start trailer shots at pct ≈ 13% (≈10s in an 80s video)
+- If use_post_image is true: first shot at pct=0, start trailer shots at pct ≈ 13% (≈10s in an 80s video)
+- If use_post_image is false: first shot at pct=0 goes directly to trailer footage
 """
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -178,7 +184,7 @@ Rules:
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index", "shots"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index", "use_post_image", "shots"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 

@@ -91,10 +91,12 @@ with tempfile.TemporaryDirectory() as tmp:
     log.info("  TTS short EN...")
     synthesize_en_short(scripts["short_en"], audio_short, ass_short)
 
-    # Image de fond : post Reddit sélectionné par l'IA
+    # Image de fond : post sélectionné par l'IA, uniquement si elle juge l'image pertinente
     image_short = None
     post_idx = int(scripts.get("short_post_index", 0))
-    if 0 <= post_idx < len(posts):
+    if not scripts.get("use_post_image", True):
+        log.info("  Image fond ignorée (IA : non pertinente pour la narration)")
+    elif 0 <= post_idx < len(posts):
         post = posts[post_idx]
 
         # Priorité 1 : image locale (asset embarqué)

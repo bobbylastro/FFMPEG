@@ -216,11 +216,24 @@ def _feed_image(item: ET.Element) -> str:
         if node is not None:
             url = node.get("url", "")
             if url:
-                return url
+                return _upgrade_image_url(url)
     enc = item.find("enclosure")
     if enc is not None and "image" in enc.get("type", ""):
-        return enc.get("url", "")
+        return _upgrade_image_url(enc.get("url", ""))
     return ""
+
+
+def _upgrade_image_url(url: str) -> str:
+    """Remplace les paramètres de taille basse résolution par la pleine résolution."""
+    if not url:
+        return url
+    # Supprime ou remplace les params de taille basse (w=300, width=690, size=small…)
+    url = re.sub(r'([?&])w=\d+', r'\1w=1280', url)
+    url = re.sub(r'([?&])width=\d+', r'\1width=1280', url)
+    url = re.sub(r'([?&])size=\w+', '', url)
+    url = re.sub(r'-\d+x\d+(\.\w+)$', r'\1', url)   # WordPress: image-300x200.jpg → image.jpg
+    url = re.sub(r'[?&]$', '', url)
+    return url
 
 
 def _og_image(url: str, timeout: int = 6) -> str:
@@ -238,7 +251,7 @@ def _og_image(url: str, timeout: int = 6) -> str:
         ]:
             m = re.search(pat, raw_html)
             if m:
-                return m.group(1).strip()
+                return _upgrade_image_url(m.group(1).strip())
     except Exception:
         pass
     return ""
