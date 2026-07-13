@@ -87,15 +87,24 @@ with tempfile.TemporaryDirectory() as tmp:
     image_short = None
     post_idx = int(scripts.get("short_post_index", 0))
     if 0 <= post_idx < len(posts):
-        img_url = posts[post_idx].get("image_url", "")
-        if img_url:
+        post = posts[post_idx]
+
+        # Priorité 1 : image locale (asset embarqué)
+        local_img = post.get("local_image", "")
+        if local_img and os.path.exists(local_img):
+            image_short = local_img
+            log.info(f"  Image fond (locale) : {post['title'][:60]}")
+
+        # Priorité 2 : téléchargement depuis URL distante
+        elif post.get("image_url"):
             import urllib.request
+            img_url  = post["image_url"]
             img_ext  = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
             img_path = os.path.join(tmp, f"post_image{img_ext}")
             try:
                 urllib.request.urlretrieve(img_url, img_path)
                 image_short = img_path
-                log.info(f"  Image fond : {posts[post_idx]['title'][:60]}")
+                log.info(f"  Image fond (remote) : {post['title'][:60]}")
             except Exception as e:
                 log.warning(f"  Image téléchargement échoué ({img_url}): {e}")
 
