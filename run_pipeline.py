@@ -40,17 +40,17 @@ if not args.upload_only:
     print_report(game_slug, game_name)
 
     # ── 1. Fetch candidates (Twitch, expansion progressive si besoin) ────────────
-    MIN_CLIPS = 6
+    MIN_CLIPS = 10
 
-    def _fetch_twitch(days: int, limit: int = 80) -> list[dict]:
+    def _fetch_twitch(days: int, limit: int = 150) -> list[dict]:
         candidates = fetch_twitch_clips(game_slug, game_name, limit=limit, days=days)
         print(f"  Twitch ({days}j) : {len(candidates)} candidats")
         return candidates
 
-    all_candidates = _fetch_twitch(days=14)
+    all_candidates = _fetch_twitch(days=21)
 
-    for expand_days in (30, 60):
-        if len(all_candidates) >= MIN_CLIPS * 5:
+    for expand_days in (45, 90):
+        if len(all_candidates) >= CLIPS_PER_VIDEO * 5:
             break
         logging.warning(f"Seulement {len(all_candidates)} candidats — extension à {expand_days} jours")
         seen_ids = {c["id"] for c in all_candidates}
@@ -63,11 +63,11 @@ if not args.upload_only:
         except NoClipsSelectedError:
             return []
 
-    clips = _ai_select(all_candidates[:60])
+    clips = _ai_select(all_candidates[:100])
 
-    if len(clips) < MIN_CLIPS and len(all_candidates) > 60:
+    if len(clips) < MIN_CLIPS and len(all_candidates) > 100:
         logging.warning(f"Seulement {len(clips)} clips — retry batch 2")
-        extra = _ai_select(all_candidates[60:120])
+        extra = _ai_select(all_candidates[100:200])
         seen_ids = {c["id"] for c in clips}
         clips += [c for c in extra if c["id"] not in seen_ids]
 
