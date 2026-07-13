@@ -21,6 +21,7 @@ _GAME_CONTEXT = {
     "apex-legends":  "Battle royale FPS with squads of 3. Last squad standing wins. Characters have unique abilities. High movement, fast TTK.",
     "rocket-league": "Soccer with rocket-powered cars. Players fly, boost, and spin to hit a giant ball into a goal. Aerial mechanics are the highlight.",
     "r6-siege":      "Tactical 5v5 FPS with operator gadgets. Attackers breach a building, defenders fortify it. One life per round, heavy destruction mechanics.",
+    "gta-6":         "Open-world action game set in Vice City. Players explore a massive map, complete missions, cause chaos, pull off heists, and engage in police chases. Massive freedom of play.",
 }
 
 _GAME_PLAYS = {
@@ -30,6 +31,7 @@ _GAME_PLAYS = {
     "apex-legends":  "squad wipe, 20-kill game, 3k damage, 4k damage, 1v3 clutch, final circle win, champion squad, revive clutch, 1v2, 1v3, no-scope, wingman shot",
     "rocket-league": "aerial goal, ceiling shot, musty flick, flip reset, double tap, overtime winner, insane save, 360 shot, air dribble, redirect",
     "r6-siege":      "ace, 4k, 3k, clutch, 1v2, 1v3, 1v4, 1v5, drone play, wallbang, operator ability play, defuse clutch, retake, through wall kill",
+    "gta-6":         "insane stunt, police escape, 5 stars, 6 stars, wanted level, heist, crazy crash, impossible jump, car chase, jet stunt, parachute, explosion, rampage, speedrun",
 }
 
 

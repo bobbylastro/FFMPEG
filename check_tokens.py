@@ -13,6 +13,7 @@ from googleapiclient.discovery import build
 
 GAMES = {
     "r6-siege": "YOUTUBE_TOKEN_R6_SIEGE",
+    # "gta-6":  "YOUTUBE_TOKEN_GTA_6",   # À activer le 19 nov 2026
 }
 
 ok = True

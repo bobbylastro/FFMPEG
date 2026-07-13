@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 # Twitch slug → display name (used by run_pipeline.py)
 TWITCH_GAME_CATALOG = {
     "r6-siege": "Rainbow Six Siege",
+    # "gta-6": "Grand Theft Auto VI",  # À activer le 19 nov 2026 (sortie du jeu)
 }
 
 TWITCH_AUTH_URL = "https://id.twitch.tv/oauth2/token"
