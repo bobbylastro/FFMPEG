@@ -96,28 +96,72 @@ def _build_base_video(
         raise RuntimeError(f"Base video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
 
 
-def _build_base_video_image(
+def _build_mixed_video(
     image_path: str,
     audio_path: str,
     duration: float,
     output_path: str,
     vertical: bool,
+    trailers: list[str],
+    image_duration: float = 10.0,
 ) -> None:
-    """Vidéo de base avec image Reddit statique comme fond (au lieu du trailer)."""
+    """10s d'image Reddit en fond, puis trailer pour le reste."""
+    trailer_dur = duration - image_duration
+    if trailer_dur <= 2.0:
+        # Vidéo trop courte pour le split — image seule
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1", "-i", image_path,
+            "-i", audio_path,
+            "-vf", _scale_filter(vertical),
+            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+            "-c:a", "aac", "-b:a", "192k",
+            "-map", "0:v:0", "-map", "1:a:0",
+            "-t", str(duration), output_path,
+        ]
+        result = subprocess.run(cmd, capture_output=True)
+        if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+            raise RuntimeError(f"Image-only video failed (rc={result.returncode}): {result.stderr.decode()[-400:]}")
+        return
+
+    trailer = trailers[0]
+    trailer_full_dur   = _get_audio_duration(trailer)
+    trailer_usable_dur = max(trailer_full_dur - TRAILER_INPOINT, 10.0)
+    loops = math.ceil(trailer_dur / trailer_usable_dur) + 1
+
+    concat_file = output_path + ".concat.txt"
+    with open(concat_file, "w") as f:
+        for _ in range(loops):
+            f.write(f"file '{trailer}'\n")
+            f.write(f"inpoint {TRAILER_INPOINT}\n")
+
+    scale = _scale_filter(vertical)
+    filter_complex = (
+        f"[0:v]{scale}[img];"
+        f"[1:v]{scale}[trl];"
+        f"[img][trl]concat=n=2:v=1:a=0[out]"
+    )
+
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1", "-i", image_path,
+        "-loop", "1", "-t", str(image_duration), "-i", image_path,
+        "-f", "concat", "-safe", "0", "-i", concat_file,
         "-i", audio_path,
-        "-vf", _scale_filter(vertical),
+        "-filter_complex", filter_complex,
+        "-map", "[out]", "-map", "2:a:0",
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "aac", "-b:a", "192k",
-        "-map", "0:v:0", "-map", "1:a:0",
         "-t", str(duration),
         output_path,
     ]
     result = subprocess.run(cmd, capture_output=True)
+    try:
+        os.remove(concat_file)
+    except OSError:
+        pass
+
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
-        raise RuntimeError(f"Image video failed (rc={result.returncode}): {result.stderr.decode()[-400:]}")
+        raise RuntimeError(f"Mixed video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
 
 
 _FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "fonts"))
@@ -175,11 +219,11 @@ def build_video(
     with tempfile.TemporaryDirectory() as tmp:
         base = os.path.join(tmp, "base.mp4")
 
+        trailers = _get_trailers()
         if image_path and os.path.exists(image_path):
-            log.info(f"Fond image Reddit : {os.path.basename(image_path)}")
-            _build_base_video_image(image_path, audio_path, duration, base, vertical)
+            log.info(f"Fond image Reddit (10s) + trailer : {os.path.basename(image_path)}")
+            _build_mixed_video(image_path, audio_path, duration, base, vertical, trailers)
         else:
-            trailers = _get_trailers()
             _build_base_video(audio_path, duration, base, vertical, trailers)
 
         if srt_path and os.path.exists(srt_path):

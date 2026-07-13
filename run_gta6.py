@@ -44,10 +44,17 @@ for p in posts[:5]:
     log.info(f"    [{p['score']:>6}] {p['title'][:70]}")
 
 # ── 2. Génération des scripts IA ──────────────────────────────────────────────
-from src.generate_gta6_script import generate_scripts
+from src.generate_gta6_script import generate_scripts, load_topic_history, save_topic
 
 log.info("\nGénération des scripts (Claude Haiku)...")
-scripts = generate_scripts(posts, topic=args.topic)
+history = load_topic_history()
+if history:
+    log.info(f"  {len(history)} sujets déjà couverts en mémoire")
+scripts = generate_scripts(posts, topic=args.topic, history=history)
+
+# Enregistrer le sujet dans l'historique
+save_topic(scripts, date_str)
+log.info(f"  Sujet sauvegardé : {scripts.get('thumbnail_title', '')}")
 
 # ── 3. TTS ────────────────────────────────────────────────────────────────────
 from src.tts_gta6 import synthesize_en, synthesize_en_short, synthesize_fr

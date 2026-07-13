@@ -6,6 +6,7 @@ Génère 3 scripts depuis les posts Reddit GTA 6 :
 """
 import json
 import logging
+import os
 import re
 
 import anthropic
@@ -14,6 +15,30 @@ from config.settings import ANTHROPIC_API_KEY
 
 log = logging.getLogger(__name__)
 MODEL = "claude-haiku-4-5-20251001"
+
+TOPICS_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_topics.json")
+
+
+def load_topic_history() -> list[dict]:
+    """Charge l'historique des sujets GTA6 déjà traités."""
+    if not os.path.exists(TOPICS_FILE):
+        return []
+    with open(TOPICS_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_topic(scripts: dict, date_str: str) -> None:
+    """Enregistre le sujet du jour dans l'historique."""
+    os.makedirs(os.path.dirname(os.path.abspath(TOPICS_FILE)), exist_ok=True)
+    history = load_topic_history()
+    history.append({
+        "date": date_str,
+        "angle": scripts.get("thumbnail_title", ""),
+        "hook": scripts.get("tiktok_hook", ""),
+        "summary": scripts.get("short_en", "")[:120],
+    })
+    with open(TOPICS_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, indent=2, ensure_ascii=False)
 
 
 def _build_context(posts: list[dict]) -> str:
@@ -27,7 +52,7 @@ def _build_context(posts: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def generate_scripts(posts: list[dict], topic: str = "") -> dict:
+def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | None = None) -> dict:
     """
     Retourne {"long_en": str, "short_en": str, "tiktok_fr": str}.
     topic optionnel pour orienter le script sur un angle spécifique.
@@ -35,11 +60,19 @@ def generate_scripts(posts: list[dict], topic: str = "") -> dict:
     context = _build_context(posts)
     topic_hint = f"\nFocus specifically on this angle: {topic}\n" if topic else ""
 
+    history_block = ""
+    if history:
+        lines = "\n".join(
+            f"- {h['date']}: {h['angle']} — {h['summary'][:80]}"
+            for h in history[-20:]  # derniers 20 sujets
+        )
+        history_block = f"\nALREADY COVERED (do NOT repeat these angles):\n{lines}\n"
+
     prompt = f"""You are a viral YouTube/TikTok content creator for GTA 6 hype content.
 GTA 6 launches November 19, 2026 — it is NOT yet released.
 Based on the Reddit posts below, pick the MOST interesting, surprising, or insane angle.
 Don't just describe theories — make it feel like breaking news or an exclusive reveal.
-{topic_hint}
+{topic_hint}{history_block}
 Reddit content:
 {context}
 
