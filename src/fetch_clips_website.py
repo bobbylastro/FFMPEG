@@ -69,6 +69,7 @@ WEBSITE_GAME_CATALOG = {
     "minecraft":          "Minecraft",
     "overwatch":          "Overwatch 2",
     "arc-raiders":        "ARC Raiders",
+    # "gta-6":            "Grand Theft Auto VI",  # À activer le 19 nov 2026 (sortie du jeu)
 }
 
 
