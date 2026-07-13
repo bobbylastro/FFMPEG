@@ -50,7 +50,7 @@ log.info("\nGénération des scripts (Claude Haiku)...")
 scripts = generate_scripts(posts, topic=args.topic)
 
 # ── 3. TTS ────────────────────────────────────────────────────────────────────
-from src.tts_gta6 import synthesize_en, synthesize_fr
+from src.tts_gta6 import synthesize_en, synthesize_en_short, synthesize_fr
 from src.build_gta6_video import build_long_en, build_short_en, build_tiktok_fr
 
 log.info("\nSynthèse vocale + montage vidéo...")
@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory() as tmp:
     audio_long   = os.path.join(tmp, "long_en.mp3")
     srt_long     = os.path.join(tmp, "long_en.srt")
     audio_short  = os.path.join(tmp, "short_en.mp3")
-    srt_short    = os.path.join(tmp, "short_en.srt")
+    ass_short    = os.path.join(tmp, "short_en.ass")   # ASS — style TikTok dynamique
     audio_tiktok = os.path.join(tmp, "tiktok_fr.mp3")
 
     paths = {}
@@ -71,9 +71,9 @@ with tempfile.TemporaryDirectory() as tmp:
         paths["long"] = build_long_en(audio_long, srt_long, date_str)
 
     log.info("  TTS short EN...")
-    synthesize_en(scripts["short_en"], audio_short, srt_short)
+    synthesize_en_short(scripts["short_en"], audio_short, ass_short)
     log.info("  Montage short EN...")
-    paths["short"] = build_short_en(audio_short, srt_short, date_str)
+    paths["short"] = build_short_en(audio_short, ass_short, date_str)
 
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)

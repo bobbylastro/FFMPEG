@@ -155,44 +155,59 @@ def generate_thumbnail_gta6(title_line: str, date_str: str,
     logo_y = 28
     img.paste(logo_img, (logo_x, logo_y), logo_img)
 
-    # 4. Titre principal — zone basse (sous le logo)
+    # 4. Titre principal — zone basse, texte jaune avec glow rose
     draw      = ImageDraw.Draw(img)
     title_up  = title_line.upper()
-    MAX_W     = THUMB_W - 120
-    font_hl   = _auto_font(draw, title_up, FONT_TITLE, 110, MAX_W)
-    lines     = _wrap_title(title_up, draw, font_hl, MAX_W)
+    MAX_W     = THUMB_W - 100
 
-    # Calculer la hauteur totale du bloc titre
-    line_h   = font_hl.getbbox("A")[3] + 8
-    total_h  = len(lines) * line_h
-    # Positionner le titre juste au-dessus du badge, centré verticalement dans la zone basse
-    title_zone_top = logo_y + logo_h + 20
-    title_y_start  = title_zone_top + max(0, (THUMB_H - 60 - title_zone_top - total_h) // 2)
+    # Police Bebas Neue (impactante, condensée, parfaite pour thumbnails gaming)
+    FONT_BEBAS = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "assets", "fonts", "BebasNeue-Regular.otf")
+    )
+    font_hl = _auto_font(draw, title_up, FONT_BEBAS, 140, MAX_W)
+    lines   = _wrap_title(title_up, draw, font_hl, MAX_W)
+
+    line_h        = int(font_hl.getbbox("A")[3] * 1.1) + 4
+    total_h       = len(lines) * line_h
+    title_zone_top = logo_y + logo_h + 16
+    title_y_start  = title_zone_top + max(10, (THUMB_H - 70 - title_zone_top - total_h) // 2)
+
+    YELLOW = (255, 220, 0)
 
     for i, line in enumerate(lines):
-        bb    = draw.textbbox((0, 0), line, font=font_hl)
-        lw    = bb[2] - bb[0]
-        lx    = (THUMB_W - lw) // 2
-        ly    = title_y_start + i * line_h
-        _draw_outlined(draw, lx, ly, line, font_hl, fill=WHITE, outline=BLACK, outline_w=6)
+        bb = draw.textbbox((0, 0), line, font=font_hl)
+        lw = bb[2] - bb[0]
+        lx = (THUMB_W - lw) // 2
+        ly = title_y_start + i * line_h
 
-    # 5. Badge "THEORY" en bas à gauche — style pill rose néon
+        # Glow neon rose derrière le texte (blur layer)
+        glow_layer = Image.new("RGBA", (THUMB_W, THUMB_H), (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glow_layer)
+        gd.text((lx, ly), line, font=font_hl, fill=(255, 60, 120, 180))
+        glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(radius=14))
+        img = Image.alpha_composite(img.convert("RGBA"), glow_layer).convert("RGB")
+        draw = ImageDraw.Draw(img)
+
+        # Texte jaune avec contour fin
+        _draw_outlined(draw, lx, ly, line, font_hl, fill=YELLOW, outline=BLACK, outline_w=3)
+
+    # 5. Badge en bas à gauche
     font_badge = ImageFont.truetype(FONT_SUB, 34)
-    badge_text = "THEORY"
+    badge_text = "GTA VI THEORY"
     bb_b = draw.textbbox((0, 0), badge_text, font=font_badge)
     bw, bh = bb_b[2] - bb_b[0], bb_b[3] - bb_b[1]
-    pad_x, pad_y = 22, 10
-    bx = 48
-    by = THUMB_H - bh - 2 * pad_y - 38
+    pad_x, pad_y = 20, 9
+    bx = 44
+    by = THUMB_H - bh - 2 * pad_y - 36
     draw.rounded_rectangle(
         [(bx, by), (bx + bw + 2 * pad_x, by + bh + 2 * pad_y)],
         radius=8, fill=NEON_PINK,
     )
     draw.text((bx + pad_x, by + pad_y), badge_text, font=font_badge, fill=WHITE)
 
-    # 6. Trait néon teal sous le logo (séparateur visuel)
-    sep_y = logo_y + logo_h + 8
-    draw.rectangle([(logo_x + 40, sep_y), (logo_x + logo_target_w - 40, sep_y + 3)],
+    # 6. Trait néon teal sous le logo
+    sep_y = logo_y + logo_h + 6
+    draw.rectangle([(logo_x + 30, sep_y), (logo_x + logo_target_w - 30, sep_y + 3)],
                    fill=NEON_TEAL)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)

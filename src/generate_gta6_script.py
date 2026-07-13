@@ -33,34 +33,36 @@ def generate_scripts(posts: list[dict], topic: str = "") -> dict:
     context = _build_context(posts)
     topic_hint = f"\nFocus specifically on this angle: {topic}\n" if topic else ""
 
-    prompt = f"""You are a YouTube content creator specializing in GTA 6 hype content.
-GTA 6 is NOT yet released (launch date: November 19, 2026).
-Based on the Reddit posts below, write engaging scripts about GTA 6 theories, leaks, and news.
+    prompt = f"""You are a viral YouTube/TikTok content creator for GTA 6 hype content.
+GTA 6 launches November 19, 2026 — it is NOT yet released.
+Based on the Reddit posts below, pick the MOST interesting, surprising, or insane angle.
+Don't just describe theories — make it feel like breaking news or an exclusive reveal.
 {topic_hint}
 Reddit content:
 {context}
 
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 
-LONG_EN (~420 words, ~3 minutes spoken at 140 wpm):
-- Hook: bold statement or question in the first sentence
-- Cover 2-3 different GTA 6 theories or news points (general theme: "what we know about GTA 6")
-- Transition naturally between topics
-- Conversational YouTube tone, enthusiastic
-- End with "Subscribe for more GTA 6 coverage" and a question for comments
+LONG_EN (~420 words, ~3 minutes):
+- Hook: start with the most jaw-dropping fact/detail in the first sentence
+- Cover 2-3 different angles (hidden trailer details, leaks, comparisons, wild implications)
+- Use rhetorical questions, build suspense, reveal progressively
+- Conversational but energetic YouTube tone
+- End with a subscribe CTA and a provocative question
 
-SHORT_EN (~240 words, ~75-85 seconds spoken — MINIMUM 75 SEC, MAXIMUM 90 SEC):
-- Hook in the very first sentence
-- Pick ONE specific theory from the posts and go deep on it
-- Build tension, give details, end with a question or twist
-- Keep going — do NOT end under 75 seconds. Add details, analogies, or build-up to fill the time.
+SHORT_EN (~240 words, ~75-85 seconds — DO NOT END BEFORE 75 SECONDS):
+- Pick the ONE most viral-worthy angle from the posts (surprising stat, wild detail, shocking implication)
+- Hook: first sentence must be a jaw-dropping statement or question people need to answer
+- Go deep on ONE thing only — build it up, give context, add details that surprise
+- End on a cliffhanger or shocking twist
+- Tone: urgent, like you just discovered something crazy
 
-TIKTOK_FR (~240 words, ~75-85 seconds spoken — MINIMUM 75 SEC, MAXIMUM 90 SEC):
-- SAME theory as SHORT_EN but in natural, casual French
-- Hook in the first sentence in French
-- Modern French internet tone (pas trop formel, dynamique)
-- Keep going — do NOT end under 75 seconds. Add details or build-up to fill the time.
-- End with a question to engage viewers
+TIKTOK_FR (~240 words, ~75-85 seconds — DO NOT END BEFORE 75 SECONDS):
+- SAME angle as SHORT_EN, adapted for French TikTok audience
+- Start with a hook that stops the scroll in French
+- Casual but excited tone — like you're telling your friends something insane
+- Do NOT translate literally — rephrase naturally in French internet speak
+- End with a question to trigger comments
 
 Return ONLY this JSON (no other text):
 {{

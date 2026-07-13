@@ -94,26 +94,32 @@ def _build_base_video(
         raise RuntimeError(f"Base video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
 
 
+_FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "fonts"))
+
+
 def _burn_subtitles(input_path: str, srt_path: str, output_path: str, vertical: bool) -> None:
-    """Brûle les sous-titres SRT dans la vidéo."""
-    font_size = 18 if vertical else 22
-    margin_v  = 80 if vertical else 60
+    """Brûle les sous-titres dans la vidéo. Supporte SRT (long) et ASS (short)."""
+    sub_escaped = srt_path.replace("\\", "/").replace(":", "\\:")
+    fonts_escaped = _FONTS_DIR.replace("\\", "/").replace(":", "\\:")
 
-    # Escape du chemin pour le filtre subtitles (Linux)
-    srt_escaped = srt_path.replace("\\", "/").replace(":", "\\:")
-
-    sub_filter = (
-        f"subtitles={srt_escaped}:force_style='"
-        f"Fontname=Arial,"
-        f"Fontsize={font_size},"
-        f"Bold=1,"
-        f"PrimaryColour=&H00FFFFFF,"
-        f"OutlineColour=&H00000000,"
-        f"Outline=2,"
-        f"Shadow=1,"
-        f"Alignment=2,"
-        f"MarginV={margin_v}'"
-    )
+    if srt_path.endswith(".ass"):
+        # ASS embarque son propre style — on pointe juste vers notre dossier de fonts
+        sub_filter = f"subtitles={sub_escaped}:fontsdir={fonts_escaped}"
+    else:
+        font_size = 18 if vertical else 22
+        margin_v  = 80 if vertical else 60
+        sub_filter = (
+            f"subtitles={sub_escaped}:force_style='"
+            f"Fontname=Open Sans,"
+            f"Fontsize={font_size},"
+            f"Bold=1,"
+            f"PrimaryColour=&H00FFFFFF,"
+            f"OutlineColour=&H00000000,"
+            f"Outline=2,"
+            f"Shadow=1,"
+            f"Alignment=2,"
+            f"MarginV={margin_v}'"
+        )
 
     cmd = [
         "ffmpeg", "-y",
