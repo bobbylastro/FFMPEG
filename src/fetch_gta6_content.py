@@ -1,30 +1,25 @@
 """
 Scrape Reddit (r/GTA6, r/GTA, r/GTASeries) pour les théories et news GTA 6.
-Pas d'auth requise — utilise l'API JSON publique de Reddit.
+Utilise PRAW (OAuth) avec les credentials REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
 """
 import logging
-import requests
+import os
+
+import praw
+
+from config.settings import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET
 
 log = logging.getLogger(__name__)
-
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/125.0.0.0 Safari/537.36"
-    )
-}
-REDDIT_BASE = "https://old.reddit.com"
 
 GTA6_KEYWORDS = {"gta 6", "gta6", "gta vi", "grand theft auto 6", "grand theft auto vi"}
 
 SOURCES = [
     # (subreddit, sort, time_filter)
-    ("GTA6",       "hot",  None),
-    ("GTA6",       "top",  "week"),
-    ("GTA6",       "top",  "month"),
-    ("GTA",        "hot",  None),
-    ("GTASeries",  "hot",  None),
+    ("GTA6",      "hot",  None),
+    ("GTA6",      "top",  "week"),
+    ("GTA6",      "top",  "month"),
+    ("GTA",       "hot",  None),
+    ("GTASeries", "hot",  None),
 ]
 
 
@@ -63,60 +58,61 @@ MOCK_POSTS = [
 ]
 
 
+def _make_reddit() -> praw.Reddit:
+    return praw.Reddit(
+        client_id=REDDIT_CLIENT_ID,
+        client_secret=REDDIT_CLIENT_SECRET,
+        user_agent="gta6-pipeline/1.0 by bobbylastro",
+    )
+
+
 def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
     """Retourne les meilleurs posts GTA 6 de Reddit, dédupliqués et triés par score."""
     if mock:
         log.info("Mode mock — utilisation des posts test intégrés")
         return MOCK_POSTS[:limit]
 
+    reddit = _make_reddit()
     seen_titles: set[str] = set()
     posts: list[dict] = []
 
-    for sub, sort, time_filter in SOURCES:
-        params: dict = {"limit": 25, "raw_json": 1}
-        if time_filter:
-            params["t"] = time_filter
-
+    for sub_name, sort, time_filter in SOURCES:
         try:
-            resp = requests.get(
-                f"{REDDIT_BASE}/r/{sub}/{sort}.json",
-                headers=HEADERS,
-                params=params,
-                timeout=15,
-            )
-            resp.raise_for_status()
-            children = resp.json()["data"]["children"]
+            subreddit = reddit.subreddit(sub_name)
+            if sort == "hot":
+                listing = subreddit.hot(limit=30)
+            elif sort == "top":
+                listing = subreddit.top(time_filter=time_filter or "week", limit=30)
+            else:
+                listing = subreddit.new(limit=30)
+
+            for submission in listing:
+                title = submission.title.strip()
+
+                if not _is_gta6_relevant(title, sub_name):
+                    continue
+                if submission.score < 30:
+                    continue
+                # Ignorer les posts sans texte (images, liens sans corps)
+                if submission.is_self is False and not getattr(submission, "selftext", ""):
+                    continue
+                if title in seen_titles:
+                    continue
+
+                seen_titles.add(title)
+                posts.append({
+                    "title":     title,
+                    "body":      (submission.selftext or "")[:800],
+                    "score":     submission.score,
+                    "comments":  submission.num_comments,
+                    "flair":     submission.link_flair_text or "",
+                    "url":       f"https://reddit.com{submission.permalink}",
+                    "subreddit": sub_name,
+                })
+
         except Exception as e:
-            log.warning(f"Reddit fetch failed ({sub}/{sort}): {e}")
+            log.warning(f"Reddit fetch failed ({sub_name}/{sort}): {e}")
             continue
-
-        for item in children:
-            p = item["data"]
-            title = p.get("title", "").strip()
-
-            if not _is_gta6_relevant(title, sub):
-                continue
-            if p.get("score", 0) < 30:
-                continue
-            # Ignorer les posts image/vidéo sans texte
-            if p.get("is_video") or (
-                p.get("post_hint", "") in ("image", "link")
-                and not p.get("selftext")
-            ):
-                continue
-            if title in seen_titles:
-                continue
-
-            seen_titles.add(title)
-            posts.append({
-                "title":     title,
-                "body":      (p.get("selftext") or "")[:800],
-                "score":     p.get("score", 0),
-                "comments":  p.get("num_comments", 0),
-                "flair":     p.get("link_flair_text") or "",
-                "url":       f"{REDDIT_BASE}{p.get('permalink', '')}",
-                "subreddit": sub,
-            })
 
     posts.sort(key=lambda x: x["score"], reverse=True)
     log.info(f"Reddit: {len(posts)} posts GTA 6 collectés")
