@@ -72,8 +72,25 @@ with tempfile.TemporaryDirectory() as tmp:
 
     log.info("  TTS short EN...")
     synthesize_en_short(scripts["short_en"], audio_short, ass_short)
+
+    # Image de fond : post Reddit sélectionné par l'IA
+    image_short = None
+    post_idx = int(scripts.get("short_post_index", 0))
+    if 0 <= post_idx < len(posts):
+        img_url = posts[post_idx].get("image_url", "")
+        if img_url:
+            import urllib.request
+            img_ext  = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
+            img_path = os.path.join(tmp, f"post_image{img_ext}")
+            try:
+                urllib.request.urlretrieve(img_url, img_path)
+                image_short = img_path
+                log.info(f"  Image fond : {posts[post_idx]['title'][:60]}")
+            except Exception as e:
+                log.warning(f"  Image téléchargement échoué ({img_url}): {e}")
+
     log.info("  Montage short EN...")
-    paths["short"] = build_short_en(audio_short, ass_short, date_str)
+    paths["short"] = build_short_en(audio_short, ass_short, date_str, image_path=image_short)
 
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)

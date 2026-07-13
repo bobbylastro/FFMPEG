@@ -18,10 +18,12 @@ MODEL = "claude-haiku-4-5-20251001"
 
 def _build_context(posts: list[dict]) -> str:
     parts = []
-    for p in posts[:8]:
+    for i, p in enumerate(posts[:8]):
         flair = f"[{p['flair']}] " if p["flair"] else ""
         body  = p["body"].strip()
-        parts.append(f"{flair}{p['title']}\n{body}" if body else f"{flair}{p['title']}")
+        img   = f"\n[image disponible: {p['image_url']}]" if p.get("image_url") else ""
+        text  = f"{flair}{p['title']}\n{body}" if body else f"{flair}{p['title']}"
+        parts.append(f"[POST {i}]{img}\n{text}")
     return "\n\n---\n\n".join(parts)
 
 
@@ -70,7 +72,8 @@ Return ONLY this JSON (no other text):
   "short_en": "...",
   "tiktok_fr": "...",
   "thumbnail_title": "...",
-  "tiktok_hook": "..."
+  "tiktok_hook": "...",
+  "short_post_index": 0
 }}
 
 thumbnail_title: 5-7 words MAX, ALL CAPS, punchy clickbait for the YouTube thumbnail.
@@ -79,6 +82,9 @@ Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIE
 tiktok_hook: 4-5 words MAX, ALL CAPS, French teaser shown at the top of the TikTok for 3 seconds.
 It must stop the scroll instantly. Use urgency, surprise, or a provocative question.
 Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT CACHÉ ?"
+
+short_post_index: integer — the index (0-7) of the [POST N] that SHORT_EN focuses on.
+Used to show the post's image as background video. Pick the post with the most visual/image potential.
 """
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -94,7 +100,7 @@ Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT C
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 

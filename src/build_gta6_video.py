@@ -42,6 +42,19 @@ def _get_trailers() -> list[str]:
     return trailers
 
 
+TRAILER_INPOINT = 8.0  # secondes à sauter au début (écrans noirs Rockstar)
+
+
+def _scale_filter(vertical: bool) -> str:
+    w, h = (1080, 1920) if vertical else (1920, 1080)
+    if vertical:
+        return f"scale=-1:{h},crop={w}:{h},fps=24,format=yuv420p"
+    return (
+        f"scale={w}:{h}:force_original_aspect_ratio=decrease,"
+        f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2,fps=24,format=yuv420p"
+    )
+
+
 def _build_base_video(
     audio_path: str,
     duration: float,
@@ -49,35 +62,24 @@ def _build_base_video(
     vertical: bool,
     trailers: list[str],
 ) -> None:
-    """Génère la vidéo de base : trailer concaténé + audio TTS + overlay sombre."""
-    w, h = (1080, 1920) if vertical else (1920, 1080)
-
-    if vertical:
-        scale = f"scale=-1:{h},crop={w}:{h}"
-    else:
-        scale = (
-            f"scale={w}:{h}:force_original_aspect_ratio=decrease,"
-            f"pad={w}:{h}:(ow-iw)/2:(oh-ih)/2"
-        )
-
-    vf = f"{scale},fps=24,format=yuv420p"
-
-    # Calculer combien de boucles du trailer sont nécessaires pour couvrir l'audio
+    """Génère la vidéo de base : trailer concaténé (intro skippée) + audio TTS."""
     trailer = trailers[0]
-    trailer_dur = _get_audio_duration(trailer)
-    loops = math.ceil(duration / trailer_dur) + 1
+    trailer_full_dur   = _get_audio_duration(trailer)
+    trailer_usable_dur = max(trailer_full_dur - TRAILER_INPOINT, 10.0)
+    loops = math.ceil(duration / trailer_usable_dur) + 1
 
-    # Fichier concat : trailer répété N fois
+    # concat avec inpoint pour sauter l'intro noire
     concat_file = output_path + ".concat.txt"
     with open(concat_file, "w") as f:
         for _ in range(loops):
             f.write(f"file '{trailer}'\n")
+            f.write(f"inpoint {TRAILER_INPOINT}\n")
 
     cmd = [
         "ffmpeg", "-y",
         "-f", "concat", "-safe", "0", "-i", concat_file,
         "-i", audio_path,
-        "-vf", vf,
+        "-vf", _scale_filter(vertical),
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
         "-c:a", "aac", "-b:a", "192k",
         "-map", "0:v:0", "-map", "1:a:0",
@@ -92,6 +94,30 @@ def _build_base_video(
 
     if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
         raise RuntimeError(f"Base video failed (rc={result.returncode}): {result.stderr.decode()[-600:]}")
+
+
+def _build_base_video_image(
+    image_path: str,
+    audio_path: str,
+    duration: float,
+    output_path: str,
+    vertical: bool,
+) -> None:
+    """Vidéo de base avec image Reddit statique comme fond (au lieu du trailer)."""
+    cmd = [
+        "ffmpeg", "-y",
+        "-loop", "1", "-i", image_path,
+        "-i", audio_path,
+        "-vf", _scale_filter(vertical),
+        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "26",
+        "-c:a", "aac", "-b:a", "192k",
+        "-map", "0:v:0", "-map", "1:a:0",
+        "-t", str(duration),
+        output_path,
+    ]
+    result = subprocess.run(cmd, capture_output=True)
+    if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
+        raise RuntimeError(f"Image video failed (rc={result.returncode}): {result.stderr.decode()[-400:]}")
 
 
 _FONTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "fonts"))
@@ -141,14 +167,20 @@ def build_video(
     srt_path: str | None,
     output_path: str,
     vertical: bool = False,
+    image_path: str | None = None,
 ) -> str:
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    trailers = _get_trailers()
     duration = _get_audio_duration(audio_path)
 
     with tempfile.TemporaryDirectory() as tmp:
         base = os.path.join(tmp, "base.mp4")
-        _build_base_video(audio_path, duration, base, vertical, trailers)
+
+        if image_path and os.path.exists(image_path):
+            log.info(f"Fond image Reddit : {os.path.basename(image_path)}")
+            _build_base_video_image(image_path, audio_path, duration, base, vertical)
+        else:
+            trailers = _get_trailers()
+            _build_base_video(audio_path, duration, base, vertical, trailers)
 
         if srt_path and os.path.exists(srt_path):
             _burn_subtitles(base, srt_path, output_path, vertical)
@@ -165,9 +197,10 @@ def build_long_en(audio_path: str, srt_path: str, date_str: str) -> str:
     return build_video(audio_path, srt_path, out, vertical=False)
 
 
-def build_short_en(audio_path: str, srt_path: str, date_str: str) -> str:
+def build_short_en(audio_path: str, srt_path: str, date_str: str,
+                   image_path: str | None = None) -> str:
     out = os.path.join(OUTPUT_DIR, f"{date_str}_short_en.mp4")
-    return build_video(audio_path, srt_path, out, vertical=True)
+    return build_video(audio_path, srt_path, out, vertical=True, image_path=image_path)
 
 
 _BEBAS = os.path.abspath(

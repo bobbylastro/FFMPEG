@@ -33,27 +33,27 @@ MOCK_POSTS = [
     {
         "title": "GTA 6 map is reportedly 3x bigger than GTA 5 — here's what we know",
         "body": "Multiple leakers have confirmed the map will feature Vice City, a large surrounding state, and possibly a second city. The map is said to include swamps, suburbs, highways and a massive downtown area.",
-        "score": 12400, "comments": 847, "flair": "Theory", "url": "", "subreddit": "GTA6",
+        "score": 12400, "comments": 847, "flair": "Theory", "url": "", "subreddit": "GTA6", "image_url": "",
     },
     {
         "title": "The female protagonist Lucia's backstory — fan theories compiled",
         "body": "Based on the trailers, many fans believe Lucia is a criminal who got out of prison and is trying to start fresh with her partner Jason. The relationship dynamic seems central to the story.",
-        "score": 8900, "comments": 612, "flair": "Discussion", "url": "", "subreddit": "GTA6",
+        "score": 8900, "comments": 612, "flair": "Discussion", "url": "", "subreddit": "GTA6", "image_url": "",
     },
     {
         "title": "GTA 6 economy system explained — social media, influencers and stocks",
         "body": "Leaks suggest the game will feature a deep in-game social media system, a streaming platform parody, and a stock market. Players might be able to manipulate stocks like in GTA 5.",
-        "score": 7300, "comments": 504, "flair": "Leak", "url": "", "subreddit": "GTA6",
+        "score": 7300, "comments": 504, "flair": "Leak", "url": "", "subreddit": "GTA6", "image_url": "",
     },
     {
         "title": "Every detail hidden in the GTA 6 trailers — frame by frame analysis",
         "body": "Fans have spotted: alligators in swamps, a GPS with a huge road network, female cop NPCs, a much more detailed crowd AI, and what appears to be a drug lab mission.",
-        "score": 15600, "comments": 1200, "flair": "Analysis", "url": "", "subreddit": "GTA6",
+        "score": 15600, "comments": 1200, "flair": "Analysis", "url": "", "subreddit": "GTA6", "image_url": "",
     },
     {
         "title": "Will GTA 6 have the most realistic driving physics ever?",
         "body": "Based on the trailer footage, car handling looks significantly improved over GTA 5. Some insiders claim there are multiple driving physics modes. Motorcycles also look completely revamped.",
-        "score": 5200, "comments": 389, "flair": "Discussion", "url": "", "subreddit": "GTA6",
+        "score": 5200, "comments": 389, "flair": "Discussion", "url": "", "subreddit": "GTA6", "image_url": "",
     },
 ]
 
@@ -93,21 +93,42 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
                     continue
                 if submission.score < 30:
                     continue
-                # Ignorer les posts sans texte (images, liens sans corps)
-                if submission.is_self is False and not getattr(submission, "selftext", ""):
-                    continue
                 if title in seen_titles:
                     continue
+
+                # Image associée au post
+                image_url = ""
+                url = getattr(submission, "url", "") or ""
+                hint = getattr(submission, "post_hint", "") or ""
+
+                if hint == "image" and "i.redd.it" in url:
+                    # Post image simple hébergé sur Reddit
+                    image_url = url
+                elif getattr(submission, "is_gallery", False):
+                    # Post galerie : prendre la première image
+                    meta = getattr(submission, "media_metadata", {}) or {}
+                    for item in meta.values():
+                        src = (item.get("s") or {}).get("u", "")
+                        if src:
+                            image_url = src.replace("&amp;", "&")
+                            break
+                elif url and any(url.lower().endswith(e) for e in (".jpg", ".jpeg", ".png")):
+                    if "i.redd.it" in url or "imgur.com" in url:
+                        image_url = url
+
+                # Corps texte (vide pour les posts image, OK)
+                body = (getattr(submission, "selftext", "") or "")[:800]
 
                 seen_titles.add(title)
                 posts.append({
                     "title":     title,
-                    "body":      (submission.selftext or "")[:800],
+                    "body":      body,
                     "score":     submission.score,
                     "comments":  submission.num_comments,
                     "flair":     submission.link_flair_text or "",
                     "url":       f"https://reddit.com{submission.permalink}",
                     "subreddit": sub_name,
+                    "image_url": image_url,
                 })
 
         except Exception as e:
