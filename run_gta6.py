@@ -150,7 +150,31 @@ log.info("\nGénération de la miniature...")
 thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
 paths["thumbnail"] = thumb_path
 
-# ── 4bis. Upload TikTok vers R2 + caption prête à poster ───────────────────────
+# ── 4bis. Upload YouTube Short ──────────────────────────────────────────────
+from src.upload_youtube import upload_video, QuotaExceededError
+
+short_video_id = None
+short_description = (
+    f"{scripts.get('thumbnail_title', '')}\n\n"
+    "GTA 6 sort le 19 novembre 2026.\n\n"
+    "#GTA6 #GTAVI #Shorts #RockstarGames #Gaming"
+)
+try:
+    short_video_id = upload_video(
+        video_path=paths["short"],
+        title=f"{scripts.get('thumbnail_title', '')} #Shorts"[:100],
+        description=short_description,
+        thumbnail_path=paths["thumbnail"],
+        tags=["gta6", "gtavi", "rockstargames", "shorts"],
+        privacy="public",
+        game_slug="valorant",
+    )
+    paths["short_url"] = f"https://youtu.be/{short_video_id}"
+    log.info(f"  Short uploadé → {paths['short_url']}")
+except QuotaExceededError as e:
+    log.warning(f"  Quota YouTube dépassé — short non uploadé : {e}")
+
+# ── 4ter. Upload TikTok vers R2 + caption prête à poster ───────────────────────
 from src.r2_manager import delete_prefix, upload_public_file
 
 tiktok_caption = scripts.get("tiktok_caption", "")
@@ -174,7 +198,10 @@ lines = [
 ]
 if "long" in paths:
     lines.append(f"📺  YouTube long  → {paths['long']}")
-lines.append(f"▶️   YouTube Short → {paths['short']}")
+if "short_url" in paths:
+    lines.append(f"▶️   YouTube Short → {paths['short_url']}")
+else:
+    lines.append(f"▶️   YouTube Short → {paths['short']}  (upload échoué, fichier local)")
 lines.append(f"🎵  TikTok FR     → {paths['tiktok']}  (poster manuellement)")
 lines.append(f"🖼️   Miniature     → {paths['thumbnail']}")
 lines.append("━" * 50)
