@@ -12,6 +12,7 @@ Usage :
   python run_gta6.py --no-long   (skip la vidéo longue, plus rapide)
 """
 import argparse
+import json
 import logging
 import os
 import tempfile
@@ -147,6 +148,20 @@ from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
 log.info("\nGénération de la miniature...")
 thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
 paths["thumbnail"] = thumb_path
+
+# ── 4bis. Upload TikTok vers R2 + caption prête à poster ───────────────────────
+from src.r2_manager import upload_public_file
+
+tiktok_caption = scripts.get("tiktok_caption", "")
+tiktok_filename = os.path.basename(paths["tiktok"])
+tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}")
+if tiktok_url:
+    log.info(f"  TikTok uploadé → {tiktok_url}")
+
+meta_path = os.path.join("output/gta6", f"{date_str}_tiktok_meta.json")
+with open(meta_path, "w", encoding="utf-8") as f:
+    json.dump({"tiktok_url": tiktok_url or "", "tiktok_caption": tiktok_caption}, f, ensure_ascii=False, indent=2)
+paths["tiktok_meta"] = meta_path
 
 # ── 5. Résumé ─────────────────────────────────────────────────────────────────
 lines = [

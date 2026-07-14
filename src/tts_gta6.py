@@ -64,30 +64,25 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 
 def _fmt_ass_time(seconds: float) -> str:
-    h   = int(seconds // 3600)
-    m   = int((seconds % 3600) // 60)
-    s   = seconds % 60
-    cs  = int(round((s - int(s)) * 100))
-    return f"{h}:{m:02d}:{int(s):02d}.{cs:02d}"
+    total_cs = int(round(seconds * 100))
+    h, rem   = divmod(total_cs, 360_000)
+    m, rem   = divmod(rem, 6_000)
+    s, cs    = divmod(rem, 100)
+    return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
 
-def _split_into_word_groups(sentences: list[dict], max_words: int = 3) -> list[dict]:
-    """Découpe les phrases en groupes de max_words mots avec timing proportionnel."""
+def _split_into_word_groups(words: list[dict], max_words: int = 3) -> list[dict]:
+    """Regroupe des mots (timing réel, un WordBoundary par mot) en paquets de max_words."""
     result = []
-    for sent in sentences:
-        words    = sent["word"].split()
-        n        = len(words)
-        if n <= max_words:
-            result.append(sent)
-            continue
-        per_word = sent["duration"] / n
-        for i in range(0, n, max_words):
-            group = words[i : i + max_words]
-            result.append({
-                "word":     " ".join(group),
-                "start":    sent["start"] + i * per_word,
-                "duration": len(group) * per_word,
-            })
+    for i in range(0, len(words), max_words):
+        group = words[i : i + max_words]
+        start = group[0]["start"]
+        end   = group[-1]["start"] + group[-1]["duration"]
+        result.append({
+            "word":     " ".join(w["word"] for w in group),
+            "start":    start,
+            "duration": end - start,
+        })
     return result
 
 
@@ -131,7 +126,10 @@ async def _synthesize(
     sub_format: str = "srt",  # "srt" ou "ass"
     vertical:   bool = False,
 ) -> None:
-    communicate = edge_tts.Communicate(text, voice=voice, rate=rate)
+    # ASS (short/tiktok) a besoin du timing réel par mot pour rester synchro avec la voix ;
+    # SRT (vidéo longue) reste au niveau phrase (un bloc = une phrase, pas d'interpolation).
+    boundary = "WordBoundary" if sub_format == "ass" else "SentenceBoundary"
+    communicate = edge_tts.Communicate(text, voice=voice, rate=rate, boundary=boundary)
 
     sentences: list[dict] = []
     audio_chunks: list[bytes] = []
@@ -139,7 +137,7 @@ async def _synthesize(
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
             audio_chunks.append(chunk["data"])
-        elif chunk["type"] == "SentenceBoundary":
+        elif chunk["type"] == boundary:
             sentences.append({
                 "word":     chunk["text"],
                 "start":    chunk["offset"]   / 10_000_000,

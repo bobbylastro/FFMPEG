@@ -133,6 +133,7 @@ Return ONLY this JSON (no other text):
   "tiktok_fr": "...",
   "thumbnail_title": "...",
   "tiktok_hook": "...",
+  "tiktok_caption": "...",
   "short_post_index": 0,
   "use_post_image": true,
   "shots": [
@@ -149,6 +150,11 @@ Examples: "GTA 6 MAP IS 3X BIGGER?", "LUCIA'S DARK SECRET REVEALED", "THE CRAZIE
 tiktok_hook: 4-5 words MAX, ALL CAPS, French teaser shown at the top of the TikTok for 3 seconds.
 It must stop the scroll instantly. Use urgency, surprise, or a provocative question.
 Examples: "LA MAP GTA 6 DÉVOILÉE", "CE DÉTAIL VA TE CHOQUER", "ILS ONT TOUT CACHÉ ?"
+
+tiktok_caption: the TikTok post caption in French, ready to copy-paste when publishing.
+- 1-2 short punchy sentences (max ~150 chars) restating the hook/angle, plus a line of EXACTLY 3 relevant hashtags
+- Always include #gta6, then 2 more hashtags specific to today's angle (e.g. #vicecity, #lucia, #rockstargames, #gtavi, #gaming)
+- Example: "Rockstar a caché un truc énorme dans le trailer 👀\n#gta6 #vicecity #gaming"
 
 short_post_index: integer — the index (0-7) of the [POST N] that SHORT_EN focuses on.
 The post may have an image — use_post_image tells whether to show it.
@@ -184,7 +190,7 @@ Rules:
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "short_post_index", "use_post_image", "shots"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "tiktok_caption", "short_post_index", "use_post_image", "shots"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 

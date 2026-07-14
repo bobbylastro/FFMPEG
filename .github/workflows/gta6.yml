@@ -41,6 +41,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
         run: |
           ARGS=""
           if [ -n "${{ github.event.inputs.topic }}" ]; then
@@ -50,6 +52,37 @@ jobs:
             ARGS="$ARGS --no-long"
           fi
           python run_gta6.py $ARGS
+
+      - name: Read TikTok metadata
+        id: tiktok_meta
+        run: |
+          META=$(ls output/gta6/*_tiktok_meta.json | head -1)
+          if [ -f "$META" ]; then
+            echo "url=$(jq -r '.tiktok_url' "$META")" >> "$GITHUB_OUTPUT"
+            {
+              echo "caption<<CAPTION_EOF"
+              jq -r '.tiktok_caption' "$META"
+              echo "CAPTION_EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Email TikTok ready to post
+        if: steps.tiktok_meta.outputs.url != ''
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🎬 TikTok GTA6 prêt à poster"
+          to: bobbylastronaute@gmail.com
+          from: GTA6 Pipeline
+          body: |
+            Le TikTok du jour est prêt :
+            ${{ steps.tiktok_meta.outputs.url }}
+
+            Caption à copier-coller :
+            ${{ steps.tiktok_meta.outputs.caption }}
 
       - name: Commit topic history
         run: |
