@@ -151,10 +151,11 @@ thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
 paths["thumbnail"] = thumb_path
 
 # ── 4bis. Upload TikTok vers R2 + caption prête à poster ───────────────────────
-from src.r2_manager import upload_public_file
+from src.r2_manager import delete_prefix, upload_public_file
 
 tiktok_caption = scripts.get("tiktok_caption", "")
 tiktok_filename = os.path.basename(paths["tiktok"])
+delete_prefix("gta6-tiktok/")
 tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}", download=True)
 if tiktok_url:
     log.info(f"  TikTok uploadé → {tiktok_url}")

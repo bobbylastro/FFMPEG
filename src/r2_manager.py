@@ -76,6 +76,26 @@ def upload_clip(game_slug: str, local_path: str, filename: str, title: str) -> b
 R2_PUBLIC_BASE = "https://clips.ultimate-playground.com"
 
 
+def delete_prefix(prefix: str) -> None:
+    """Supprime tous les objets R2 sous ce préfixe (ex: nettoyer l'ancien TikTok avant d'uploader le nouveau)."""
+    if not R2_ACCESS_KEY or not R2_SECRET_KEY:
+        return
+    r2 = _r2()
+    try:
+        resp = r2.list_objects_v2(Bucket=R2_BUCKET, Prefix=prefix)
+    except Exception as e:
+        log.warning(f"  R2 list failed ({prefix}): {e}")
+        return
+    keys = [obj["Key"] for obj in resp.get("Contents", [])]
+    if not keys:
+        return
+    try:
+        r2.delete_objects(Bucket=R2_BUCKET, Delete={"Objects": [{"Key": k} for k in keys]})
+        log.info(f"  🗑️  R2 nettoyé ({prefix}): {len(keys)} fichier(s)")
+    except Exception as e:
+        log.warning(f"  R2 delete failed ({prefix}): {e}")
+
+
 def upload_public_file(local_path: str, r2_key: str, content_type: str = "video/mp4",
                        download: bool = False) -> str | None:
     """Upload un fichier vers R2 sous r2_key et renvoie son URL publique (sans passer par Supabase).
