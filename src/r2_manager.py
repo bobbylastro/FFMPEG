@@ -76,18 +76,25 @@ def upload_clip(game_slug: str, local_path: str, filename: str, title: str) -> b
 R2_PUBLIC_BASE = "https://clips.ultimate-playground.com"
 
 
-def upload_public_file(local_path: str, r2_key: str, content_type: str = "video/mp4") -> str | None:
-    """Upload un fichier vers R2 sous r2_key et renvoie son URL publique (sans passer par Supabase)."""
+def upload_public_file(local_path: str, r2_key: str, content_type: str = "video/mp4",
+                       download: bool = False) -> str | None:
+    """Upload un fichier vers R2 sous r2_key et renvoie son URL publique (sans passer par Supabase).
+    download=True force le navigateur à télécharger le fichier au lieu de l'ouvrir dans un lecteur inline."""
     if not R2_ACCESS_KEY or not R2_SECRET_KEY:
         log.warning("  R2 credentials manquants — upload skippé")
         return None
     try:
         with open(local_path, "rb") as fh:
+            extra = {}
+            if download:
+                filename = os.path.basename(r2_key)
+                extra["ContentDisposition"] = f'attachment; filename="{filename}"'
             _r2().put_object(
                 Bucket=R2_BUCKET,
                 Key=r2_key,
                 Body=fh,
                 ContentType=content_type,
+                **extra,
             )
     except Exception as e:
         log.warning(f"  R2 upload failed ({r2_key}): {e}")

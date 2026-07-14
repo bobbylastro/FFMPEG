@@ -155,7 +155,7 @@ from src.r2_manager import upload_public_file
 
 tiktok_caption = scripts.get("tiktok_caption", "")
 tiktok_filename = os.path.basename(paths["tiktok"])
-tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}")
+tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}", download=True)
 if tiktok_url:
     log.info(f"  TikTok uploadé → {tiktok_url}")
 
