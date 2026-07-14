@@ -90,13 +90,17 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
         )
         history_block = f"\nALREADY COVERED (do NOT repeat these angles):\n{lines}\n"
 
-    prompt = f"""You are a viral YouTube/TikTok content creator for GTA 6 hype content.
+    prompt = f"""You are a viral TikTok/Shorts content creator for GTA 6 hype content.
 GTA 6 launches November 19, 2026 — it is NOT yet released.
-Based on the Reddit posts below, pick the MOST interesting, surprising, or insane angle.
+Based on the Reddit posts below, pick the angle with the HIGHEST TikTok virality potential — not just the most "interesting" one.
 Don't just describe theories — make it feel like breaking news or an exclusive reveal.
 
-IMPORTANT — Choose an angle that is VISUALLY ILLUSTRATABLE with general trailer footage:
-- Prefer broad, visual topics: the map size, Vice City aesthetics, Lucia's story, the world's richness, crime/heist vibes, Florida atmosphere, open world scale
+IMPORTANT — Choose an angle that is TIKTOK-NATIVE, not a generic news recap:
+- Optimize for the scroll-stop test: could this angle work as a 3-word on-screen hook that makes someone stop mid-scroll?
+- Favor angles that trigger a reaction, not just information: disbelief ("wait, WHAT?"), FOMO, a hot take people will agree/disagree with in the comments, a "you didn't notice this but now you can't unsee it" reveal
+- Prefer angles framed around the VIEWER directly ("this changes how YOU'LL play", "you're going to waste hours on this") over distant/neutral framing ("Rockstar has added a feature")
+- Comparisons, countdowns, and "X vs Y" framing perform well — use them when the posts support it
+- Avoid dry, corporate-sounding news angles (patch notes, release logistics, preorder details) unless they're spun into something surprising or personally relevant
 - Avoid hyper-specific angles that hinge on a single precise trailer moment (e.g. "a 3-second POV driving shot reveals physics", "one frame shows X detail") — these are impossible to illustrate without that exact moment
 - The best angles are ones where ANY scenic, action, or character shot from the trailer naturally fits the narration
 {topic_hint}{history_block}{catalog_block}

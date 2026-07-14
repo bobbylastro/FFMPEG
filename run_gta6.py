@@ -1,15 +1,15 @@
 """
 Pipeline GTA 6 — théories & news (avant lancement du jeu).
 
-Génère 3 fichiers dans output/gta6/ :
-  {date}_long_en.mp4   → YouTube long 16:9, voix EN, sous-titres brûlés
+Génère par défaut 2 fichiers dans output/gta6/ (vidéo longue passée par défaut — utiliser --with-long pour la générer) :
   {date}_short_en.mp4  → YouTube Short 9:16, voix EN, sous-titres brûlés
   {date}_tiktok_fr.mp4 → TikTok 9:16, voix FR, sans sous-titres (à poster manuellement)
+  {date}_long_en.mp4   → YouTube long 16:9, voix EN, sous-titres brûlés (avec --with-long)
 
 Usage :
   python run_gta6.py
   python run_gta6.py --topic "GTA 6 map size comparison"
-  python run_gta6.py --no-long   (skip la vidéo longue, plus rapide)
+  python run_gta6.py --with-long   (génère aussi la vidéo longue, plus lent)
 """
 import argparse
 import json
@@ -22,11 +22,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--topic",   default="", help="Angle/sujet à privilégier (optionnel)")
-parser.add_argument("--no-long", action="store_true", help="Passer la vidéo longue")
-parser.add_argument("--mock",    action="store_true", help="Utiliser le cache local (sans appel réseau)")
-parser.add_argument("--reddit",  action="store_true", help="Forcer le scraping Reddit (bloqué en datacenter)")
+parser.add_argument("--topic",     default="", help="Angle/sujet à privilégier (optionnel)")
+parser.add_argument("--with-long", action="store_true", help="Générer aussi la vidéo longue (passée par défaut)")
+parser.add_argument("--mock",      action="store_true", help="Utiliser le cache local (sans appel réseau)")
+parser.add_argument("--reddit",    action="store_true", help="Forcer le scraping Reddit (bloqué en datacenter)")
 args = parser.parse_args()
+args.no_long = not args.with_long
 
 date_str = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("output/gta6", exist_ok=True)

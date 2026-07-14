@@ -7,8 +7,8 @@ on:
         description: "Angle/sujet à privilégier (laisser vide pour auto)"
         required: false
         default: ""
-      skip_long:
-        description: "Passer la vidéo longue (plus rapide)"
+      with_long:
+        description: "Générer aussi la vidéo longue (passée par défaut, y compris via cron)"
         required: false
         default: "false"
         type: choice
@@ -48,8 +48,8 @@ jobs:
           if [ -n "${{ github.event.inputs.topic }}" ]; then
             ARGS="--topic '${{ github.event.inputs.topic }}'"
           fi
-          if [ "${{ github.event.inputs.skip_long }}" = "true" ]; then
-            ARGS="$ARGS --no-long"
+          if [ "${{ github.event.inputs.with_long }}" = "true" ]; then
+            ARGS="$ARGS --with-long"
           fi
           python run_gta6.py $ARGS
 
