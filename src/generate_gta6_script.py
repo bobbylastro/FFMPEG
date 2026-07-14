@@ -100,9 +100,13 @@ IMPORTANT — Choose an angle that is TIKTOK-NATIVE, not a generic news recap:
 - Favor angles that trigger a reaction, not just information: disbelief ("wait, WHAT?"), FOMO, a hot take people will agree/disagree with in the comments, a "you didn't notice this but now you can't unsee it" reveal
 - Prefer angles framed around the VIEWER directly ("this changes how YOU'LL play", "you're going to waste hours on this") over distant/neutral framing ("Rockstar has added a feature")
 - Comparisons, countdowns, and "X vs Y" framing perform well — use them when the posts support it
-- Avoid dry, corporate-sounding news angles (patch notes, release logistics, preorder details) unless they're spun into something surprising or personally relevant
 - Avoid hyper-specific angles that hinge on a single precise trailer moment (e.g. "a 3-second POV driving shot reveals physics", "one frame shows X detail") — these are impossible to illustrate without that exact moment
 - The best angles are ones where ANY scenic, action, or character shot from the trailer naturally fits the narration
+
+Three GOOD angle categories — pick whichever the posts best support, don't default to one:
+1. REVEAL/THEORY: a hidden trailer detail, leak, or fan theory presented as an exclusive discovery
+2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments. These work great even from "dry" news posts (e.g. a $80 price tag called "ridiculous") when framed as a hot take
+3. HYPE/COMPARISON: scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
