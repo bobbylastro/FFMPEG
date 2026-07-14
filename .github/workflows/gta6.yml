@@ -92,11 +92,13 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "chore: update GTA6 topic history + posts cache"
           for i in 1 2 3 4 5; do
-            git pull --rebase origin main && git push && break
+            git pull --rebase origin main && git push && exit 0
             echo "Retry $i..."
             git rebase --abort 2>/dev/null || true
             sleep $((i * 5))
           done
+          echo "::error::Impossible de push l'historique des sujets après 5 tentatives"
+          exit 1
 
       - name: Upload videos
         uses: actions/upload-artifact@v4
