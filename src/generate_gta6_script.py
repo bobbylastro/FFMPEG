@@ -105,13 +105,39 @@ def _build_context(posts: list[dict]) -> str:
     return "\n\n---\n\n".join(parts)
 
 
+_DEBATE_TITLE_KW = [
+    "$200", "$150", "$80", "$70", "price", "cost", "worth", "costs",
+    "analyst", "crunch", "overtime", "layoff", "boycott", "backlash",
+    "too expensive", "too cheap", "how much",
+]
+
+
+def _filter_debate_posts(posts: list[dict]) -> list[dict]:
+    """Retire les articles clairement DEBATE (prix, analyst, crunch) de la liste."""
+    filtered = [
+        p for p in posts
+        if not any(kw.lower() in p.get("title", "").lower() for kw in _DEBATE_TITLE_KW)
+    ]
+    return filtered if len(filtered) >= 3 else posts
+
+
 def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | None = None,
                      catalog: list[dict] | None = None) -> dict:
     """
     Retourne {"long_en": str, "short_en": str, "tiktok_fr": str}.
     topic optionnel pour orienter le script sur un angle spécifique.
     """
-    context = _build_context(posts)
+    category_constraint = _category_constraint(history or [])
+
+    # Si contrainte force hors DEBATE → retirer les articles DEBATE du contexte
+    # (l'IA ne peut pas choisir ce qu'elle ne voit pas)
+    effective_posts = posts
+    if "REVEAL or HYPE" in category_constraint:
+        effective_posts = _filter_debate_posts(posts)
+        if len(effective_posts) < len(posts):
+            log.info(f"  Articles DEBATE filtrés : {len(effective_posts)}/{len(posts)} posts envoyés à l'IA")
+
+    context = _build_context(effective_posts)
     topic_hint = f"\nFocus specifically on this angle: {topic}\n" if topic else ""
 
     catalog_block = ""
@@ -129,8 +155,6 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
                 line += f" [sources: {' | '.join(h['source_titles'][:3])}]"
             lines.append(line)
         history_block = "\nALREADY COVERED (do NOT repeat these angles or reuse these sources):\n" + "\n".join(lines) + "\n"
-
-    category_constraint = _category_constraint(history or [])
 
     prompt = f"""You are a viral TikTok/Shorts content creator for GTA 6 hype content.
 GTA 6 launches November 19, 2026 — it is NOT yet released.
