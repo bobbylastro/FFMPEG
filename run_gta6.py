@@ -33,7 +33,7 @@ date_str = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("output/gta6", exist_ok=True)
 
 # ── 1. Scraping Reddit ────────────────────────────────────────────────────────
-from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts
+from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts, mark_articles_used
 
 if args.mock:
     log.info("Mode mock — chargement du cache local...")
@@ -65,8 +65,10 @@ if catalog:
     log.info(f"  Catalogue trailer : {len(catalog)} moments visuels disponibles")
 scripts = generate_scripts(posts, topic=args.topic, history=history, catalog=catalog)
 
-# Enregistrer le sujet dans l'historique
+# Enregistrer le sujet dans l'historique + marquer les articles comme utilisés
 save_topic(scripts, date_str)
+if not args.mock:
+    mark_articles_used(posts)
 log.info(f"  Sujet sauvegardé : {scripts.get('thumbnail_title', '')}")
 
 # ── 3. TTS ────────────────────────────────────────────────────────────────────

@@ -257,12 +257,54 @@ def _og_image(url: str, timeout: int = 6) -> str:
     return ""
 
 
+
+# ── Blocklist articles déjà utilisés ─────────────────────────────────────────
+
+_USED_ARTICLES_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_used_articles.json")
+_MAX_ARTICLE_AGE_DAYS = 10
+
+
+def _load_used_urls() -> set[str]:
+    if not os.path.exists(_USED_ARTICLES_FILE):
+        return set()
+    with open(_USED_ARTICLES_FILE, encoding="utf-8") as f:
+        return set(json.load(f))
+
+
+def mark_articles_used(posts: list[dict]) -> None:
+    """Ajoute les URLs des posts utilisés à la blocklist (à appeler après génération du script)."""
+    used = _load_used_urls()
+    for p in posts:
+        if p.get("url") and "google.com" not in p["url"]:
+            used.add(p["url"])
+    os.makedirs(os.path.dirname(os.path.abspath(_USED_ARTICLES_FILE)), exist_ok=True)
+    with open(_USED_ARTICLES_FILE, "w", encoding="utf-8") as f:
+        json.dump(sorted(used), f, indent=2, ensure_ascii=False)
+
+
+def _parse_pub_date(item: ET.Element) -> float:
+    """Retourne le timestamp de pubDate, ou 0 si absent/non parsable."""
+    from email.utils import parsedate_to_datetime
+    raw = item.findtext("pubDate", "").strip()
+    if not raw:
+        return 0.0
+    try:
+        return parsedate_to_datetime(raw).timestamp()
+    except Exception:
+        return 0.0
+
+
 def fetch_news_posts(limit: int = 15) -> list[dict]:
     """
     Collecte des articles GTA 6 depuis des flux RSS gaming + Google News.
+    - Ignore les articles déjà utilisés (blocklist data/gta6_used_articles.json)
+    - Ignore les articles de plus de MAX_ARTICLE_AGE_DAYS jours
     Retourne dans le même format que fetch_reddit_posts().
     """
-    seen: set[str] = set()
+    import time
+    used_urls  = _load_used_urls()
+    cutoff     = time.time() - _MAX_ARTICLE_AGE_DAYS * 86400
+    seen_titles: set[str] = set()
     articles: list[dict] = []
 
     for source_name, feed_url in _NEWS_SOURCES:
@@ -281,15 +323,23 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
 
                 if not title or not _is_gta6_news(title, desc):
                     continue
+
+                # Filtre : article déjà utilisé
+                if link in used_urls:
+                    continue
+
+                # Filtre : article trop vieux
+                pub_ts = _parse_pub_date(item)
+                if pub_ts and pub_ts < cutoff:
+                    continue
+
                 # Déduplication par titre normalisé
                 key = re.sub(r"\W+", "", title.lower())[:60]
-                if key in seen:
+                if key in seen_titles:
                     continue
-                seen.add(key)
+                seen_titles.add(key)
 
                 image_url = _feed_image(item)
-
-                # Fallback og:image uniquement pour les sources gaming (pas Google News)
                 if not image_url and link.startswith("http") and source_name != "Google News":
                     image_url = _og_image(link)
 
@@ -311,7 +361,10 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
         except Exception as e:
             log.warning(f"News fetch failed ({source_name}): {e}")
 
-    # Trier : articles avec image en premier, puis par source (Google News en dernier)
+    skipped = len(used_urls)
+    log.info(f"  ({skipped} articles déjà utilisés ignorés, fenêtre {_MAX_ARTICLE_AGE_DAYS}j)")
+
+    # Trier : articles avec image en premier, puis Google News en dernier
     articles.sort(key=lambda x: (0 if x["image_url"] else 1, x["flair"] == "Google News"))
     result = articles[:limit]
     log.info(f"News: {len(result)} articles GTA 6 collectés ({sum(1 for a in result if a['image_url'])} avec image)")
