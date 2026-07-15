@@ -407,10 +407,13 @@ def _add_tiktok_hook(input_path: str, hook_text: str, output_path: str) -> None:
         txt_file = f.name
     txt_esc = txt_file.replace(":", "\\:")
 
+    is_multiline = '\n' in wrapped
+    x_expr = "w/2" if is_multiline else "(w-text_w)/2"
+    align  = ":text_align=center" if is_multiline else ""
     drawtext = (
         f"drawtext=fontfile={font_esc}:textfile={txt_esc}:"
-        f"fontcolor=white:fontsize={fontsize}:line_spacing=6:"
-        f"x=(w-text_w)/2:y=90:"
+        f"fontcolor=white:fontsize={fontsize}:line_spacing=6{align}:"
+        f"x={x_expr}:y=90:"
         f"box=1:boxcolor=0x000000@0.65:boxborderw=22:"
         f"enable='between(t,0,3)'"
     )
