@@ -503,6 +503,13 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
         "take-two", "take two", "ceo", "executive", "studio head", "job cut", "union",
         "strike", "analyst", "investor", "stock", "earnings", "acquisition", "ipo",
         "lawsuit", "settlement", "discrimination", "harassment",
+        # législation / politique industrielle
+        "legislation", "government", "congress", "senate", "parliament", "european union",
+        "introduces bill", "introduces law", "regulation", "bill to keep", "bill to require",
+        # décisions platform / format physique
+        "sony", "killing disc", "killing physical", "physical game", "digital only",
+        # prix / marché
+        "boycott", "retailer", "retailers", "price cut", "price drop", "slashing price",
     ]
     def _is_industry(art: dict) -> bool:
         text = (art.get("title", "") + " " + art.get("body", "")[:300]).lower()

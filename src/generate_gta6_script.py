@@ -233,9 +233,17 @@ Three GOOD angle categories — pick whichever the posts best support, don't def
 3. HYPE/COMPARISON: confirmed official features, scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games.
 
 IMPORTANT — prioritization rule:
-- STRONGLY PREFER angles about the actual game: features, gameplay, map, characters, mechanics, graphics, missions, Vice City, Lucia, Jason, trailers, confirmed content.
-- AVOID angles about the gaming industry or Rockstar as a company: developer departures, crunch, executives, Take-Two earnings, analyst opinions, price debates, layoffs. These are for industry observers, not gaming fans.
-- If any post lists confirmed/official GTA 6 features or gameplay mechanics, ALWAYS pick that over company drama or speculation.
+- STRONGLY PREFER angles about the actual game: features, gameplay, map, characters, mechanics, graphics, missions, Vice City, Lucia, Jason, fan theories about characters, hidden trailer details, confirmed/leaked content.
+- AVOID: government legislation mentioning GTA 6, platform business decisions (Sony killing discs, disc vs digital), corporate earnings, analyst hot takes, retailer pricing, industry policy. These use GTA 6 as an example but aren't ABOUT GTA 6.
+
+Concrete examples:
+  ✅ GOOD: "GTA 6 Cover Girl Theory Explained: Why Fans Suspect DJ Gabriela Chiqui" → fan theory about a game character, REVEAL angle
+  ✅ GOOD: "5 Confirmed GTA 6 Features That Will Change Everything" → actual game features
+  ❌ BAD: "Brazil Introduces Bill to Keep Games Like GTA 6 Playable After Support" → legislation, not a GTA 6 angle
+  ❌ BAD: "Why Sony Is Killing Discs Comes Down to GTA 6-Sized Margins" → Sony's business decision, not GTA 6
+  ❌ BAD: "Analyst Says GTA 6 Should Cost $200" → analyst hot take, industry discussion
+
+If you have a fan theory, character mystery, or confirmed feature article, pick THAT over any industry/policy/business article.
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
