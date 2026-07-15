@@ -97,9 +97,10 @@ def delete_prefix(prefix: str) -> None:
 
 
 def upload_public_file(local_path: str, r2_key: str, content_type: str = "video/mp4",
-                       download: bool = False) -> str | None:
+                       download: bool = False, no_cache: bool = False) -> str | None:
     """Upload un fichier vers R2 sous r2_key et renvoie son URL publique (sans passer par Supabase).
-    download=True force le navigateur à télécharger le fichier au lieu de l'ouvrir dans un lecteur inline."""
+    download=True  → Content-Disposition: attachment (force téléchargement).
+    no_cache=True  → Cache-Control: no-store (empêche le CDN de mettre en cache)."""
     if not R2_ACCESS_KEY or not R2_SECRET_KEY:
         log.warning("  R2 credentials manquants — upload skippé")
         return None
@@ -109,6 +110,8 @@ def upload_public_file(local_path: str, r2_key: str, content_type: str = "video/
             if download:
                 filename = os.path.basename(r2_key)
                 extra["ContentDisposition"] = f'attachment; filename="{filename}"'
+            if no_cache:
+                extra["CacheControl"] = "no-store"
             _r2().put_object(
                 Bucket=R2_BUCKET,
                 Key=r2_key,

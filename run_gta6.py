@@ -255,10 +255,12 @@ if tiktok_url:
 player_url = None
 if tiktok_url:
     html_content = _make_player_html(tiktok_url, scripts.get("thumbnail_title", "TikTok GTA 6"))
-    html_path = os.path.join("output/gta6", f"{date_str}_player.html")
+    run_ts = datetime.now().strftime("%Y-%m-%d_%H%M")
+    html_path = os.path.join("output/gta6", f"{run_ts}_player.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
-    player_url = upload_public_file(html_path, f"gta6-tiktok/player_{date_str}.html", content_type="text/html; charset=utf-8")
+    player_url = upload_public_file(html_path, f"gta6-tiktok/player_{run_ts}.html",
+                                    content_type="text/html; charset=utf-8", no_cache=True)
     if player_url:
         log.info(f"  Player page → {player_url}")
 
