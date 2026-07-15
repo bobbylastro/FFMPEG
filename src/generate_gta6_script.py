@@ -66,25 +66,27 @@ def save_topic(scripts: dict, date_str: str, posts: list[dict] | None = None) ->
         json.dump(history, f, indent=2, ensure_ascii=False)
 
 
+_DEBATE_CONSTRAINT_MSG = (
+    "\n⚠️ CATEGORY CONSTRAINT: A recent run already covered a DEBATE/CONTROVERSY angle (price, analyst, crunch, backlash). "
+    "You MUST pick a REVEAL or HYPE angle this time — completely ignore price/cost/analyst/crunch articles, "
+    "find a different angle in the available posts.\n"
+)
+
+
 def _category_constraint(history: list[dict]) -> str:
     """Force la rotation REVEAL / DEBATE / HYPE.
-    Règle simple : si le dernier run catégorisé était DEBATE → force REVEAL ou HYPE.
-    Si 2 des 3 derniers catégorisés sont identiques → force rotation.
+    - Si DEBATE apparaît dans les 3 derniers runs catégorisés → force REVEAL ou HYPE
+    - Si 2+ runs identiques (hors DEBATE) dans les 3 derniers → force rotation
     """
     recent = [h.get("angle_category", "") for h in history[-5:] if h.get("angle_category")]
     if not recent:
         return ""
-    last = recent[-1]
-    OTHERS = {"DEBATE": "REVEAL or HYPE", "REVEAL": "HYPE or DEBATE", "HYPE": "REVEAL or DEBATE"}
-    # Règle 1 : le dernier run était DEBATE → immédiatement forcer un autre type
-    if last == "DEBATE":
-        return (
-            "\n⚠️ CATEGORY CONSTRAINT: The last run was a DEBATE/CONTROVERSY angle (price, analyst, crunch, backlash). "
-            "You MUST pick a REVEAL or HYPE angle this time — completely ignore price/cost/analyst/crunch articles, "
-            "find a different angle in the available posts.\n"
-        )
-    # Règle 2 : 2+ runs identiques parmi les 3 derniers catégorisés → forcer rotation
     tail = recent[-3:]
+    # DEBATE dans les 3 derniers → toujours bloquer (pas juste le run immédiat)
+    if "DEBATE" in tail:
+        return _DEBATE_CONSTRAINT_MSG
+    # 2+ runs identiques → forcer rotation
+    OTHERS = {"REVEAL": "HYPE or DEBATE", "HYPE": "REVEAL or DEBATE"}
     for cat, others in OTHERS.items():
         if tail.count(cat) >= 2:
             return (
@@ -111,14 +113,64 @@ _DEBATE_TITLE_KW = [
     "too expensive", "too cheap", "how much",
 ]
 
+_TOPIC_STOP_WORDS = {
+    "gta", "gta6", "the", "a", "an", "is", "was", "will", "be", "it", "its",
+    "in", "on", "at", "to", "for", "of", "and", "or", "but", "this", "that",
+    "with", "from", "has", "have", "had", "are", "were", "game", "games",
+    "rockstar", "grand", "theft", "auto", "what", "your", "they", "their",
+}
 
-def _filter_debate_posts(posts: list[dict]) -> list[dict]:
-    """Retire les articles clairement DEBATE (prix, analyst, crunch) de la liste."""
-    filtered = [
-        p for p in posts
-        if not any(kw.lower() in p.get("title", "").lower() for kw in _DEBATE_TITLE_KW)
-    ]
-    return filtered if len(filtered) >= 3 else posts
+
+def _covered_keywords(history: list[dict], lookback: int = 6) -> set[str]:
+    """Mots-clés significatifs extraits des angles et titres sources déjà couverts."""
+    import re
+    words: set[str] = set()
+    for entry in history[-lookback:]:
+        for w in re.findall(r"[a-z0-9]+", entry.get("angle", "").lower()):
+            if len(w) >= 4 and w not in _TOPIC_STOP_WORDS:
+                words.add(w)
+        for title in entry.get("source_titles", [])[:3]:
+            for w in re.findall(r"[a-z0-9]+", title.lower()):
+                if len(w) >= 5 and w not in _TOPIC_STOP_WORDS:
+                    words.add(w)
+    return words
+
+
+def _filter_repetitive_posts(posts: list[dict], history: list[dict],
+                              active_debate_filter: bool = False) -> list[dict]:
+    """Filtre en deux passes :
+    1. Si active_debate_filter : retire articles DEBATE (prix/analyst/crunch) par mots-clés fixes
+    2. Retire articles dont le titre chevauche ≥2 mots avec les angles déjà couverts
+    """
+    import re
+    result = list(posts)
+
+    # Passe 1 : mots-clés DEBATE fixes
+    if active_debate_filter:
+        no_debate = [
+            p for p in result
+            if not any(kw.lower() in p.get("title", "").lower() for kw in _DEBATE_TITLE_KW)
+        ]
+        if len(no_debate) >= 3:
+            removed = len(result) - len(no_debate)
+            log.info(f"  Filtre DEBATE : {removed} article(s) retirés")
+            result = no_debate
+
+    # Passe 2 : similarité avec angles déjà couverts
+    if history:
+        covered = _covered_keywords(history)
+        no_overlap = []
+        for p in result:
+            title_words = set(re.findall(r"[a-z0-9]+", p.get("title", "").lower()))
+            overlap = title_words & covered
+            if len(overlap) >= 2:
+                log.info(f"  Filtre overlap ({overlap}) : {p['title'][:60]}")
+            else:
+                no_overlap.append(p)
+        if len(no_overlap) >= 3:
+            result = no_overlap
+
+    return result
 
 
 def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | None = None,
@@ -129,13 +181,12 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
     """
     category_constraint = _category_constraint(history or [])
 
-    # Si contrainte force hors DEBATE → retirer les articles DEBATE du contexte
+    # Filtrer les articles trop similaires à ce qui a déjà été couvert
     # (l'IA ne peut pas choisir ce qu'elle ne voit pas)
-    effective_posts = posts
-    if "REVEAL or HYPE" in category_constraint:
-        effective_posts = _filter_debate_posts(posts)
-        if len(effective_posts) < len(posts):
-            log.info(f"  Articles DEBATE filtrés : {len(effective_posts)}/{len(posts)} posts envoyés à l'IA")
+    active_debate_filter = "REVEAL or HYPE" in category_constraint
+    effective_posts = _filter_repetitive_posts(posts, history or [], active_debate_filter)
+    if len(effective_posts) < len(posts):
+        log.info(f"  Articles filtrés : {len(effective_posts)}/{len(posts)} posts envoyés à l'IA")
 
     context = _build_context(effective_posts)
     topic_hint = f"\nFocus specifically on this angle: {topic}\n" if topic else ""
