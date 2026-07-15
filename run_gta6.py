@@ -57,39 +57,42 @@ video{{width:100%;max-width:360px;max-height:62vh;border-radius:14px;background:
 </style>
 </head>
 <body>
-<video id="v" playsinline controls preload="metadata"></video>
+<video id="v" playsinline controls preload="auto"></video>
 <p class="title" id="ttl"></p>
-<button class="btn" id="btn" onclick="saveVideo()">Enregistrer dans Photos</button>
-<p class="hint" id="hint">Appuie sur le bouton — choisit "Enregistrer la vidéo" dans le menu qui s'ouvre</p>
+<button class="btn" id="btn" disabled>Chargement…</button>
+<p class="hint" id="hint">Si ça ne marche pas : appuie longuement sur la vidéo → "Enregistrer dans Photos"</p>
 <script>
 const videoUrl={v},videoTitle={t};
+const btn=document.getElementById('btn'),hint=document.getElementById('hint');
 document.getElementById('v').src=videoUrl;
 document.getElementById('ttl').textContent=videoTitle;
-async function saveVideo(){{
-  const btn=document.getElementById('btn'),hint=document.getElementById('hint');
-  btn.disabled=true;btn.textContent='Chargement…';
-  try{{
-    const blob=await fetch(videoUrl).then(r=>r.blob());
-    const file=new File([blob],'gta6_tiktok.mp4',{{type:'video/mp4'}});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({{files:[file]}})){{
-      await navigator.share({{files:[file],title:videoTitle}});
-    }}else{{
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(blob);
-      a.download='gta6_tiktok.mp4';
-      document.body.appendChild(a);a.click();
-      setTimeout(()=>{{URL.revokeObjectURL(a.href);document.body.removeChild(a)}},1000);
-    }}
-  }}catch(e){{
-    hint.textContent='Erreur : '+e.message;
-  }}finally{{
-    btn.disabled=false;btn.textContent='Enregistrer dans Photos';
+let readyBlob=null;
+fetch(videoUrl).then(r=>r.blob()).then(b=>{{
+  readyBlob=b;
+  btn.disabled=false;btn.textContent='Enregistrer dans Photos';
+}}).catch(()=>{{
+  btn.disabled=false;btn.textContent='Enregistrer dans Photos';
+  hint.textContent='Appuie longuement sur la vidéo → "Enregistrer dans Photos"';
+}});
+function saveVideo(){{
+  if(!readyBlob){{hint.textContent='Encore en chargement…';return;}}
+  const file=new File([readyBlob],'gta6_tiktok.mp4',{{type:'video/mp4'}});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({{files:[file]}})){{
+    navigator.share({{files:[file],title:videoTitle}}).catch(()=>{{
+      hint.textContent='Appuie longuement sur la vidéo → "Enregistrer dans Photos"';
+    }});
+  }}else{{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(readyBlob);
+    a.download='gta6_tiktok.mp4';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{{URL.revokeObjectURL(a.href);document.body.removeChild(a)}},1000);
   }}
 }}
+btn.onclick=saveVideo;
 </script>
 </body>
 </html>"""
-
 # ── 1. Scraping Reddit ────────────────────────────────────────────────────────
 from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts, mark_articles_used
 

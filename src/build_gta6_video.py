@@ -44,6 +44,13 @@ def _get_trailers() -> list[str]:
 
 TRAILER_INPOINT = 8.0  # secondes à sauter au début (écrans noirs Rockstar)
 
+# Plages à éviter absolument dans chaque trailer (cartons titre "Rockstar Games presents")
+# L'IA peut halluciner des timestamps hors catalogue qui tombent dans ces zones.
+_TITLE_CARD_RANGES: dict[str, list[tuple[float, float]]] = {
+    "T1": [(12.0, 20.5)],
+    "T2": [(69.0, 77.5), (84.5, 92.0)],
+}
+
 
 def _scale_filter(vertical: bool) -> str:
     w, h = (1080, 1920) if vertical else (1920, 1080)
@@ -224,8 +231,15 @@ def _build_shot_video(
             if clip_dur < 0.3:
                 continue
 
-            trailer_file = trailer_map.get(str(shot.get("trailer", "T1")), trailers[0])
+            trailer_key  = str(shot.get("trailer", "T1"))
+            trailer_file = trailer_map.get(trailer_key, trailers[0])
             ts = max(float(shot.get("ts", TRAILER_INPOINT)), TRAILER_INPOINT)
+
+            # Rejeter les timestamps qui tombent dans les cartons titre
+            forbidden = _TITLE_CARD_RANGES.get(trailer_key, [])
+            if any(lo <= ts <= hi for lo, hi in forbidden):
+                log.warning(f"  Shot ignoré (carton titre) : {trailer_key} t={ts:.1f}s")
+                continue
 
             clip_path = os.path.join(tmp, f"clip_{i:02d}.mp4")
             subprocess.run([
