@@ -171,27 +171,102 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
 
 # ── News RSS ──────────────────────────────────────────────────────────────────
 
-_NEWS_SOURCES = [
-    # Sources avec content:encoded complet dans le RSS (texte article complet, pas d'extra fetch nécessaire)
-    ("GameSpot",    "https://www.gamespot.com/feeds/news/"),        # desc=2836 chars
-    ("IGN",         "https://feeds.ign.com/ign/all"),               # content:encoded=6339
-    ("GamesRadar",  "https://www.gamesradar.com/rss/"),            # content:encoded=3444
-    ("PCGamer",     "https://www.pcgamer.com/rss/"),               # content:encoded=4176
-    ("Destructoid", "https://www.destructoid.com/feed/"),          # content:encoded=5546
-    # Sources sans content:encoded — trafilatura fetch l'article complet
-    ("Eurogamer",   "https://www.eurogamer.net/feed"),
-    ("RPS",         "https://www.rockpapershotgun.com/feed"),
-    ("VG247",       "https://www.vg247.com/feed"),
-    ("Push Square", "https://www.pushsquare.com/feeds/latest"),
-    ("Kotaku",      "https://kotaku.com/rss"),
-    ("VGC",         "https://www.videogameschronicle.com/feed/"),
-    # Site spécialisé GTA6 — quasiment 100% d'articles pertinents
-    ("GTA BOOM",    "https://www.gtaboom.com/feed/"),
-    # Sources supplémentaires avec content:encoded complet
-    ("WhatIfGaming", "https://whatifgaming.com/feed/"),             # content:encoded=4648
-    ("TechRadar",    "https://www.techradar.com/rss"),              # content:encoded=6571
-    ("FandomWire",   "https://fandomwire.com/feed/"),               # content:encoded=7475
+_NEWS_SOURCES_BASE = [
+    # Sources fixes connues — feed URL validée manuellement
+    ("GameSpot",     "https://www.gamespot.com/feeds/news/"),
+    ("IGN",          "https://feeds.ign.com/ign/all"),
+    ("GamesRadar",   "https://www.gamesradar.com/rss/"),
+    ("PCGamer",      "https://www.pcgamer.com/rss/"),
+    ("Destructoid",  "https://www.destructoid.com/feed/"),
+    ("Eurogamer",    "https://www.eurogamer.net/feed"),
+    ("RPS",          "https://www.rockpapershotgun.com/feed"),
+    ("VG247",        "https://www.vg247.com/feed"),
+    ("Push Square",  "https://www.pushsquare.com/feeds/latest"),
+    ("Kotaku",       "https://kotaku.com/rss"),
+    ("VGC",          "https://www.videogameschronicle.com/feed/"),
+    ("GTA BOOM",     "https://www.gtaboom.com/feed/"),
+    ("WhatIfGaming", "https://whatifgaming.com/feed/"),
+    ("TechRadar",    "https://www.techradar.com/rss"),
+    ("FandomWire",   "https://fandomwire.com/feed/"),
 ]
+
+_GNEWS_QUERY = "https://news.google.com/rss/search?q=GTA+6+grand+theft+auto&hl=en-US&gl=US&ceid=US:en"
+_RSS_PATTERNS = ["/feed/", "/feed", "/rss/", "/rss", "/rss.xml", "/feeds/rss2", "/feeds/latest"]
+_DISCOVERED_CACHE_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_discovered_feeds.json")
+
+
+def _discover_sources_from_gnews() -> list[tuple[str, str]]:
+    """Fetch Google News RSS pour GTA 6, extrait les domaines sources,
+    tente de trouver leur feed RSS direct. Résultats mis en cache 24h."""
+    import time
+    from urllib.parse import urlparse
+    from concurrent.futures import ThreadPoolExecutor
+
+    # Cache 24h
+    if os.path.exists(_DISCOVERED_CACHE_FILE):
+        with open(_DISCOVERED_CACHE_FILE, encoding="utf-8") as f:
+            cached = json.load(f)
+        if time.time() - cached.get("ts", 0) < 86400:
+            log.info(f"  Discovered feeds (cache) : {len(cached['feeds'])} sources")
+            return [(name, url) for name, url in cached["feeds"]]
+
+    log.info("  Découverte des sources via Google News RSS…")
+    known_domains = {urlparse(url).netloc for _, url in _NEWS_SOURCES_BASE}
+
+    try:
+        req = urllib.request.Request(_GNEWS_QUERY, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            xml_data = r.read()
+        root = ET.fromstring(xml_data)
+        items = root.findall(".//item")
+    except Exception as e:
+        log.warning(f"  Google News RSS fetch failed : {e}")
+        return []
+
+    # Extraire les domaines uniques depuis <source url="...">
+    new_domains: dict[str, str] = {}
+    for item in items:
+        src = item.find("source")
+        if src is None:
+            continue
+        name = (src.text or "").strip()
+        domain_url = src.get("url", "").strip()
+        if not domain_url:
+            continue
+        domain = urlparse(domain_url).netloc
+        if domain and domain not in known_domains and domain not in new_domains:
+            new_domains[domain] = name
+
+    log.info(f"  {len(new_domains)} nouveaux domaines à tester…")
+
+    def probe_feed(domain_name: tuple[str, str]) -> tuple[str, str] | None:
+        domain, name = domain_name
+        for pat in _RSS_PATTERNS:
+            url = f"https://{domain}{pat}"
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req, timeout=5) as r:
+                    data = r.read(4000)
+                if b"<rss" in data or b"<feed" in data or b"<channel" in data:
+                    return (name, url)
+            except Exception:
+                continue
+        return None
+
+    discovered: list[tuple[str, str]] = []
+    with ThreadPoolExecutor(max_workers=10) as exc:
+        for result in exc.map(probe_feed, new_domains.items()):
+            if result:
+                discovered.append(result)
+                log.info(f"    ✓ {result[0]} → {result[1]}")
+
+    log.info(f"  {len(discovered)} nouveaux feeds découverts")
+
+    os.makedirs(os.path.dirname(os.path.abspath(_DISCOVERED_CACHE_FILE)), exist_ok=True)
+    with open(_DISCOVERED_CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump({"ts": time.time(), "feeds": discovered}, f, indent=2, ensure_ascii=False)
+
+    return discovered
 
 _MEDIA_NS   = {"media":   "http://search.yahoo.com/mrss/"}
 _CONTENT_NS = {"content": "http://purl.org/rss/1.0/modules/content/"}
@@ -342,10 +417,11 @@ def _enrich_articles(articles: list[dict], max_workers: int = 6) -> list[dict]:
 
 def fetch_news_posts(limit: int = 15) -> list[dict]:
     """
-    Collecte des articles GTA 6 depuis des flux RSS gaming + Google News.
+    Collecte des articles GTA 6 depuis des flux RSS gaming.
+    - Sources fixes (_NEWS_SOURCES_BASE) + sources dynamiques découvertes via Google News RSS
     - Ignore les articles déjà utilisés (blocklist data/gta6_used_articles.json)
     - Ignore les articles de plus de MAX_ARTICLE_AGE_DAYS jours
-    - Enrichit chaque article avec le contenu complet de la page (pas juste l'extrait RSS)
+    - Enrichit chaque article avec le contenu complet (content:encoded ou trafilatura)
     Retourne dans le même format que fetch_reddit_posts().
     """
     import time
@@ -354,7 +430,12 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
     seen_titles: set[str] = set()
     articles: list[dict] = []
 
-    for source_name, feed_url in _NEWS_SOURCES:
+    # Sources fixes + sources découvertes dynamiquement depuis Google News
+    discovered = _discover_sources_from_gnews()
+    all_sources = _NEWS_SOURCES_BASE + discovered
+    log.info(f"  {len(_NEWS_SOURCES_BASE)} sources fixes + {len(discovered)} découvertes = {len(all_sources)} total")
+
+    for source_name, feed_url in all_sources:
         try:
             req = urllib.request.Request(feed_url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=10) as resp:

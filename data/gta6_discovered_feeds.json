@@ -1,0 +1,109 @@
+{
+  "ts": 1784116590.3104634,
+  "feeds": [
+    [
+      "Aftermath",
+      "https://aftermath.site/feed/"
+    ],
+    [
+      "ComicBook.com",
+      "https://comicbook.com/feed/"
+    ],
+    [
+      "Investor's Business Daily",
+      "https://www.investors.com/feed/"
+    ],
+    [
+      "player.one",
+      "https://www.player.one/rss/"
+    ],
+    [
+      "Creative Bloq",
+      "https://www.creativebloq.com/feed/"
+    ],
+    [
+      "NME",
+      "https://www.nme.com/feed/"
+    ],
+    [
+      "GamesIndustry.biz",
+      "https://www.gamesindustry.biz/feed/"
+    ],
+    [
+      "MP1st",
+      "https://mp1st.com/feed/"
+    ],
+    [
+      "HotHardware",
+      "https://hothardware.com/rss/"
+    ],
+    [
+      "Mashable",
+      "https://mashable.com/feed/"
+    ],
+    [
+      "IGN Southeast Asia",
+      "https://sea.ign.com/rss"
+    ],
+    [
+      "KTLA",
+      "https://ktla.com/feed/"
+    ],
+    [
+      "Inverse",
+      "https://www.inverse.com/rss/"
+    ],
+    [
+      "Game Developer",
+      "https://www.gamedeveloper.com/rss.xml"
+    ],
+    [
+      "9to5Toys",
+      "https://9to5toys.com/feed/"
+    ],
+    [
+      "IGN Nordic",
+      "https://nordic.ign.com/rss"
+    ],
+    [
+      "PlayStation.Blog",
+      "https://blog.playstation.com/feed/"
+    ],
+    [
+      "Game Informer",
+      "https://gameinformer.com/rss.xml"
+    ],
+    [
+      "Consequence of Sound",
+      "https://consequence.net/feed/"
+    ],
+    [
+      "Engadget",
+      "https://www.engadget.com/feed/"
+    ],
+    [
+      "Fortune",
+      "https://fortune.com/feed/"
+    ],
+    [
+      "Pure Xbox",
+      "https://www.purexbox.com/feed/"
+    ],
+    [
+      "Popverse",
+      "https://www.thepopverse.com/feed/"
+    ],
+    [
+      "Niche Gamer",
+      "https://nichegamer.com/feed/"
+    ],
+    [
+      "The Shortcut | Matt Swider",
+      "https://www.theshortcut.com/feed/"
+    ],
+    [
+      "Man of Many",
+      "https://manofmany.com/feed/"
+    ]
+  ]
+}
