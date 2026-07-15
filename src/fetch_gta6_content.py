@@ -172,21 +172,25 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
 # ── News RSS ──────────────────────────────────────────────────────────────────
 
 _NEWS_SOURCES_BASE = [
-    # Sources fixes connues — feed URL validée manuellement
-    ("GameSpot",     "https://www.gamespot.com/feeds/news/"),
-    ("IGN",          "https://feeds.ign.com/ign/all"),
-    ("GamesRadar",   "https://www.gamesradar.com/rss/"),
-    ("PCGamer",      "https://www.pcgamer.com/rss/"),
-    ("Destructoid",  "https://www.destructoid.com/feed/"),
-    ("Eurogamer",    "https://www.eurogamer.net/feed"),
-    ("RPS",          "https://www.rockpapershotgun.com/feed"),
-    ("VG247",        "https://www.vg247.com/feed"),
-    ("Push Square",  "https://www.pushsquare.com/feeds/latest"),
-    ("Kotaku",       "https://kotaku.com/rss"),
-    ("VGC",          "https://www.videogameschronicle.com/feed/"),
+    # Feeds catégorie/tag GTA 6 — ultra-concentrés, à traiter en priorité
+    ("Dexerto GTA",  "https://www.dexerto.com/gta/feed/"),       # ~43/50 GTA 6
+    ("Kotaku GTA6",  "https://kotaku.com/tag/gta-6/rss"),        # ~16/20 GTA 6
+    ("MP1st GTA6",   "https://mp1st.com/tag/grand-theft-auto-6/feed/"),  # ~19/20 GTA 6
+    # Sites spécialisés GTA / Rockstar
     ("GTA BOOM",     "https://www.gtaboom.com/feed/"),
     ("WhatIfGaming", "https://whatifgaming.com/feed/"),
-    ("TechRadar",    "https://www.techradar.com/rss"),
+    # Presse gaming généraliste (feeds généraux — moins dense en GTA 6)
+    ("IGN",          "https://feeds.ign.com/ign/all"),
+    ("GameSpot",     "https://www.gamespot.com/feeds/news/"),
+    ("GamesRadar",   "https://www.gamesradar.com/rss/"),
+    ("PCGamer",      "https://www.pcgamer.com/rss/"),
+    ("Eurogamer",    "https://www.eurogamer.net/feed"),
+    ("Destructoid",  "https://www.destructoid.com/feed/"),
+    ("RPS",          "https://www.rockpapershotgun.com/feed"),
+    ("VG247",        "https://www.vg247.com/feed"),
+    ("VGC",          "https://www.videogameschronicle.com/feed/"),
+    ("Push Square",  "https://www.pushsquare.com/feeds/latest"),
+    ("Aftermath",    "https://aftermath.site/feed/"),
     ("FandomWire",   "https://fandomwire.com/feed/"),
 ]
 
@@ -214,7 +218,7 @@ def _discover_sources_from_gnews() -> list[tuple[str, str]]:
     known_domains = {urlparse(url).netloc for _, url in _NEWS_SOURCES_BASE}
 
     try:
-        req = urllib.request.Request(_GNEWS_QUERY, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(_GNEWS_QUERY, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"})
         with urllib.request.urlopen(req, timeout=10) as r:
             xml_data = r.read()
         root = ET.fromstring(xml_data)
@@ -244,7 +248,7 @@ def _discover_sources_from_gnews() -> list[tuple[str, str]]:
         for pat in _RSS_PATTERNS:
             url = f"https://{domain}{pat}"
             try:
-                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+                req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"})
                 with urllib.request.urlopen(req, timeout=5) as r:
                     data = r.read(4000)
                 if b"<rss" in data or b"<feed" in data or b"<channel" in data:
@@ -276,10 +280,12 @@ _GTA6_EXCLUDE = {"gta 5", "gta5", "gta v ", " gta v,", "gta iv", "gta 4", "red d
 
 
 def _is_gta6_news(title: str, body: str = "") -> bool:
-    text = (title + " " + body).lower()
-    if not any(k in text for k in _GTA6_ONLY):
+    # GTA 6 doit apparaître dans le TITRE — les articles qui le mentionnent
+    # juste en passant dans le body ne comptent pas
+    title_low = title.lower()
+    if not any(k in title_low for k in _GTA6_ONLY):
         return False
-    if any(k in text for k in _GTA6_EXCLUDE):
+    if any(k in title_low for k in _GTA6_EXCLUDE):
         return False
     return True
 
@@ -356,7 +362,7 @@ def _fetch_article_data(url: str) -> tuple[str, str]:
 # ── Blocklist articles déjà utilisés ─────────────────────────────────────────
 
 _USED_ARTICLES_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "gta6_used_articles.json")
-_MAX_ARTICLE_AGE_DAYS = 10
+_MAX_ARTICLE_AGE_DAYS = 30
 
 
 def _load_used_urls() -> set[str]:
@@ -437,7 +443,7 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
 
     for source_name, feed_url in all_sources:
         try:
-            req = urllib.request.Request(feed_url, headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(feed_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 xml_data = resp.read()
             root = ET.fromstring(xml_data)
