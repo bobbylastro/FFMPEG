@@ -1,21 +1,25 @@
 {
-  "ts": 1784116590.3104634,
+  "ts": 1784119118.9276755,
   "feeds": [
-    [
-      "Aftermath",
-      "https://aftermath.site/feed/"
-    ],
     [
       "ComicBook.com",
       "https://comicbook.com/feed/"
     ],
     [
-      "Investor's Business Daily",
-      "https://www.investors.com/feed/"
+      "ScreenRant",
+      "https://screenrant.com/feed/"
     ],
     [
       "player.one",
       "https://www.player.one/rss/"
+    ],
+    [
+      "Collider",
+      "https://collider.com/feed/"
+    ],
+    [
+      "Polygon.com",
+      "https://www.polygon.com/feed/"
     ],
     [
       "Creative Bloq",
@@ -28,10 +32,6 @@
     [
       "GamesIndustry.biz",
       "https://www.gamesindustry.biz/feed/"
-    ],
-    [
-      "MP1st",
-      "https://mp1st.com/feed/"
     ],
     [
       "HotHardware",
@@ -94,16 +94,12 @@
       "https://www.thepopverse.com/feed/"
     ],
     [
-      "Niche Gamer",
-      "https://nichegamer.com/feed/"
-    ],
-    [
       "The Shortcut | Matt Swider",
       "https://www.theshortcut.com/feed/"
     ],
     [
-      "Man of Many",
-      "https://manofmany.com/feed/"
+      "Niche Gamer",
+      "https://nichegamer.com/feed/"
     ]
   ]
 }
