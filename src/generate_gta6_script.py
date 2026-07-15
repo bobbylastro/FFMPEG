@@ -170,9 +170,11 @@ IMPORTANT — Choose an angle that is TIKTOK-NATIVE, not a generic news recap:
 - The best angles are ones where ANY scenic, action, or character shot from the trailer naturally fits the narration
 
 Three GOOD angle categories — pick whichever the posts best support, don't default to one:
-1. REVEAL/THEORY: a hidden trailer detail, leak, or fan theory presented as an exclusive discovery
-2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments. These work great even from "dry" news posts (e.g. a $80 price tag called "ridiculous") when framed as a hot take
-3. HYPE/COMPARISON: scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games
+1. REVEAL/THEORY: a hidden trailer detail, leak, or fan theory presented as an exclusive discovery. Only pick this if the post actually contains a specific surprising detail — do NOT invent mechanics that aren't mentioned in the posts.
+2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments.
+3. HYPE/COMPARISON: confirmed official features, scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games.
+
+IMPORTANT — prioritization rule: if any post lists confirmed/official GTA 6 features or gameplay mechanics, PREFER that over a speculative "hidden mechanic" theory. Confirmed content is more credible and drives more saves/shares than speculation.
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
