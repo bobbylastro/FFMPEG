@@ -258,7 +258,7 @@ if tiktok_url:
     html_path = os.path.join("output/gta6", f"{date_str}_player.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
-    player_url = upload_public_file(html_path, "gta6-tiktok/player.html", content_type="text/html; charset=utf-8")
+    player_url = upload_public_file(html_path, f"gta6-tiktok/player_{date_str}.html", content_type="text/html; charset=utf-8")
     if player_url:
         log.info(f"  Player page → {player_url}")
 
