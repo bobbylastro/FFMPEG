@@ -230,6 +230,9 @@ IMPORTANT — prioritization rule: if any post lists confirmed/official GTA 6 fe
 Reddit content:
 {context}
 
+CRITICAL RULE — DELIVER WHAT YOU PROMISE:
+If the thumbnail_title mentions a number ("5 features", "3 details", "7 things") or a specific claim ("X REVEALED", "SECRET EXPOSED"), the scripts MUST explicitly name and explain each one. No vague generalities. A title that says "5 features" must list 5 actual features by name in the script. A title that says "SECRET EXPOSED" must actually reveal the secret, not just tease it. The viewer clicked because of the title — do not bait-and-switch.
+
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 
 LONG_EN (~420 words, ~3 minutes):
