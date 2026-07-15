@@ -378,20 +378,39 @@ _BEBAS = os.path.abspath(
 )
 
 
+def _wrap_hook(text: str, max_chars: int = 20) -> tuple[str, int]:
+    """Coupe le hook en 2 lignes si trop long, retourne (texte, fontsize)."""
+    if len(text) <= max_chars:
+        return text, 85
+    mid = len(text) // 2
+    left  = text.rfind(' ', 0, mid + 1)
+    right = text.find(' ', mid)
+    if left == -1 and right == -1:
+        return text, 72  # pas d'espace → fontsize réduit
+    if left == -1:
+        cut = right
+    elif right == -1:
+        cut = left
+    else:
+        cut = left if (mid - left) <= (right - mid) else right
+    return text[:cut] + '\n' + text[cut + 1:], 78
+
+
 def _add_tiktok_hook(input_path: str, hook_text: str, output_path: str) -> None:
     """Overlay texte d'accroche centré en haut, visible les 3 premières secondes."""
     import tempfile
     font_esc = _BEBAS.replace(":", "\\:")
 
+    wrapped, fontsize = _wrap_hook(hook_text.upper())
     with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8") as f:
-        f.write(hook_text.upper())
+        f.write(wrapped)
         txt_file = f.name
     txt_esc = txt_file.replace(":", "\\:")
 
     drawtext = (
         f"drawtext=fontfile={font_esc}:textfile={txt_esc}:"
-        f"fontcolor=white:fontsize=85:"
-        f"x=(w-text_w)/2:y=110:"
+        f"fontcolor=white:fontsize={fontsize}:line_spacing=6:"
+        f"x=(w-text_w)/2:y=90:"
         f"box=1:boxcolor=0x000000@0.65:boxborderw=22:"
         f"enable='between(t,0,3)'"
     )
