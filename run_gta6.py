@@ -173,6 +173,10 @@ try:
     log.info(f"  Short uploadé → {paths['short_url']}")
 except QuotaExceededError as e:
     log.warning(f"  Quota YouTube dépassé — short non uploadé : {e}")
+except FileNotFoundError as e:
+    log.warning(f"  Token YouTube GTA 6 manquant — short non uploadé (configurer YOUTUBE_TOKEN_VALORANT) : {e}")
+except Exception as e:
+    log.warning(f"  Upload YouTube échoué — short non uploadé : {e}")
 
 # ── 4ter. Upload TikTok vers R2 + caption prête à poster ───────────────────────
 from src.r2_manager import delete_prefix, upload_public_file
