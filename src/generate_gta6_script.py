@@ -230,8 +230,12 @@ IMPORTANT — prioritization rule: if any post lists confirmed/official GTA 6 fe
 Reddit content:
 {context}
 
-CRITICAL RULE — DELIVER WHAT YOU PROMISE:
-If the thumbnail_title mentions a number ("5 features", "3 details", "7 things") or a specific claim ("X REVEALED", "SECRET EXPOSED"), the scripts MUST explicitly name and explain each one. No vague generalities. A title that says "5 features" must list 5 actual features by name in the script. A title that says "SECRET EXPOSED" must actually reveal the secret, not just tease it. The viewer clicked because of the title — do not bait-and-switch.
+CRITICAL RULE — ONLY PROMISE WHAT THE POSTS ACTUALLY CONTAIN:
+The posts below are RSS excerpts — often just a title and 2-3 lines of text. Before picking an angle, check: does the available text actually contain the specific details needed to deliver on that angle?
+- If you want to say "5 features", the 5 features must be NAMED in the posts. If they aren't, pick a different angle.
+- If you want to say "SECRET EXPOSED", the secret must be described in the posts. If it isn't, pick a different angle.
+- NEVER pick an angle that requires details you don't have. A script that vaguely alludes to "incredible features" without naming them is worthless.
+Work only with what is actually written in the posts. If the posts are thin on detail, pick a broader angle (comparison, hype, reaction) that you CAN fully develop.
 
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 
