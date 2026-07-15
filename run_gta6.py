@@ -33,6 +33,63 @@ args.no_long = not args.with_long
 date_str = datetime.now().strftime("%Y-%m-%d")
 os.makedirs("output/gta6", exist_ok=True)
 
+
+def _make_player_html(video_url: str, title: str) -> str:
+    """Page HTML légère pour sauvegarder le TikTok dans Photos sur iPhone."""
+    import json as _json
+    v = _json.dumps(video_url)
+    t = _json.dumps(title)
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>{title}</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+html,body{{height:100%;background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}}
+body{{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;min-height:100vh}}
+video{{width:100%;max-width:360px;max-height:62vh;border-radius:14px;background:#111}}
+.title{{font-size:14px;font-weight:600;text-align:center;opacity:.7;max-width:320px}}
+.btn{{width:100%;max-width:320px;background:#ff2d55;color:#fff;border:none;border-radius:14px;padding:18px;font-size:17px;font-weight:700;cursor:pointer}}
+.btn:disabled{{opacity:.5}}
+.hint{{font-size:12px;color:#666;text-align:center;max-width:280px;line-height:1.5}}
+</style>
+</head>
+<body>
+<video id="v" playsinline controls preload="metadata"></video>
+<p class="title" id="ttl"></p>
+<button class="btn" id="btn" onclick="saveVideo()">Enregistrer dans Photos</button>
+<p class="hint" id="hint">Appuie sur le bouton — choisit "Enregistrer la vidéo" dans le menu qui s'ouvre</p>
+<script>
+const videoUrl={v},videoTitle={t};
+document.getElementById('v').src=videoUrl;
+document.getElementById('ttl').textContent=videoTitle;
+async function saveVideo(){{
+  const btn=document.getElementById('btn'),hint=document.getElementById('hint');
+  btn.disabled=true;btn.textContent='Chargement…';
+  try{{
+    const blob=await fetch(videoUrl).then(r=>r.blob());
+    const file=new File([blob],'gta6_tiktok.mp4',{{type:'video/mp4'}});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({{files:[file]}})){{
+      await navigator.share({{files:[file],title:videoTitle}});
+    }}else{{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='gta6_tiktok.mp4';
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{{URL.revokeObjectURL(a.href);document.body.removeChild(a)}},1000);
+    }}
+  }}catch(e){{
+    hint.textContent='Erreur : '+e.message;
+  }}finally{{
+    btn.disabled=false;btn.textContent='Enregistrer dans Photos';
+  }}
+}}
+</script>
+</body>
+</html>"""
+
 # ── 1. Scraping Reddit ────────────────────────────────────────────────────────
 from src.fetch_gta6_content import fetch_reddit_posts, fetch_news_posts, mark_articles_used
 
@@ -179,19 +236,36 @@ if not args.tiktok_only and "short" in paths:
     except Exception as e:
         log.warning(f"  Upload YouTube échoué — short non uploadé : {e}")
 
-# ── 4ter. Upload TikTok vers R2 + caption prête à poster ───────────────────────
+# ── 4ter. Upload TikTok vers R2 + page player pour iPhone ─────────────────────
 from src.r2_manager import delete_prefix, upload_public_file
 
 tiktok_caption = scripts.get("tiktok_caption", "")
 tiktok_filename = os.path.basename(paths["tiktok"])
 delete_prefix("gta6-tiktok/")
-tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}", download=True)
+
+# Vidéo en inline (pas Content-Disposition: attachment) pour que le player HTML puisse la fetch
+tiktok_url = upload_public_file(paths["tiktok"], f"gta6-tiktok/{tiktok_filename}", download=False)
 if tiktok_url:
     log.info(f"  TikTok uploadé → {tiktok_url}")
 
+# Page HTML player : bouton "Enregistrer dans Photos" qui fonctionne sur iPhone
+player_url = None
+if tiktok_url:
+    html_content = _make_player_html(tiktok_url, scripts.get("thumbnail_title", "TikTok GTA 6"))
+    html_path = os.path.join("output/gta6", f"{date_str}_player.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    player_url = upload_public_file(html_path, "gta6-tiktok/player.html", content_type="text/html; charset=utf-8")
+    if player_url:
+        log.info(f"  Player page → {player_url}")
+
 meta_path = os.path.join("output/gta6", f"{date_str}_tiktok_meta.json")
 with open(meta_path, "w", encoding="utf-8") as f:
-    json.dump({"tiktok_url": tiktok_url or "", "tiktok_caption": tiktok_caption}, f, ensure_ascii=False, indent=2)
+    json.dump({
+        "tiktok_url":  tiktok_url  or "",
+        "player_url":  player_url  or "",
+        "tiktok_caption": tiktok_caption,
+    }, f, ensure_ascii=False, indent=2)
 paths["tiktok_meta"] = meta_path
 
 # ── 5. Résumé ─────────────────────────────────────────────────────────────────

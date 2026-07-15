@@ -68,7 +68,7 @@ jobs:
         run: |
           META=$(ls output/gta6/*_tiktok_meta.json | head -1)
           if [ -f "$META" ]; then
-            echo "url=$(jq -r '.tiktok_url' "$META")" >> "$GITHUB_OUTPUT"
+            echo "url=$(jq -r '.player_url // .tiktok_url' "$META")" >> "$GITHUB_OUTPUT"
             {
               echo "caption<<CAPTION_EOF"
               jq -r '.tiktok_caption' "$META"
@@ -88,7 +88,7 @@ jobs:
           to: bobbylastronaute@gmail.com
           from: GTA6 Pipeline
           body: |
-            Le TikTok du jour est prêt :
+            Le TikTok du jour est prêt — ouvre le lien sur ton iPhone et clique "Enregistrer dans Photos" :
             ${{ steps.tiktok_meta.outputs.url }}
 
             Caption à copier-coller :

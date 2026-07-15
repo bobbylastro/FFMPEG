@@ -48,17 +48,35 @@ def save_topic(scripts: dict, date_str: str, posts: list[dict] | None = None) ->
     """Enregistre le sujet du jour dans l'historique."""
     os.makedirs(os.path.dirname(os.path.abspath(TOPICS_FILE)), exist_ok=True)
     history = load_topic_history()
-    # Titres des articles sources (pour bloquer les mêmes sources à l'avenir)
     source_titles = [p["title"][:80] for p in (posts or [])[:8]]
     history.append({
-        "date":          date_str,
-        "angle":         scripts.get("thumbnail_title", ""),
-        "hook":          scripts.get("tiktok_hook", ""),
-        "summary":       scripts.get("short_en", "")[:120],
-        "source_titles": source_titles,
+        "date":           date_str,
+        "angle":          scripts.get("thumbnail_title", ""),
+        "angle_category": scripts.get("angle_category", ""),
+        "hook":           scripts.get("tiktok_hook", ""),
+        "summary":        scripts.get("short_en", "")[:120],
+        "source_titles":  source_titles,
     })
     with open(TOPICS_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
+
+
+def _category_constraint(history: list[dict]) -> str:
+    """Force la rotation REVEAL / DEBATE / HYPE si les derniers runs sont tous du même type."""
+    recent = [h.get("angle_category", "") for h in history[-3:] if h.get("angle_category")]
+    if len(recent) < 2:
+        return ""
+    for cat, others in [
+        ("DEBATE", "REVEAL or HYPE"),
+        ("REVEAL", "HYPE or DEBATE"),
+        ("HYPE",   "REVEAL or DEBATE"),
+    ]:
+        if recent.count(cat) >= 2:
+            return (
+                f"\n⚠️ CATEGORY CONSTRAINT: The last runs were mostly {cat}. "
+                f"You MUST pick a {others} angle this time — do NOT pick another {cat}.\n"
+            )
+    return ""
 
 
 def _build_context(posts: list[dict]) -> str:
@@ -89,17 +107,21 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
     if history:
         lines = []
         for h in history[-20:]:
-            line = f"- {h['date']}: {h['angle']} — {h['summary'][:80]}"
+            cat = h.get("angle_category", "")
+            cat_tag = f"[{cat}] " if cat else ""
+            line = f"- {h['date']}: {cat_tag}{h['angle']} — {h['summary'][:80]}"
             if h.get("source_titles"):
                 line += f" [sources: {' | '.join(h['source_titles'][:3])}]"
             lines.append(line)
-        history_block = f"\nALREADY COVERED (do NOT repeat these angles or reuse these sources):\n" + "\n".join(lines) + "\n"
+        history_block = "\nALREADY COVERED (do NOT repeat these angles or reuse these sources):\n" + "\n".join(lines) + "\n"
+
+    category_constraint = _category_constraint(history or [])
 
     prompt = f"""You are a viral TikTok/Shorts content creator for GTA 6 hype content.
 GTA 6 launches November 19, 2026 — it is NOT yet released.
 Based on the Reddit posts below, pick the angle with the HIGHEST TikTok virality potential — not just the most "interesting" one.
 Don't just describe theories — make it feel like breaking news or an exclusive reveal.
-
+{category_constraint}
 IMPORTANT — Choose an angle that is TIKTOK-NATIVE, not a generic news recap:
 - Optimize for the scroll-stop test: could this angle work as a 3-word on-screen hook that makes someone stop mid-scroll?
 - Favor angles that trigger a reaction, not just information: disbelief ("wait, WHAT?"), FOMO, a hot take people will agree/disagree with in the comments, a "you didn't notice this but now you can't unsee it" reveal
@@ -149,6 +171,7 @@ Return ONLY this JSON (no other text):
   "tiktok_caption": "...",
   "short_post_index": 0,
   "use_post_image": true,
+  "angle_category": "REVEAL",
   "shots": [
     {{"pct": 0,  "trailer": "T1", "ts": 14}},
     {{"pct": 20, "trailer": "T1", "ts": 35}},
@@ -171,6 +194,11 @@ tiktok_caption: the TikTok post caption in French, ready to copy-paste when publ
 
 short_post_index: integer — the index (0-7) of the [POST N] that SHORT_EN focuses on.
 The post may have an image — use_post_image tells whether to show it.
+
+angle_category: the category of this angle — exactly one of "REVEAL", "DEBATE", or "HYPE".
+REVEAL = hidden detail, leak, fan theory, exclusive discovery.
+DEBATE = controversy, price, crunch, backlash, hot take, comparison that divides people.
+HYPE = scale, visual fidelity, world detail, insane comparison to other games.
 
 use_post_image: boolean — true ONLY if the post's image would genuinely illustrate the narration
 (e.g. a map screenshot when talking about map size, a screenshot of the game when describing gameplay).
@@ -203,7 +231,7 @@ Rules:
         raise ValueError(f"No JSON in response: {raw[:300]!r}")
 
     scripts = json.loads(match.group())
-    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "tiktok_caption", "short_post_index", "use_post_image", "shots"):
+    for key in ("long_en", "short_en", "tiktok_fr", "thumbnail_title", "tiktok_hook", "tiktok_caption", "short_post_index", "use_post_image", "angle_category", "shots"):
         if key not in scripts:
             raise ValueError(f"Missing key '{key}' in AI response")
 
