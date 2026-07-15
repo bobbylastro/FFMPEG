@@ -27,10 +27,15 @@ def load_trailer_catalog() -> list[dict]:
         return json.load(f)
 
 
+_CATALOG_BLACKLIST = ("title card", "rockstar games", "presents title", "presents logo")
+
 def _format_catalog(catalog: list[dict]) -> str:
     """Catalogue compact pour le prompt : [trailer · ts] description."""
     lines = []
     for e in catalog:
+        desc_low = e["description"].lower()
+        if any(kw in desc_low for kw in _CATALOG_BLACKLIST):
+            continue  # exclut les cartons titre "Rockstar Games presents"
         trailer_short = "T1" if "Trailer 1" in e["trailer"] else "T2"
         lines.append(f"[{trailer_short} t={e['ts']:.0f}s] {e['description']}")
     return "\n".join(lines)
@@ -211,6 +216,7 @@ shots: visual timeline for SHORT_EN and TIKTOK_FR (6-8 entries).
 - ts: timestamp in seconds from the TRAILER VISUAL CATALOG above
 Rules:
 - Choose visuals that MATCH what's being said at each moment — make it feel directed
+- NEVER use title cards, logo screens, or "presents" text overlays — these show text-on-black behind subtitles and look terrible
 - EVERY shot must use a DIFFERENT timestamp (minimum 10s gap between any two shots from the same trailer)
 - Alternate between T1 and T2 as much as possible for visual variety
 - Spread shots evenly across the full runtime — avoid clustering them together
