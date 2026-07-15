@@ -235,6 +235,13 @@ Three GOOD angle categories — pick whichever the posts best support, don't def
 AUDIENCE FILTER — before picking an angle, ask yourself: "Would someone who is hyped about playing GTA 6 care about this?"
 - YES → pick it. Map details, characters (Lucia, Jason, Gabriela), gameplay mechanics, features, fan theories, trailer discoveries, leaks, Vice City world, missions, graphics, multiplayer hints.
 - NO → skip it. Government legislation that happens to mention GTA 6, Sony's disc strategy, analyst pricing opinions, Take-Two earnings, retailer deals, industry policy. These are for industry journalists, not players.
+
+PRIORITY ORDER — when multiple posts pass the audience filter:
+1. REVEAL first: confirmed features, leaked mechanics, "X details from info dump", Easter eggs, character reveals, new gameplay info → these always win
+2. HYPE second: official confirmed content, scale comparisons, graphical impressions
+3. DEBATE last: pricing drama, fan backlash, controversy — only if no REVEAL or HYPE angle is available with real content
+
+If an article says "10 new details", "X features confirmed", "leaked mechanic", "info dump", "things we learned" — that is your article. Don't pick a pricing debate when a feature reveal is sitting right there.
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
