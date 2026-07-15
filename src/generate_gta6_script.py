@@ -100,9 +100,16 @@ def _build_context(posts: list[dict]) -> str:
     parts = []
     for i, p in enumerate(posts[:8]):
         flair = f"[{p['flair']}] " if p["flair"] else ""
-        body  = p["body"].strip()
+        body  = p["body"].strip()[:1800]
         img   = f"\n[image disponible: {p['image_url']}]" if p.get("image_url") else ""
-        text  = f"{flair}{p['title']}\n{body}" if body else f"{flair}{p['title']}"
+        # Détecte si le body est essentiellement vide/inutilisable (juste le titre répété, ou <150 chars)
+        body_is_thin = len(body) < 150 or body.lower().replace(" ", "").startswith(p["title"][:25].lower().replace(" ", ""))
+        if body_is_thin:
+            text = (f"{flair}{p['title']}\n"
+                    "[⚠️ BODY UNAVAILABLE — only the title is accessible, no article text. "
+                    "Do NOT pick this as your main angle; you cannot deliver specific details from it.]")
+        else:
+            text = f"{flair}{p['title']}\n{body}" if body else f"{flair}{p['title']}"
         parts.append(f"[POST {i}]{img}\n{text}")
     return "\n\n---\n\n".join(parts)
 
@@ -231,11 +238,11 @@ Reddit content:
 {context}
 
 CRITICAL RULE — ONLY PROMISE WHAT THE POSTS ACTUALLY CONTAIN:
-The posts below are RSS excerpts — often just a title and 2-3 lines of text. Before picking an angle, check: does the available text actually contain the specific details needed to deliver on that angle?
-- If you want to say "5 features", the 5 features must be NAMED in the posts. If they aren't, pick a different angle.
-- If you want to say "SECRET EXPOSED", the secret must be described in the posts. If it isn't, pick a different angle.
-- NEVER pick an angle that requires details you don't have. A script that vaguely alludes to "incredible features" without naming them is worthless.
-Work only with what is actually written in the posts. If the posts are thin on detail, pick a broader angle (comparison, hype, reaction) that you CAN fully develop.
+The posts below include the FULL article body text (not just RSS excerpts). Before picking an angle, verify that the specific details are actually present in the text:
+- If you want to say "5 features", the 5 features must be NAMED and DESCRIBED in the posts. If they are listed, name them explicitly in your script.
+- If you want to say "SECRET EXPOSED", the secret must be described in the posts. Don't invent mechanics that aren't mentioned.
+- NEVER pick an angle that requires details you don't have. A script that vaguely alludes to "incredible features" without naming them is worthless and embarrassing.
+Work only with what is actually written in the posts. If a post lists specific features/details/mechanics, USE THEM — name them one by one in your script. That's the whole point.
 
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 

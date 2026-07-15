@@ -188,7 +188,8 @@ _NEWS_SOURCES = [
     ("Google News", "https://news.google.com/rss/search?q=GTA+6+grand+theft+auto&hl=en-US&gl=US&ceid=US:en"),
 ]
 
-_MEDIA_NS = {"media": "http://search.yahoo.com/mrss/"}
+_MEDIA_NS   = {"media":   "http://search.yahoo.com/mrss/"}
+_CONTENT_NS = {"content": "http://purl.org/rss/1.0/modules/content/"}
 
 _GTA6_ONLY = {"gta 6", "gta6", "gta vi", "grand theft auto 6", "grand theft auto vi"}
 _GTA6_EXCLUDE = {"gta 5", "gta5", "gta v ", " gta v,", "gta iv", "gta 4", "red dead"}
@@ -236,25 +237,46 @@ def _upgrade_image_url(url: str) -> str:
     return url
 
 
-def _og_image(url: str, timeout: int = 6) -> str:
-    """Fetch l'URL et extrait og:image (fallback quand le flux n'a pas d'image)."""
+def _fetch_article_data(url: str, timeout: int = 8) -> tuple[str, str]:
+    """Fetch l'URL une seule fois, retourne (og_image_url, article_body_text).
+    Extrait le corps complet de l'article (jusqu'à 2500 chars) pour donner à l'IA
+    le contenu réel plutôt que le court extrait RSS."""
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120",
             "Accept": "text/html",
         })
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw_html = resp.read(80000).decode("utf-8", errors="ignore")
+            raw_html = resp.read(250000).decode("utf-8", errors="ignore")
+
+        # og:image
+        image_url = ""
         for pat in [
             r'property=["\']og:image["\']\s*content=["\']([^"\']+)',
             r'content=["\']([^"\']+)["\']\s*property=["\']og:image',
         ]:
             m = re.search(pat, raw_html)
             if m:
-                return _upgrade_image_url(m.group(1).strip())
+                image_url = _upgrade_image_url(m.group(1).strip())
+                break
+
+        # Corps de l'article : cherche <article> d'abord, puis <main>, sinon tout le HTML
+        article_m = re.search(r'<article[^>]*>(.*?)</article>', raw_html, re.DOTALL | re.IGNORECASE)
+        if article_m:
+            content_html = article_m.group(1)
+        else:
+            main_m = re.search(r'<main[^>]*>(.*?)</main>', raw_html, re.DOTALL | re.IGNORECASE)
+            content_html = main_m.group(1) if main_m else raw_html
+
+        # Extrait les paragraphes <p>
+        paras = re.findall(r'<p[^>]*>(.*?)</p>', content_html, re.DOTALL | re.IGNORECASE)
+        cleaned_paras = [_clean_html(p) for p in paras]
+        body_text = " ".join(p for p in cleaned_paras if len(p) > 40)
+        body_text = re.sub(r'\s+', ' ', body_text).strip()[:2500]
+
+        return image_url, body_text
     except Exception:
-        pass
-    return ""
+        return "", ""
 
 
 
@@ -294,11 +316,38 @@ def _parse_pub_date(item: ET.Element) -> float:
         return 0.0
 
 
+def _enrich_articles(articles: list[dict], max_workers: int = 6) -> list[dict]:
+    """Fetch le contenu complet de chaque article en parallèle (image + corps).
+    Remplace l'extrait RSS par le vrai texte de l'article quand disponible."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def enrich(art: dict) -> dict:
+        url = art.get("url", "")
+        if not url or "google.com" in url:
+            return art
+        fetched_image, fetched_body = _fetch_article_data(url)
+        result = dict(art)
+        if fetched_image and not result.get("image_url"):
+            result["image_url"] = fetched_image
+        if fetched_body and len(fetched_body) > len(result.get("body", "")):
+            result["body"] = fetched_body
+            log.debug(f"  Corps enrichi ({len(fetched_body)} chars) : {art['title'][:60]}")
+        return result
+
+    log.info(f"  Fetch contenu complet des articles ({len(articles)} articles, {max_workers} workers)…")
+    with ThreadPoolExecutor(max_workers=max_workers) as exc:
+        enriched = list(exc.map(enrich, articles))
+    full_count = sum(1 for a, b in zip(articles, enriched) if len(b.get("body", "")) > len(a.get("body", "")))
+    log.info(f"  {full_count}/{len(articles)} articles enrichis avec le contenu complet")
+    return enriched
+
+
 def fetch_news_posts(limit: int = 15) -> list[dict]:
     """
     Collecte des articles GTA 6 depuis des flux RSS gaming + Google News.
     - Ignore les articles déjà utilisés (blocklist data/gta6_used_articles.json)
     - Ignore les articles de plus de MAX_ARTICLE_AGE_DAYS jours
+    - Enrichit chaque article avec le contenu complet de la page (pas juste l'extrait RSS)
     Retourne dans le même format que fetch_reddit_posts().
     """
     import time
@@ -318,11 +367,18 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
             gta6_count = 0
             for item in items:
                 title = _clean_html(item.findtext("title", ""))
-                desc  = _clean_html(item.findtext("description", ""))[:600]
+                desc_raw     = _clean_html(item.findtext("description", ""))
                 link  = item.findtext("link", "").strip()
 
-                if not title or not _is_gta6_news(title, desc):
+                # Filtre GTA 6 sur titre + 300 premiers chars de la desc (évite les faux positifs
+                # quand GTA 6 est juste mentionné en passant dans un long article sur autre chose)
+                if not title or not _is_gta6_news(title, desc_raw[:300]):
                     continue
+
+                # Enrich body : préfère content:encoded (texte complet) à la description courte
+                content_node = item.find("content:encoded", _CONTENT_NS)
+                content_full = _clean_html(content_node.text or "") if content_node is not None else ""
+                desc = content_full[:2500] if len(content_full) > len(desc_raw) else desc_raw[:2500]
 
                 # Filtre : article déjà utilisé
                 if link in used_urls:
@@ -339,10 +395,6 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
                     continue
                 seen_titles.add(key)
 
-                image_url = _feed_image(item)
-                if not image_url and link.startswith("http") and source_name != "Google News":
-                    image_url = _og_image(link)
-
                 articles.append({
                     "title":     title,
                     "body":      desc,
@@ -351,7 +403,7 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
                     "flair":     source_name,
                     "url":       link,
                     "subreddit": "news",
-                    "image_url": image_url,
+                    "image_url": _feed_image(item),
                 })
                 gta6_count += 1
 
@@ -364,10 +416,18 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
     skipped = len(used_urls)
     log.info(f"  ({skipped} articles déjà utilisés ignorés, fenêtre {_MAX_ARTICLE_AGE_DAYS}j)")
 
-    # Trier : articles avec image en premier, puis Google News en dernier
+    # Trier avant enrichissement (articles avec image RSS en premier, Google News en dernier)
     articles.sort(key=lambda x: (0 if x["image_url"] else 1, x["flair"] == "Google News"))
-    result = articles[:limit]
-    log.info(f"News: {len(result)} articles GTA 6 collectés ({sum(1 for a in result if a['image_url'])} avec image)")
-    if result:
-        _save_posts_cache(result)
-    return result
+    # Limiter avant d'enrichir (évite de fetch 40 articles)
+    articles = articles[:limit]
+
+    # Fallback : fetch page HTML pour les articles dont le body RSS est encore court
+    thin = [a for a in articles if len(a.get("body", "")) < 300 and a.get("url") and "google.com" not in a.get("url", "")]
+    if thin:
+        log.info(f"  {len(thin)} articles avec body court → fetch page HTML…")
+        articles = _enrich_articles(articles)
+
+    log.info(f"News: {len(articles)} articles GTA 6 collectés ({sum(1 for a in articles if a['image_url'])} avec image)")
+    if articles:
+        _save_posts_cache(articles)
+    return articles
