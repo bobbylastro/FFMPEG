@@ -1,9 +1,7 @@
 .env
-output/long/*.mp4
-output/shorts/*.mp4
-output/thumbnails/
-logs/*.log
-public/clips/
+output/
+logs/
+public/
 __pycache__/
 *.pyc
 .venv/
