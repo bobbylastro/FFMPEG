@@ -241,11 +241,16 @@ Reddit content:
 {context}
 
 CRITICAL RULE — ONLY PROMISE WHAT THE POSTS ACTUALLY CONTAIN:
-The posts below include the FULL article body text (not just RSS excerpts). Before picking an angle, verify that the specific details are actually present in the text:
-- If you want to say "5 features", the 5 features must be NAMED and DESCRIBED in the posts. If they are listed, name them explicitly in your script.
-- If you want to say "SECRET EXPOSED", the secret must be described in the posts. Don't invent mechanics that aren't mentioned.
-- NEVER pick an angle that requires details you don't have. A script that vaguely alludes to "incredible features" without naming them is worthless and embarrassing.
-Work only with what is actually written in the posts. If a post lists specific features/details/mechanics, USE THEM — name them one by one in your script. That's the whole point.
+The posts below include the FULL article body text. Before picking an angle, verify that the specific details are present:
+- If you want to say "5 features", the 5 features must be NAMED in the posts. List them explicitly in the script.
+- If you want to say "cheats confirmed", actual cheat codes or a Rockstar official statement must be in the posts. Not just "GTA has always had cheats so probably GTA 6 will too."
+- If you want to say "SECRET EXPOSED", the secret must be described. Don't invent mechanics.
+- NEVER pick an angle that requires details you don't have. A script that says generic things like "il y a toujours eu des cheats donc sûrement GTA 6 aussi" is worthless — that's not content, that's padding.
+
+SPECULATION RULE: If an article title contains a question mark ("cheats confirmed?", "will X happen?") or hedging words ("reportedly", "rumored", "might", "could"), the body probably doesn't contain confirmed facts. Before using it:
+- Read the body carefully. Does it contain specific confirmed details? If yes, use them explicitly.
+- If the body is just speculation or history recap, either (a) frame the TikTok as a genuine question/debate ("vous pensez que…?") rather than a revelation, or (b) pick a different post.
+- NEVER dress up speculation as confirmation. "Rockstar a confirmé les cheats 👀" when nothing is confirmed = misinformation that kills credibility.
 
 Write THREE scripts. Pure spoken text only — no stage directions, no emojis, no hashtags, no [Music] tags.
 
