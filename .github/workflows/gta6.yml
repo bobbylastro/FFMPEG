@@ -8,7 +8,13 @@ on:
         required: false
         default: ""
       with_long:
-        description: "Générer aussi la vidéo longue (passée par défaut, y compris via cron)"
+        description: "Générer aussi la vidéo longue"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      tiktok_only:
+        description: "TikTok uniquement (pas de short, pas d'upload YT, pas de miniature)"
         required: false
         default: "false"
         type: choice
@@ -51,6 +57,9 @@ jobs:
           fi
           if [ "${{ github.event.inputs.with_long }}" = "true" ]; then
             ARGS="$ARGS --with-long"
+          fi
+          if [ "${{ github.event.inputs.tiktok_only }}" = "true" ]; then
+            ARGS="$ARGS --tiktok-only"
           fi
           python run_gta6.py $ARGS
 

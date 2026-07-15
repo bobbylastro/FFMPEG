@@ -22,10 +22,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--topic",     default="", help="Angle/sujet à privilégier (optionnel)")
-parser.add_argument("--with-long", action="store_true", help="Générer aussi la vidéo longue (passée par défaut)")
-parser.add_argument("--mock",      action="store_true", help="Utiliser le cache local (sans appel réseau)")
-parser.add_argument("--reddit",    action="store_true", help="Forcer le scraping Reddit (bloqué en datacenter)")
+parser.add_argument("--topic",       default="", help="Angle/sujet à privilégier (optionnel)")
+parser.add_argument("--with-long",   action="store_true", help="Générer aussi la vidéo longue")
+parser.add_argument("--tiktok-only", action="store_true", help="Générer uniquement le TikTok (pas de short ni d'upload YT ni de miniature)")
+parser.add_argument("--mock",        action="store_true", help="Utiliser le cache local (sans appel réseau)")
+parser.add_argument("--reddit",      action="store_true", help="Forcer le scraping Reddit (bloqué en datacenter)")
 args = parser.parse_args()
 args.no_long = not args.with_long
 
@@ -66,7 +67,7 @@ if catalog:
 scripts = generate_scripts(posts, topic=args.topic, history=history, catalog=catalog)
 
 # Enregistrer le sujet dans l'historique + marquer les articles comme utilisés
-save_topic(scripts, date_str)
+save_topic(scripts, date_str, posts=posts)
 if not args.mock:
     mark_articles_used(posts)
 log.info(f"  Sujet sauvegardé : {scripts.get('thumbnail_title', '')}")
@@ -92,51 +93,50 @@ with tempfile.TemporaryDirectory() as tmp:
         log.info("  Montage long EN...")
         paths["long"] = build_long_en(audio_long, srt_long, date_str)
 
-    log.info("  TTS short EN...")
-    synthesize_en_short(scripts["short_en"], audio_short, ass_short)
-
-    # Image de fond : post sélectionné par l'IA, uniquement si elle juge l'image pertinente
-    image_short = None
-    post_idx = int(scripts.get("short_post_index", 0))
-    if not scripts.get("use_post_image", True):
-        log.info("  Image fond ignorée (IA : non pertinente pour la narration)")
-    elif 0 <= post_idx < len(posts):
-        post = posts[post_idx]
-
-        # Priorité 1 : image locale (asset embarqué)
-        local_img = post.get("local_image", "")
-        if local_img and os.path.exists(local_img):
-            image_short = local_img
-            log.info(f"  Image fond (locale) : {post['title'][:60]}")
-
-        # Priorité 2 : téléchargement depuis URL distante
-        elif post.get("image_url"):
-            import urllib.request
-            img_url  = post["image_url"]
-            img_ext  = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
-            if img_ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
-                img_ext = ".jpg"
-            img_path = os.path.join(tmp, f"post_image{img_ext}")
-            try:
-                req = urllib.request.Request(img_url, headers={
-                    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-                    "Referer": post.get("url", img_url),
-                })
-                with urllib.request.urlopen(req, timeout=10) as resp:
-                    with open(img_path, "wb") as f:
-                        f.write(resp.read())
-                image_short = img_path
-                log.info(f"  Image fond (remote) : {post['title'][:60]}")
-            except Exception as e:
-                log.warning(f"  Image téléchargement échoué ({img_url}): {e}")
-
     shots = scripts.get("shots") or []
     if shots:
         log.info(f"  Shot list IA : {len(shots)} plans visuels")
 
-    log.info("  Montage short EN...")
-    paths["short"] = build_short_en(audio_short, ass_short, date_str,
-                                    image_path=image_short, shots=shots)
+    if not args.tiktok_only:
+        log.info("  TTS short EN...")
+        synthesize_en_short(scripts["short_en"], audio_short, ass_short)
+
+        # Image de fond : post sélectionné par l'IA, uniquement si elle juge l'image pertinente
+        image_short = None
+        post_idx = int(scripts.get("short_post_index", 0))
+        if not scripts.get("use_post_image", True):
+            log.info("  Image fond ignorée (IA : non pertinente pour la narration)")
+        elif 0 <= post_idx < len(posts):
+            post = posts[post_idx]
+
+            local_img = post.get("local_image", "")
+            if local_img and os.path.exists(local_img):
+                image_short = local_img
+                log.info(f"  Image fond (locale) : {post['title'][:60]}")
+            elif post.get("image_url"):
+                import urllib.request
+                img_url  = post["image_url"]
+                img_ext  = os.path.splitext(img_url.split("?")[0])[1] or ".jpg"
+                if img_ext not in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
+                    img_ext = ".jpg"
+                img_path = os.path.join(tmp, f"post_image{img_ext}")
+                try:
+                    req = urllib.request.Request(img_url, headers={
+                        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+                        "Referer": post.get("url", img_url),
+                    })
+                    with urllib.request.urlopen(req, timeout=10) as resp:
+                        with open(img_path, "wb") as f:
+                            f.write(resp.read())
+                    image_short = img_path
+                    log.info(f"  Image fond (remote) : {post['title'][:60]}")
+                except Exception as e:
+                    log.warning(f"  Image téléchargement échoué ({img_url}): {e}")
+
+        if shots:
+            log.info("  Montage short EN...")
+            paths["short"] = build_short_en(audio_short, ass_short, date_str,
+                                            image_path=image_short, shots=shots)
 
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)
@@ -145,40 +145,39 @@ with tempfile.TemporaryDirectory() as tmp:
                                        hook_text=scripts.get("tiktok_hook", ""),
                                        shots=shots)
 
-# ── 4. Miniature ──────────────────────────────────────────────────────────────
-from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
-
-log.info("\nGénération de la miniature...")
-thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
-paths["thumbnail"] = thumb_path
+# ── 4. Miniature (uniquement si on génère le short YouTube) ───────────────────
+if not args.tiktok_only:
+    from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
+    log.info("\nGénération de la miniature...")
+    thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
+    paths["thumbnail"] = thumb_path
 
 # ── 4bis. Upload YouTube Short ──────────────────────────────────────────────
-from src.upload_youtube import upload_video, QuotaExceededError
-
-short_video_id = None
-short_description = (
-    f"{scripts.get('thumbnail_title', '')}\n\n"
-    "GTA 6 sort le 19 novembre 2026.\n\n"
-    "#GTA6 #GTAVI #Shorts #RockstarGames #Gaming"
-)
-try:
-    short_video_id = upload_video(
-        video_path=paths["short"],
-        title=f"{scripts.get('thumbnail_title', '')} #Shorts"[:100],
-        description=short_description,
-        thumbnail_path=paths["thumbnail"],
-        tags=["gta6", "gtavi", "rockstargames", "shorts"],
-        privacy="public",
-        game_slug="gta",
+if not args.tiktok_only and "short" in paths:
+    from src.upload_youtube import upload_video, QuotaExceededError
+    short_description = (
+        f"{scripts.get('thumbnail_title', '')}\n\n"
+        "GTA 6 sort le 19 novembre 2026.\n\n"
+        "#GTA6 #GTAVI #Shorts #RockstarGames #Gaming"
     )
-    paths["short_url"] = f"https://youtu.be/{short_video_id}"
-    log.info(f"  Short uploadé → {paths['short_url']}")
-except QuotaExceededError as e:
-    log.warning(f"  Quota YouTube dépassé — short non uploadé : {e}")
-except FileNotFoundError as e:
-    log.warning(f"  Token YouTube GTA 6 manquant — short non uploadé (configurer YOUTUBE_TOKEN_VALORANT) : {e}")
-except Exception as e:
-    log.warning(f"  Upload YouTube échoué — short non uploadé : {e}")
+    try:
+        short_video_id = upload_video(
+            video_path=paths["short"],
+            title=f"{scripts.get('thumbnail_title', '')} #Shorts"[:100],
+            description=short_description,
+            thumbnail_path=paths.get("thumbnail"),
+            tags=["gta6", "gtavi", "rockstargames", "shorts"],
+            privacy="public",
+            game_slug="gta",
+        )
+        paths["short_url"] = f"https://youtu.be/{short_video_id}"
+        log.info(f"  Short uploadé → {paths['short_url']}")
+    except QuotaExceededError as e:
+        log.warning(f"  Quota YouTube dépassé — short non uploadé : {e}")
+    except FileNotFoundError as e:
+        log.warning(f"  Token YouTube GTA 6 manquant — short non uploadé (configurer YOUTUBE_TOKEN_GTA) : {e}")
+    except Exception as e:
+        log.warning(f"  Upload YouTube échoué — short non uploadé : {e}")
 
 # ── 4ter. Upload TikTok vers R2 + caption prête à poster ───────────────────────
 from src.r2_manager import delete_prefix, upload_public_file
@@ -206,9 +205,10 @@ if "long" in paths:
     lines.append(f"📺  YouTube long  → {paths['long']}")
 if "short_url" in paths:
     lines.append(f"▶️   YouTube Short → {paths['short_url']}")
-else:
+elif "short" in paths:
     lines.append(f"▶️   YouTube Short → {paths['short']}  (upload échoué, fichier local)")
 lines.append(f"🎵  TikTok FR     → {paths['tiktok']}  (poster manuellement)")
-lines.append(f"🖼️   Miniature     → {paths['thumbnail']}")
+if "thumbnail" in paths:
+    lines.append(f"🖼️   Miniature     → {paths['thumbnail']}")
 lines.append("━" * 50)
 log.info("\n".join(lines))

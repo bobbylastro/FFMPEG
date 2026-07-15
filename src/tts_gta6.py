@@ -56,7 +56,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Bebas Neue,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,10,0,5,0,0,0,1
+Style: Default,Bebas Neue,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,8,0,5,{margin_l},{margin_r},{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -95,11 +95,13 @@ def _words_to_ass(sentences: list[dict], path: str,
     chunks = _split_into_word_groups(sentences, max_words)
 
     res_x, res_y = (1080, 1920) if vertical else (1920, 1080)
-    font_size     = 160 if vertical else 80
-    margin_v      = 220 if vertical else 80
+    font_size = 110 if vertical else 72
+    margin_l  = margin_r = 80 if vertical else 60
+    margin_v  = 220 if vertical else 80
 
     header = _ASS_HEADER.format(
-        res_x=res_x, res_y=res_y, font_size=font_size, margin_v=margin_v
+        res_x=res_x, res_y=res_y, font_size=font_size,
+        margin_l=margin_l, margin_r=margin_r, margin_v=margin_v,
     )
 
     lines = [header.rstrip()]

@@ -44,15 +44,18 @@ def load_topic_history() -> list[dict]:
         return json.load(f)
 
 
-def save_topic(scripts: dict, date_str: str) -> None:
+def save_topic(scripts: dict, date_str: str, posts: list[dict] | None = None) -> None:
     """Enregistre le sujet du jour dans l'historique."""
     os.makedirs(os.path.dirname(os.path.abspath(TOPICS_FILE)), exist_ok=True)
     history = load_topic_history()
+    # Titres des articles sources (pour bloquer les mêmes sources à l'avenir)
+    source_titles = [p["title"][:80] for p in (posts or [])[:8]]
     history.append({
-        "date": date_str,
-        "angle": scripts.get("thumbnail_title", ""),
-        "hook": scripts.get("tiktok_hook", ""),
-        "summary": scripts.get("short_en", "")[:120],
+        "date":          date_str,
+        "angle":         scripts.get("thumbnail_title", ""),
+        "hook":          scripts.get("tiktok_hook", ""),
+        "summary":       scripts.get("short_en", "")[:120],
+        "source_titles": source_titles,
     })
     with open(TOPICS_FILE, "w", encoding="utf-8") as f:
         json.dump(history, f, indent=2, ensure_ascii=False)
@@ -84,11 +87,13 @@ def generate_scripts(posts: list[dict], topic: str = "", history: list[dict] | N
 
     history_block = ""
     if history:
-        lines = "\n".join(
-            f"- {h['date']}: {h['angle']} — {h['summary'][:80]}"
-            for h in history[-20:]  # derniers 20 sujets
-        )
-        history_block = f"\nALREADY COVERED (do NOT repeat these angles):\n{lines}\n"
+        lines = []
+        for h in history[-20:]:
+            line = f"- {h['date']}: {h['angle']} — {h['summary'][:80]}"
+            if h.get("source_titles"):
+                line += f" [sources: {' | '.join(h['source_titles'][:3])}]"
+            lines.append(line)
+        history_block = f"\nALREADY COVERED (do NOT repeat these angles or reuse these sources):\n" + "\n".join(lines) + "\n"
 
     prompt = f"""You are a viral TikTok/Shorts content creator for GTA 6 hype content.
 GTA 6 launches November 19, 2026 — it is NOT yet released.
