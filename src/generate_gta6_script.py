@@ -232,18 +232,9 @@ Three GOOD angle categories — pick whichever the posts best support, don't def
 2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments.
 3. HYPE/COMPARISON: confirmed official features, scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games.
 
-IMPORTANT — prioritization rule:
-- STRONGLY PREFER angles about the actual game: features, gameplay, map, characters, mechanics, graphics, missions, Vice City, Lucia, Jason, fan theories about characters, hidden trailer details, confirmed/leaked content.
-- AVOID: government legislation mentioning GTA 6, platform business decisions (Sony killing discs, disc vs digital), corporate earnings, analyst hot takes, retailer pricing, industry policy. These use GTA 6 as an example but aren't ABOUT GTA 6.
-
-Concrete examples:
-  ✅ GOOD: "GTA 6 Cover Girl Theory Explained: Why Fans Suspect DJ Gabriela Chiqui" → fan theory about a game character, REVEAL angle
-  ✅ GOOD: "5 Confirmed GTA 6 Features That Will Change Everything" → actual game features
-  ❌ BAD: "Brazil Introduces Bill to Keep Games Like GTA 6 Playable After Support" → legislation, not a GTA 6 angle
-  ❌ BAD: "Why Sony Is Killing Discs Comes Down to GTA 6-Sized Margins" → Sony's business decision, not GTA 6
-  ❌ BAD: "Analyst Says GTA 6 Should Cost $200" → analyst hot take, industry discussion
-
-If you have a fan theory, character mystery, or confirmed feature article, pick THAT over any industry/policy/business article.
+AUDIENCE FILTER — before picking an angle, ask yourself: "Would someone who is hyped about playing GTA 6 care about this?"
+- YES → pick it. Map details, characters (Lucia, Jason, Gabriela), gameplay mechanics, features, fan theories, trailer discoveries, leaks, Vice City world, missions, graphics, multiplayer hints.
+- NO → skip it. Government legislation that happens to mention GTA 6, Sony's disc strategy, analyst pricing opinions, Take-Two earnings, retailer deals, industry policy. These are for industry journalists, not players.
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
