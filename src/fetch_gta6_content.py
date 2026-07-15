@@ -497,8 +497,21 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
     skipped = len(used_urls)
     log.info(f"  ({skipped} articles déjà utilisés ignorés, fenêtre {_MAX_ARTICLE_AGE_DAYS}j)")
 
-    # Trier avant enrichissement : articles avec image en premier
-    articles.sort(key=lambda x: (0 if x["image_url"] else 1))
+    # Trier : contenu jeu en premier, industrie/people en dernier
+    _INDUSTRY_KW = [
+        "houser", "layoff", "crunch", "overtime", "developer left", "fired", "quit",
+        "take-two", "take two", "ceo", "executive", "studio head", "job cut", "union",
+        "strike", "analyst", "investor", "stock", "earnings", "acquisition", "ipo",
+        "lawsuit", "settlement", "discrimination", "harassment",
+    ]
+    def _is_industry(art: dict) -> bool:
+        text = (art.get("title", "") + " " + art.get("body", "")[:300]).lower()
+        return any(kw in text for kw in _INDUSTRY_KW)
+
+    articles.sort(key=lambda x: (
+        1 if _is_industry(x) else 0,   # industrie/people → fin
+        0 if x["image_url"] else 1,    # avec image → avant sans image
+    ))
     # Limiter avant d'enrichir (évite de fetch 40 articles)
     articles = articles[:limit]
 

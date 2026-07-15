@@ -232,7 +232,10 @@ Three GOOD angle categories — pick whichever the posts best support, don't def
 2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments.
 3. HYPE/COMPARISON: confirmed official features, scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games.
 
-IMPORTANT — prioritization rule: if any post lists confirmed/official GTA 6 features or gameplay mechanics, PREFER that over a speculative "hidden mechanic" theory. Confirmed content is more credible and drives more saves/shares than speculation.
+IMPORTANT — prioritization rule:
+- STRONGLY PREFER angles about the actual game: features, gameplay, map, characters, mechanics, graphics, missions, Vice City, Lucia, Jason, trailers, confirmed content.
+- AVOID angles about the gaming industry or Rockstar as a company: developer departures, crunch, executives, Take-Two earnings, analyst opinions, price debates, layoffs. These are for industry observers, not gaming fans.
+- If any post lists confirmed/official GTA 6 features or gameplay mechanics, ALWAYS pick that over company drama or speculation.
 {topic_hint}{history_block}{catalog_block}
 Reddit content:
 {context}
