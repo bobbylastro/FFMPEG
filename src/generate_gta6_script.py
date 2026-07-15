@@ -67,19 +67,29 @@ def save_topic(scripts: dict, date_str: str, posts: list[dict] | None = None) ->
 
 
 def _category_constraint(history: list[dict]) -> str:
-    """Force la rotation REVEAL / DEBATE / HYPE si les derniers runs sont tous du même type."""
-    recent = [h.get("angle_category", "") for h in history[-3:] if h.get("angle_category")]
-    if len(recent) < 2:
+    """Force la rotation REVEAL / DEBATE / HYPE.
+    Règle simple : si le dernier run catégorisé était DEBATE → force REVEAL ou HYPE.
+    Si 2 des 3 derniers catégorisés sont identiques → force rotation.
+    """
+    recent = [h.get("angle_category", "") for h in history[-5:] if h.get("angle_category")]
+    if not recent:
         return ""
-    for cat, others in [
-        ("DEBATE", "REVEAL or HYPE"),
-        ("REVEAL", "HYPE or DEBATE"),
-        ("HYPE",   "REVEAL or DEBATE"),
-    ]:
-        if recent.count(cat) >= 2:
+    last = recent[-1]
+    OTHERS = {"DEBATE": "REVEAL or HYPE", "REVEAL": "HYPE or DEBATE", "HYPE": "REVEAL or DEBATE"}
+    # Règle 1 : le dernier run était DEBATE → immédiatement forcer un autre type
+    if last == "DEBATE":
+        return (
+            "\n⚠️ CATEGORY CONSTRAINT: The last run was a DEBATE/CONTROVERSY angle (price, analyst, crunch, backlash). "
+            "You MUST pick a REVEAL or HYPE angle this time — completely ignore price/cost/analyst/crunch articles, "
+            "find a different angle in the available posts.\n"
+        )
+    # Règle 2 : 2+ runs identiques parmi les 3 derniers catégorisés → forcer rotation
+    tail = recent[-3:]
+    for cat, others in OTHERS.items():
+        if tail.count(cat) >= 2:
             return (
-                f"\n⚠️ CATEGORY CONSTRAINT: The last runs were mostly {cat}. "
-                f"You MUST pick a {others} angle this time — do NOT pick another {cat}.\n"
+                f"\n⚠️ CATEGORY CONSTRAINT: Recent runs were mostly {cat}. "
+                f"You MUST pick a {others} angle this time.\n"
             )
     return ""
 
