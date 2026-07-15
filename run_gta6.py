@@ -167,7 +167,7 @@ try:
         thumbnail_path=paths["thumbnail"],
         tags=["gta6", "gtavi", "rockstargames", "shorts"],
         privacy="public",
-        game_slug="valorant",
+        game_slug="gta",
     )
     paths["short_url"] = f"https://youtu.be/{short_video_id}"
     log.info(f"  Short uploadé → {paths['short_url']}")
