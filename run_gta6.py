@@ -30,7 +30,8 @@ parser.add_argument("--reddit",      action="store_true", help="Forcer le scrapi
 args = parser.parse_args()
 args.no_long = not args.with_long
 
-date_str = datetime.now().strftime("%Y-%m-%d")
+date_str = datetime.now().strftime("%Y-%m-%d")        # pour l'historique JSON
+run_ts   = datetime.now().strftime("%Y-%m-%d_%H%M")   # pour les noms de fichiers (unique par run)
 os.makedirs("output/gta6", exist_ok=True)
 
 
@@ -151,7 +152,7 @@ with tempfile.TemporaryDirectory() as tmp:
         log.info("  TTS long EN...")
         synthesize_en(scripts["long_en"], audio_long, srt_long)
         log.info("  Montage long EN...")
-        paths["long"] = build_long_en(audio_long, srt_long, date_str)
+        paths["long"] = build_long_en(audio_long, srt_long, run_ts)
 
     shots = scripts.get("shots") or []
     if shots:
@@ -195,13 +196,13 @@ with tempfile.TemporaryDirectory() as tmp:
 
         if shots:
             log.info("  Montage short EN...")
-            paths["short"] = build_short_en(audio_short, ass_short, date_str,
+            paths["short"] = build_short_en(audio_short, ass_short, run_ts,
                                             image_path=image_short, shots=shots)
 
     log.info("  TTS TikTok FR...")
     synthesize_fr(scripts["tiktok_fr"], audio_tiktok)
     log.info("  Montage TikTok FR...")
-    paths["tiktok"] = build_tiktok_fr(audio_tiktok, date_str,
+    paths["tiktok"] = build_tiktok_fr(audio_tiktok, run_ts,
                                        hook_text=scripts.get("tiktok_hook", ""),
                                        shots=shots)
 
@@ -209,7 +210,7 @@ with tempfile.TemporaryDirectory() as tmp:
 if not args.tiktok_only:
     from src.generate_thumbnail_gta6 import generate_thumbnail_gta6
     log.info("\nGénération de la miniature...")
-    thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], date_str)
+    thumb_path = generate_thumbnail_gta6(scripts["thumbnail_title"], run_ts)
     paths["thumbnail"] = thumb_path
 
 # ── 4bis. Upload YouTube Short ──────────────────────────────────────────────
@@ -255,7 +256,6 @@ if tiktok_url:
 player_url = None
 if tiktok_url:
     html_content = _make_player_html(tiktok_url, scripts.get("thumbnail_title", "TikTok GTA 6"))
-    run_ts = datetime.now().strftime("%Y-%m-%d_%H%M")
     html_path = os.path.join("output/gta6", f"{run_ts}_player.html")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html_content)
