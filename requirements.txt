@@ -9,3 +9,4 @@ google-auth-oauthlib
 google-auth-httplib2
 edge-tts
 praw>=7.8.0
+trafilatura>=2.0

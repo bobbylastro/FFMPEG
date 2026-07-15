@@ -172,20 +172,25 @@ def fetch_reddit_posts(limit: int = 15, mock: bool = False) -> list[dict]:
 # ── News RSS ──────────────────────────────────────────────────────────────────
 
 _NEWS_SOURCES = [
-    # (nom, flux RSS)
-    ("GameSpot",    "https://www.gamespot.com/feeds/news/"),
-    ("IGN",         "https://feeds.ign.com/ign/all"),
-    ("GamesRadar",  "https://www.gamesradar.com/rss/"),
-    ("PCGamer",     "https://www.pcgamer.com/rss/"),
+    # Sources avec content:encoded complet dans le RSS (texte article complet, pas d'extra fetch nécessaire)
+    ("GameSpot",    "https://www.gamespot.com/feeds/news/"),        # desc=2836 chars
+    ("IGN",         "https://feeds.ign.com/ign/all"),               # content:encoded=6339
+    ("GamesRadar",  "https://www.gamesradar.com/rss/"),            # content:encoded=3444
+    ("PCGamer",     "https://www.pcgamer.com/rss/"),               # content:encoded=4176
+    ("Destructoid", "https://www.destructoid.com/feed/"),          # content:encoded=5546
+    # Sources sans content:encoded — trafilatura fetch l'article complet
     ("Eurogamer",   "https://www.eurogamer.net/feed"),
     ("RPS",         "https://www.rockpapershotgun.com/feed"),
     ("VG247",       "https://www.vg247.com/feed"),
     ("Push Square", "https://www.pushsquare.com/feeds/latest"),
     ("Kotaku",      "https://kotaku.com/rss"),
-    ("Destructoid", "https://www.destructoid.com/feed/"),
     ("VGC",         "https://www.videogameschronicle.com/feed/"),
-    # Google News pour le volume (titre + description, pas d'image directe)
-    ("Google News", "https://news.google.com/rss/search?q=GTA+6+grand+theft+auto&hl=en-US&gl=US&ceid=US:en"),
+    # Site spécialisé GTA6 — quasiment 100% d'articles pertinents
+    ("GTA BOOM",    "https://www.gtaboom.com/feed/"),
+    # Sources supplémentaires avec content:encoded complet
+    ("WhatIfGaming", "https://whatifgaming.com/feed/"),             # content:encoded=4648
+    ("TechRadar",    "https://www.techradar.com/rss"),              # content:encoded=6571
+    ("FandomWire",   "https://fandomwire.com/feed/"),               # content:encoded=7475
 ]
 
 _MEDIA_NS   = {"media":   "http://search.yahoo.com/mrss/"}
@@ -237,41 +242,34 @@ def _upgrade_image_url(url: str) -> str:
     return url
 
 
-def _fetch_article_data(url: str, timeout: int = 8) -> tuple[str, str]:
-    """Fetch l'URL une seule fois, retourne (og_image_url, article_body_text).
-    Extrait le corps complet de l'article (jusqu'à 2500 chars) pour donner à l'IA
-    le contenu réel plutôt que le court extrait RSS."""
+def _fetch_article_data(url: str) -> tuple[str, str]:
+    """Fetch l'URL et retourne (og_image_url, article_body_text) via trafilatura.
+    Trafilatura extrait le texte principal en ignorant nav/pubs/sidebar — bien plus fiable
+    qu'un parsing regex naïf."""
     try:
-        req = urllib.request.Request(url, headers={
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120",
-            "Accept": "text/html",
-        })
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            raw_html = resp.read(250000).decode("utf-8", errors="ignore")
+        import trafilatura
+        downloaded = trafilatura.fetch_url(url)
+        if not downloaded:
+            return "", ""
 
-        # og:image
+        # og:image depuis le HTML brut
         image_url = ""
         for pat in [
             r'property=["\']og:image["\']\s*content=["\']([^"\']+)',
             r'content=["\']([^"\']+)["\']\s*property=["\']og:image',
         ]:
-            m = re.search(pat, raw_html)
+            m = re.search(pat, downloaded)
             if m:
                 image_url = _upgrade_image_url(m.group(1).strip())
                 break
 
-        # Corps de l'article : cherche <article> d'abord, puis <main>, sinon tout le HTML
-        article_m = re.search(r'<article[^>]*>(.*?)</article>', raw_html, re.DOTALL | re.IGNORECASE)
-        if article_m:
-            content_html = article_m.group(1)
-        else:
-            main_m = re.search(r'<main[^>]*>(.*?)</main>', raw_html, re.DOTALL | re.IGNORECASE)
-            content_html = main_m.group(1) if main_m else raw_html
-
-        # Extrait les paragraphes <p>
-        paras = re.findall(r'<p[^>]*>(.*?)</p>', content_html, re.DOTALL | re.IGNORECASE)
-        cleaned_paras = [_clean_html(p) for p in paras]
-        body_text = " ".join(p for p in cleaned_paras if len(p) > 40)
+        # Corps de l'article via trafilatura
+        body_text = trafilatura.extract(
+            downloaded,
+            include_comments=False,
+            include_tables=False,
+            no_fallback=False,
+        ) or ""
         body_text = re.sub(r'\s+', ' ', body_text).strip()[:2500]
 
         return image_url, body_text
@@ -406,6 +404,8 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
                     "image_url": _feed_image(item),
                 })
                 gta6_count += 1
+                if gta6_count >= 5:  # max 5 articles par source pour garder la diversité
+                    break
 
             if gta6_count:
                 log.info(f"  {source_name}: {gta6_count} articles GTA 6")
@@ -416,8 +416,8 @@ def fetch_news_posts(limit: int = 15) -> list[dict]:
     skipped = len(used_urls)
     log.info(f"  ({skipped} articles déjà utilisés ignorés, fenêtre {_MAX_ARTICLE_AGE_DAYS}j)")
 
-    # Trier avant enrichissement (articles avec image RSS en premier, Google News en dernier)
-    articles.sort(key=lambda x: (0 if x["image_url"] else 1, x["flair"] == "Google News"))
+    # Trier avant enrichissement : articles avec image en premier
+    articles.sort(key=lambda x: (0 if x["image_url"] else 1))
     # Limiter avant d'enrichir (évite de fetch 40 articles)
     articles = articles[:limit]
 
