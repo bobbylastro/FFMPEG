@@ -1,66 +1,250 @@
 [
   {
-    "peak": 4200,
-    "start": 4193,
-    "end": 4203,
-    "db": -21.3,
-    "score": 6.3,
-    "reason": "Dongning attacked by white's bear, scores three points"
-  },
-  {
-    "peak": 4240,
-    "start": 4233,
-    "end": 4243,
-    "db": -20.4,
-    "score": 6.9,
-    "reason": "Left hand is broken - damage indication"
-  },
-  {
-    "peak": 4386,
-    "start": 4379,
-    "end": 4389,
-    "db": -21.0,
-    "score": 7.1,
-    "reason": "Hit the opponent's hand, directly hit by right hand, blister down"
-  },
-  {
-    "peak": 4389,
-    "start": 4382,
-    "end": 4392,
-    "db": -21.0,
-    "score": 7.1,
-    "reason": "Blister is down after being hit, didn't open at 4 degrees"
-  },
-  {
-    "peak": 5165,
-    "start": 5158,
-    "end": 5168,
-    "db": -21.5,
-    "score": 6.2,
-    "reason": "Casters identify 'This is a right-hand right-hand, this is fierce' - describes strong punch/strike"
-  },
-  {
-    "peak": 5251,
-    "start": 5244,
-    "end": 5254,
-    "db": -19.0,
+    "peak": 3001,
+    "start": 2994,
+    "end": 3004,
+    "db": -20.7,
     "score": 6.8,
-    "reason": "Casters state 'White Bear always did a super difficult move' followed by observation that 'Brother is a little bit shabby' - suggests impact from complex technique"
+    "reason": "Caster notes 'This left foot is hit very dangerously' followed by clarification that contact was made ('it hit the ball'), indicating a dangerous strike landed"
   },
   {
-    "peak": 5271,
-    "start": 5264,
-    "end": 5274,
-    "db": -19.8,
+    "peak": 3016,
+    "start": 3009,
+    "end": 3019,
+    "db": -21.1,
     "score": 7.1,
-    "reason": "Casters emphasize 'In this fight, the machine's rule, still successfully stood up' - recovery from knockdown/knockback"
+    "reason": "Caster exclaims 'Wow, this hit is big' in reaction to a significant strike; score changes to 11-11, indicating a scoring impact"
   },
   {
-    "peak": 5317,
-    "start": 5310,
-    "end": 5320,
+    "peak": 3069,
+    "start": 3062,
+    "end": 3072,
+    "db": -20.3,
+    "score": 6.9,
+    "reason": "Caster comments on Dounyoshi rising 'very fast' after being low/knocked down, praising the quick recovery speed, indicating a knockdown followed by rapid self-recovery"
+  },
+  {
+    "peak": 3074,
+    "start": 3067,
+    "end": 3077,
+    "db": -20.9,
+    "score": 6.7,
+    "reason": "Caster notes opponent 'complete the fall' awarding 3 points, indicating a takedown/knockdown occurred with scoring consequence"
+  },
+  {
+    "peak": 3151,
+    "start": 3144,
+    "end": 3154,
+    "db": -21.0,
+    "score": 6.0,
+    "reason": "Caster notes 'The left foot is heavy' with 'Add two points' and mentions 'almost five points' suggesting continuous effective strikes"
+  },
+  {
+    "peak": 4273,
+    "start": 4266,
+    "end": 4276,
+    "db": -20.2,
+    "score": 7.0,
+    "reason": "Caster exclamation 'Oh, beautiful' and 'Very beautiful' with score being added"
+  },
+  {
+    "peak": 4341,
+    "start": 4334,
+    "end": 4344,
+    "db": -21.5,
+    "score": 6.1,
+    "reason": "Caster reacts 'You feel like you have fallen off' describing a knockdown or loss of position"
+  },
+  {
+    "peak": 4362,
+    "start": 4355,
+    "end": 4365,
+    "db": -20.4,
+    "score": 6.3,
+    "reason": "Robot 'almost hit the wall' during attack exchange"
+  },
+  {
+    "peak": 4381,
+    "start": 4374,
+    "end": 4384,
+    "db": -21.3,
+    "score": 6.2,
+    "reason": "Caster notes opponent is 'so slippery' and describes being hit/knocked in the middle of exchange"
+  },
+  {
+    "peak": 4385,
+    "start": 4378,
+    "end": 4388,
+    "db": -21.0,
+    "score": 7.6,
+    "reason": "Robot hit opponent's hand, then directly hit by right hand and knocked down"
+  },
+  {
+    "peak": 4393,
+    "start": 4386,
+    "end": 4396,
+    "db": -21.6,
+    "score": 6.9,
+    "reason": "Caster exclamation 'My god' in reaction to knockdown, robot didn't get up on four-point"
+  },
+  {
+    "peak": 5064,
+    "start": 5057,
+    "end": 5067,
+    "db": -17.2,
+    "score": 6.3,
+    "reason": "Caster exclamation 'Wow, I'm done' - suggests a significant action or impact occurred"
+  },
+  {
+    "peak": 5114,
+    "start": 5107,
+    "end": 5117,
+    "db": -18.1,
+    "score": 6.9,
+    "reason": "Caster says 'I'm going to blow up' and 'Can't get up' - suggests robot took significant hit or knockdown"
+  },
+  {
+    "peak": 5252,
+    "start": 5245,
+    "end": 5255,
+    "db": -19.1,
+    "score": 6.7,
+    "reason": "Casters mention 'I did a super difficult move' and 'brother is a little bit shabby' and 'waist hurts' - suggests significant attack landed"
+  },
+  {
+    "peak": 5318,
+    "start": 5311,
+    "end": 5321,
     "db": -19.5,
+    "score": 6.0,
+    "reason": "Casters note 'The big leg is on the side and almost fell' - indicates near knockdown or stumble from attack"
+  },
+  {
+    "peak": 5931,
+    "start": 5924,
+    "end": 5934,
+    "db": -15.3,
+    "score": 8.1,
+    "reason": "Caster exclaims 'Wow' and immediately discusses Dong Lin potentially being eliminated by KO, indicating a significant hit or knockdown"
+  },
+  {
+    "peak": 5949,
+    "start": 5942,
+    "end": 5952,
+    "db": -21.9,
+    "score": 7.3,
+    "reason": "Casters mention Dong Lin losing 'four times' (knockdowns) and that they almost witnessed the first KO in the whole stadium, indicating repeated heavy impacts"
+  },
+  {
+    "peak": 6230,
+    "start": 6223,
+    "end": 6233,
+    "db": -17.4,
+    "score": 7.3,
+    "reason": "Caster describes 'another high-speed sweep kicked the other's head' - direct hit with a kick attack"
+  },
+  {
+    "peak": 6241,
+    "start": 6234,
+    "end": 6244,
+    "db": -14.6,
+    "score": 7.6,
+    "reason": "Caster exclaims 'I'm angry' (intense reaction) and immediately discusses Dong Niu being hit by mid-tank and shaking his head, indicating a solid impact"
+  },
+  {
+    "peak": 6251,
+    "start": 6244,
+    "end": 6254,
+    "db": -15.9,
+    "score": 7.5,
+    "reason": "Casters state 'Dong Niu is hit by the mid-tank' and 'He's shaking his head' and 'He's clouded' - clear hit causing visible effects"
+  },
+  {
+    "peak": 6656,
+    "start": 6649,
+    "end": 6659,
+    "db": -23.8,
     "score": 6.6,
-    "reason": "Casters note 'the big leg is on the side, and then it almost fell again' - describes strike with near-knockdown result"
+    "reason": "Caster says 'I feel like the white bean curd is going to the KO now' - indicates serious damage/knockdown scenario"
+  },
+  {
+    "peak": 6668,
+    "start": 6661,
+    "end": 6671,
+    "db": -16.2,
+    "score": 6.9,
+    "reason": "Wind cuts legs; control and attacking exchange described"
+  },
+  {
+    "peak": 6680,
+    "start": 6673,
+    "end": 6683,
+    "db": -11.8,
+    "score": 7.0,
+    "reason": "Wind and wind described as heavy - indicating heavy impacts in final 40 seconds"
+  },
+  {
+    "peak": 6694,
+    "start": 6687,
+    "end": 6697,
+    "db": -18.3,
+    "score": 7.4,
+    "reason": "Caster exclaims about heavy life/impact; bean curd described as scary"
+  },
+  {
+    "peak": 6698,
+    "start": 6691,
+    "end": 6701,
+    "db": -16.6,
+    "score": 7.5,
+    "reason": "Two robots in the air with powerful exchange; caster says 'so powerful'"
+  },
+  {
+    "peak": 6730,
+    "start": 6723,
+    "end": 6733,
+    "db": -19.3,
+    "score": 7.9,
+    "reason": "Caster exclaims 'Wow, there is a chance to KO' - indicates a significant dangerous moment just occurred"
+  },
+  {
+    "peak": 6732,
+    "start": 6725,
+    "end": 6735,
+    "db": -21.2,
+    "score": 7.1,
+    "reason": "Follow-up to KO chance moment - caster says 'The one just now, It's really from the front'"
+  },
+  {
+    "peak": 6740,
+    "start": 6733,
+    "end": 6743,
+    "db": -23.8,
+    "score": 6.6,
+    "reason": "Caster notes after white bean curd was taken down, damage appears serious to the head"
+  },
+  {
+    "peak": 7146,
+    "start": 7139,
+    "end": 7149,
+    "db": -28.5,
+    "score": 6.7,
+    "reason": "Casters describe a front-door hit that directly completed a K.O. — explicit knockout moment with caster excitement about the finishing move"
+  },
+  {
+    "peak": 7288,
+    "start": 7281,
+    "end": 7291,
+    "db": -27.5,
+    "score": 6.6,
+    "reason": "Casters discuss the final judge K.O's move — explicit reference to a knockout moment that ended the match"
+  },
+  {
+    "peak": 7622,
+    "start": 7615,
+    "end": 7625,
+    "db": -25.8,
+    "score": 6.8,
+    "reason": "Casters mention 'the wall is broken' at the end of the last fight — indicates structural damage from a powerful final exchange"
   }
 ]
