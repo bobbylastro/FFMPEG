@@ -1,0 +1,36 @@
+name: URKL TikTok Email Notification
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: "R2 public URL of the compiled video"
+        required: true
+      caption:
+        description: "TikTok caption (pre-generated)"
+        required: true
+      clip_count:
+        description: "Number of clips in the compilation"
+        required: false
+        default: "?"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "🤖 URKL Compilation prête — ${{ github.event.inputs.clip_count }} clips"
+          to: bobbylastronaute@gmail.com
+          from: URKL Pipeline
+          body: |
+            Ta compilation URKL est prête — ouvre le lien sur ton iPhone et clique "Enregistrer dans Photos" :
+            ${{ github.event.inputs.video_url }}
+
+            Caption TikTok à copier-coller :
+            ${{ github.event.inputs.caption }}
