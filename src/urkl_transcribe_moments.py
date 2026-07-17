@@ -84,24 +84,41 @@ def slice_round_audio(full_audio: str, start: int, end: int, tmp_dir: str, idx: 
 
 def build_prompt(transcript: str) -> str:
     return f"""You are analyzing a caster transcript (translated from Chinese) of URKL, a robot combat show.
+
+IMPORTANT — what URKL actually is: this is NOT a BattleBots-style show with wheeled robots,
+saws, hammers, or flamethrowers. URKL features two HUMANOID robots striking each other —
+mostly punches, and jumping or standing kicks, with occasional acrobatic strikes — scored like
+a point-fighting combat sport (points for landed strikes and knockdowns). There are no onboard
+weapons. These are robots, not trained human fighters: don't expect or look for grappling,
+clinches, throws, or submission-style moves — the technique level is limited to striking.
+Do not expect or look for sparks, fire, blades, or mechanical weapon damage either — the
+"damage" here is a robot getting staggered, knocked down, or a limb/hand no longer functioning
+correctly after taking strikes.
+
 Below is a timestamped transcript of the casters' commentary during one combat round.
 
 Your job: identify moments of ACTUAL COMBAT ACTION — direct fighting between the two robots.
 
 TARGET (pick these):
-- A robot landing a hit, ram, or weapon strike on the opponent
-- A robot getting flipped, knocked back, or damaged BY THE OPPONENT'S ATTACK
-- Sparks, fire, a part breaking off, a weapon getting stuck — as a result of an exchange
-- A KO, a robot immobilized, or a dominant/one-sided exchange
-- A dramatic turnaround DURING an active exchange (e.g. reversing a pin, escaping an attack)
+- A robot landing a punch, a jumping or standing kick, or an acrobatic strike on the opponent
+- A robot getting staggered, knocked off balance, or sent to the ground purely from the power
+  of the opponent's punch or kick (this is common and important — a strike hard enough to fell
+  the robot is a top-tier moment, not a self-righting issue)
+- Visible damage or malfunction resulting from a strike (e.g. a hand/arm stops working
+  correctly after being hit) — as a direct consequence of an exchange, not a weapon malfunction
+- A KO, a robot unable to continue, or a dominant/one-sided exchange
+- A dramatic turnaround DURING an active exchange (e.g. countering into offense right after
+  taking damage, landing a comeback strike)
 - A robot recovering from a knockdown CAUSED BY THE OPPONENT, especially if casters react with
   surprise at how fast/slow/dramatic the recovery is (e.g. beating a count) — this is a direct
   consequence of combat, unlike unprompted self-righting
 - A sudden, isolated caster exclamation ("Wow!", "Oh!", short shout) even WITHOUT a fully
   described action — casters often react half a second before or instead of narrating what
-  happened. If nearby lines hint at impact (a word like "heavy", "dangerous", a score/number
-  changing, a name followed by a reaction), include it — don't require a full sentence
-  describing the hit. Give it a lower intensity if the context is thin.
+  happened, and the loudest, most genuine reactions are often the SHORTEST. Don't require a
+  full sentence describing the hit — the exclamation itself is the evidence something big just
+  happened. Rate its intensity on how strong/urgent the reaction itself sounds (tone, emphasis,
+  repetition, exclamation marks) — NOT on how much surrounding text describes the action. A
+  short, sharp "WOW!" can be a 9, even with zero context around it.
 
 NOT interesting enough — DO NOT include:
 - A robot self-righting/getting up with NO preceding hit or knockdown from the opponent
@@ -116,17 +133,19 @@ qualifies, INCLUDE it with a lower intensity (2-3) rather than silently dropping
 downstream scoring will filter out the weak ones. Do not return an empty list just because the
 transcript is hard to parse — if casters are reacting to the fight, something is worth flagging.
 
-For each moment, also rate its INTENSITY from 1 to 10 based on how the casters react and what
-happened: 1-3 = routine scoring hit or unclear/thin context, casual tone; 4-6 = solid hit,
-casters mildly excited; 7-8 = big hit/knockdown, casters clearly excited or alarmed; 9-10 = KO,
-major damage, or casters extremely hyped/shouting. Be honest and use the full range — most
-moments should NOT be 9-10.
+For each moment, also rate its INTENSITY from 1 to 10 based on how the casters react — NOT on
+how much text surrounds it: 1-3 = routine scoring hit, casual tone, or genuinely unclear
+whether a real action even happened; 4-6 = solid hit, casters mildly excited; 7-8 = big
+hit/knockdown, casters clearly excited or alarmed; 9-10 = KO, major damage, or casters
+extremely hyped/shouting — a sharp, loud, short exclamation belongs here just as much as a
+long descriptive sentence would. Be honest and use the full range — most moments should NOT be
+9-10.
 
 Transcript:
 {transcript}
 
 Respond with ONLY a JSON array of objects, most exciting first, e.g.:
-[{{"timecode": "01:23:45", "reason": "robot A rams robot B into the wall, sparks fly", "intensity": 8}}]
+[{{"timecode": "01:23:45", "reason": "robot A lands a heavy right hook, robot B staggers back", "intensity": 8}}]
 
 Return at most 20 moments for this round. Return [] if nothing qualifies. No explanation outside the JSON."""
 
