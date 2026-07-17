@@ -176,21 +176,23 @@ def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
     _delete_previous_r2(client)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    r2_key      = f"urkl/compilation_{ts}.mp4"
-    player_key  = f"urkl/player_{ts}.html"
+    r2_key     = f"urkl/compilation_{ts}.mp4"
+    player_key = "urkl/player_latest.html"  # URL fixe — cache-busting via headers
 
     client.upload_file(
         video_path, R2_BUCKET, r2_key,
         ExtraArgs={"ContentType": "video/mp4"},
     )
 
-    video_url  = f"{R2_PUBLIC_BASE}/{r2_key}"
+    video_url   = f"{R2_PUBLIC_BASE}/{r2_key}"
     player_html = _make_player_html(video_url, clip_count)
     client.put_object(
         Bucket=R2_BUCKET, Key=player_key,
-        Body=player_html.encode(), ContentType="text/html; charset=utf-8",
+        Body=player_html.encode(),
+        ContentType="text/html; charset=utf-8",
+        CacheControl="no-cache, no-store, must-revalidate",
     )
-    player_url = f"{R2_PUBLIC_BASE}/{player_key}"
+    player_url = f"{R2_PUBLIC_BASE}/{player_key}?v={ts}"  # query string force-busts browser cache
 
     os.makedirs(os.path.dirname(LAST_R2_STATE), exist_ok=True)
     with open(LAST_R2_STATE, "w") as f:
