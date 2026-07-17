@@ -1,188 +1,154 @@
 [
   {
-    "peak": 2934,
-    "start": 2924.0,
-    "end": 2939.0,
-    "db": -20.0
+    "peak": 2999,
+    "start": 2992,
+    "end": 3002,
+    "db": -20.7,
+    "score": 7.4,
+    "reason": "Left foot kick lands dangerously on opponent, casters react with alarm ('This left foot is hit very dangerously')"
   },
   {
-    "peak": 3165,
-    "start": 3155.0,
-    "end": 3170.0,
-    "db": -19.7
+    "peak": 3016,
+    "start": 3009,
+    "end": 3019,
+    "db": -21.1,
+    "score": 7.7,
+    "reason": "Significant hit lands, casters exclaim 'Wow, this hit is big', opponent remains stable without falling"
   },
   {
-    "peak": 4245,
-    "start": 4235.0,
-    "end": 4250.0,
-    "db": -19.8
+    "peak": 3046,
+    "start": 3039,
+    "end": 3049,
+    "db": -22.3,
+    "score": 6.2,
+    "reason": "Robot knocked down and falls back, opponent gains clear scoring advantage (14-11)"
   },
   {
-    "peak": 4373,
-    "start": 4363.0,
-    "end": 4378.0,
-    "db": -20.0
+    "peak": 3069,
+    "start": 3062,
+    "end": 3072,
+    "db": -20.3,
+    "score": 7.5,
+    "reason": "Robot knocked down but recovers very quickly, casters praise the fast recovery speed despite being knocked low"
   },
   {
-    "peak": 4987,
-    "start": 4977.0,
-    "end": 4992.0,
-    "db": -19.4
+    "peak": 3075,
+    "start": 3068,
+    "end": 3078,
+    "db": -20.9,
+    "score": 7.9,
+    "reason": "Opponent thrown/knocked down completely, casters confirm 3-point scoring action for forcing opponent to fall"
   },
   {
-    "peak": 5055,
-    "start": 5045.0,
-    "end": 5060.0,
-    "db": -19.0
+    "peak": 3128,
+    "start": 3121,
+    "end": 3131,
+    "db": -21.1,
+    "score": 6.6,
+    "reason": "White ball connects two consecutive scoring kicks with strong attacks"
   },
   {
-    "peak": 5077,
-    "start": 5067.0,
-    "end": 5082.0,
-    "db": -19.2
+    "peak": 3151,
+    "start": 3144,
+    "end": 3154,
+    "db": -21.0,
+    "score": 6.6,
+    "reason": "Continuous left foot double kick combo lands, scoring two more points"
   },
   {
-    "peak": 5104,
-    "start": 5094.0,
-    "end": 5109.0,
-    "db": -19.2
+    "peak": 3157,
+    "start": 3150,
+    "end": 3160,
+    "db": -20.8,
+    "score": 6.7,
+    "reason": "Heavy kick lands again on opponent, casters describe as 'a bit heavy'"
   },
   {
-    "peak": 5124,
-    "start": 5114.0,
-    "end": 5129.0,
-    "db": -20.0
+    "peak": 3163,
+    "start": 3156,
+    "end": 3166,
+    "db": -19.7,
+    "score": 7.6,
+    "reason": "Right foot kick with heavy impact, followed by left foot double kick adding two more points in succession"
   },
   {
-    "peak": 5189,
-    "start": 5179.0,
-    "end": 5194.0,
-    "db": -19.2
-  },
-  {
-    "peak": 5223,
-    "start": 5213.0,
-    "end": 5228.0,
-    "db": -19.1
-  },
-  {
-    "peak": 5246,
-    "start": 5236.0,
-    "end": 5251.0,
-    "db": -19.9
-  },
-  {
-    "peak": 5265,
-    "start": 5255.0,
-    "end": 5270.0,
-    "db": -19.6
-  },
-  {
-    "peak": 5316,
-    "start": 5306.0,
-    "end": 5321.0,
-    "db": -19.5
-  },
-  {
-    "peak": 5903,
-    "start": 5893.0,
-    "end": 5908.0,
-    "db": -19.5
-  },
-  {
-    "peak": 5918,
-    "start": 5908.0,
-    "end": 5923.0,
-    "db": -17.5
+    "peak": 5936,
+    "start": 5929,
+    "end": 5939,
+    "db": -15.2,
+    "score": 8.1,
+    "reason": "Bulldog appears to be on the verge of KO, nearly knocked out of the arena, casters react with alarm asking 'Is the bulldog going to be KOed?'"
   },
   {
     "peak": 5938,
-    "start": 5928.0,
-    "end": 5943.0,
-    "db": -18.0
+    "start": 5931,
+    "end": 5941,
+    "db": -15.2,
+    "score": 8.1,
+    "reason": "Bulldog knocked onto the roof/edge of arena, casters note it 'keeps dancing' and falling multiple times from opponent's attacks"
   },
   {
-    "peak": 6022,
-    "start": 6012.0,
-    "end": 6027.0,
-    "db": -19.3
+    "peak": 6251,
+    "start": 6244,
+    "end": 6254,
+    "db": -15.9,
+    "score": 7.5,
+    "reason": "Dong Niu hit by mid-tank strike, head shaking from impact, casters question 'Won't it explode?' expressing concern about damage"
   },
   {
-    "peak": 6047,
-    "start": 6037.0,
-    "end": 6052.0,
-    "db": -19.4
+    "peak": 6253,
+    "start": 6246,
+    "end": 6256,
+    "db": -16.2,
+    "score": 7.4,
+    "reason": "Dong Niu continues to be hit and shaken from strikes, appearing dazed, casters express alarm about the robot's condition"
   },
   {
-    "peak": 6160,
-    "start": 6150.0,
-    "end": 6165.0,
-    "db": -18.5
+    "peak": 6628,
+    "start": 6621,
+    "end": 6631,
+    "db": -22.0,
+    "score": 7.0,
+    "reason": "Opponent finds opportunity and lands continuous top-level attacks; casters note white bean curd has no reaction"
   },
   {
-    "peak": 6229,
-    "start": 6219.0,
-    "end": 6234.0,
-    "db": -18.6
+    "peak": 6668,
+    "start": 6661,
+    "end": 6671,
+    "db": -16.2,
+    "score": 6.9,
+    "reason": "Wind and wind cuts legs of opponent during grapple exchange; casters note it looks like an attack to the head"
   },
   {
-    "peak": 6249,
-    "start": 6239.0,
-    "end": 6254.0,
-    "db": -15.9
+    "peak": 6688,
+    "start": 6681,
+    "end": 6691,
+    "db": -13.7,
+    "score": 7.6,
+    "reason": "White bean curd is rising; casters exclaim 'so cool' and call wind and wind scary, describing powerful moves"
   },
   {
-    "peak": 6296,
-    "start": 6286.0,
-    "end": 6301.0,
-    "db": -19.7
+    "peak": 6698,
+    "start": 6691,
+    "end": 6701,
+    "db": -16.6,
+    "score": 8.1,
+    "reason": "Both robots are in the air in a dramatic exchange; casters emphasize it's too powerful"
   },
   {
-    "peak": 6648,
-    "start": 6638.0,
-    "end": 6653.0,
-    "db": -19.1
+    "peak": 6732,
+    "start": 6725,
+    "end": 6735,
+    "db": -21.2,
+    "score": 7.1,
+    "reason": "Casters note there was a chance to KO in the moment just prior, describing it as very accurate"
   },
   {
-    "peak": 6666,
-    "start": 6656.0,
-    "end": 6671.0,
-    "db": -18.0
-  },
-  {
-    "peak": 6690,
-    "start": 6680.0,
-    "end": 6695.0,
-    "db": -18.8
-  },
-  {
-    "peak": 6714,
-    "start": 6704.0,
-    "end": 6719.0,
-    "db": -19.1
-  },
-  {
-    "peak": 6963,
-    "start": 6953.0,
-    "end": 6968.0,
-    "db": -17.4
-  },
-  {
-    "peak": 7029,
-    "start": 7019.0,
-    "end": 7034.0,
-    "db": -19.8
-  },
-  {
-    "peak": 7097,
-    "start": 7087.0,
-    "end": 7102.0,
-    "db": -17.0
-  },
-  {
-    "peak": 7474,
-    "start": 7464.0,
-    "end": 7479.0,
-    "db": -19.7
+    "peak": 7154,
+    "start": 7147,
+    "end": 7157,
+    "db": -27.2,
+    "score": 6.1,
+    "reason": "Casters mention a whirlwind stick move that was a significant offensive action"
   }
 ]

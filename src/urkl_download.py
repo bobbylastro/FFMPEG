@@ -6,11 +6,12 @@ Usage: python3 src/urkl_download.py [max_clips]
 """
 import json, subprocess, os, sys, time, random, tempfile
 
-sys.path.insert(0, "/workspaces/FFMPEG/src")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
 
-MOMENTS_JSON = "/workspaces/FFMPEG/data/urkl_moments.json"
-COOKIES      = "/workspaces/FFMPEG/data/yt_cookies.txt"
+MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
+COOKIES      = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 URL          = "https://www.youtube.com/watch?v=vpyO73jyx1g"
 
 MAX_CLIPS = int(sys.argv[1]) if len(sys.argv) > 1 else 5
@@ -19,7 +20,7 @@ with open(MOMENTS_JSON) as f:
     all_moments = json.load(f)
 
 if MAX_CLIPS and MAX_CLIPS < len(all_moments):
-    moments_selected = sorted(all_moments, key=lambda x: x["db"], reverse=True)[:MAX_CLIPS]
+    moments_selected = sorted(all_moments, key=lambda x: x.get("db", 0), reverse=True)[:MAX_CLIPS]
     moments_selected.sort(key=lambda x: x["start"])
     print(f"=== Mode test : {MAX_CLIPS} meilleurs clips sur {len(all_moments)} ===\n")
 else:
@@ -48,7 +49,8 @@ for i, m in enumerate(moments_selected):
         print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  déjà dans R2 ✓")
         continue
 
-    print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  ({m['db']:+.0f} dB) ...", flush=True)
+    label = f"{m['db']:+.0f} dB" if "db" in m else m.get("reason", "")[:60]
+    print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  ({label}) ...", flush=True)
 
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
         tmp_path = tmp.name
@@ -98,4 +100,4 @@ print(f"Clips dans R2 : {len(clips_in_r2)}")
 if failed:
     print(f"Clips échoués : {failed}")
 print(f"\nTéléchargement terminé. Lance le serveur :")
-print(f"  python3 /workspaces/FFMPEG/src/urkl_validate.py 8888")
+print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_validate.py')} 8888")

@@ -19,14 +19,15 @@ from botocore.config import Config
 from dotenv import load_dotenv
 import anthropic
 
-load_dotenv("/workspaces/FFMPEG/.env")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 R2_ENDPOINT   = os.getenv("R2_ENDPOINT", "https://04b6deea0b051f8adfb8273b37d9861f.r2.cloudflarestorage.com")
 R2_BUCKET     = os.getenv("R2_BUCKET", "clips")
 R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
 R2_SECRET_KEY = os.getenv("R2_SECRET_KEY")
 R2_PUBLIC_BASE = "https://clips.ultimate-playground.com"
-LAST_R2_STATE  = "/workspaces/FFMPEG/data/urkl_last_r2.json"
+LAST_R2_STATE  = os.path.join(BASE_DIR, "data/urkl_last_r2.json")
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
@@ -219,7 +220,7 @@ def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> boo
         ],
         capture_output=True,
         text=True,
-        cwd="/workspaces/FFMPEG",
+        cwd=BASE_DIR,
         env=env,
     )
     if result.returncode != 0:

@@ -7,14 +7,15 @@ Après détection, filtrer sur les rounds avec urkl_filter_rounds.py
 """
 import sys, json, subprocess, struct, math, os
 
-COOKIES      = "/workspaces/FFMPEG/data/yt_cookies.txt"
-MOMENTS_JSON = "/workspaces/FFMPEG/data/urkl_moments.json"
+BASE_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+COOKIES      = os.path.join(BASE_DIR, "data/yt_cookies.txt")
+MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
 URL          = "https://www.youtube.com/watch?v=vpyO73jyx1g"
 
 MIN_DB     = float(sys.argv[1]) if len(sys.argv) > 1 else -20.0
-MIN_GAP    = float(sys.argv[2]) if len(sys.argv) > 2 else 15.0
-PRE        = int(sys.argv[3])   if len(sys.argv) > 3 else 10
-POST       = int(sys.argv[4])   if len(sys.argv) > 4 else 5
+MIN_GAP    = float(sys.argv[2]) if len(sys.argv) > 2 else 10.0
+PRE        = int(sys.argv[3])   if len(sys.argv) > 3 else 7
+POST       = int(sys.argv[4])   if len(sys.argv) > 4 else 3
 START_FRAC = float(sys.argv[5]) if len(sys.argv) > 5 else 0.125
 
 print(f"Paramètres : MIN_DB={MIN_DB} dB, MIN_GAP={MIN_GAP}s, PRE={PRE}s, POST={POST}s, START_FRAC={START_FRAC}")
@@ -72,4 +73,4 @@ os.makedirs(os.path.dirname(MOMENTS_JSON), exist_ok=True)
 with open(MOMENTS_JSON, "w") as f:
     json.dump(moments, f, indent=2)
 print(f"\nSauvegardé : {MOMENTS_JSON}")
-print(f"Lance le download : python3 /workspaces/FFMPEG/src/urkl_download.py 5")
+print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 5")

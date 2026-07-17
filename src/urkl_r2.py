@@ -9,7 +9,7 @@ import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
 
-load_dotenv("/workspaces/FFMPEG/.env")
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 R2_ENDPOINT    = os.getenv("R2_ENDPOINT", "https://04b6deea0b051f8adfb8273b37d9861f.r2.cloudflarestorage.com")
 R2_BUCKET      = os.getenv("R2_BUCKET", "clips")

@@ -5,15 +5,16 @@ Usage: python3 src/urkl_validate.py [port]
 """
 import os, sys, json, threading, subprocess, urllib.parse, tempfile
 
-sys.path.insert(0, "/workspaces/FFMPEG/src")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
 
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 PORT          = int(sys.argv[1]) if len(sys.argv) > 1 else 8888
-MOMENTS_JSON  = "/workspaces/FFMPEG/data/urkl_moments.json"
-URKL_NOTIFIER = "/workspaces/FFMPEG/src/urkl_notifier.py"
-COOKIES       = "/workspaces/FFMPEG/data/yt_cookies.txt"
+MOMENTS_JSON  = os.path.join(BASE_DIR, "data/urkl_moments.json")
+URKL_NOTIFIER = os.path.join(BASE_DIR, "src/urkl_notifier.py")
+COOKIES       = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 
 compile_log    = []
 compile_result = {}
@@ -105,7 +106,7 @@ def do_compile(validated_files: list):
         compile_log.append("Envoi notification (R2 + email)...")
         nr = subprocess.run(
             ["python3", URKL_NOTIFIER, out_path, str(len(validated_files))],
-            capture_output=True, text=True, cwd="/workspaces/FFMPEG"
+            capture_output=True, text=True, cwd=BASE_DIR
         )
         for line in (nr.stdout or "").strip().split("\n"):
             if line: compile_log.append(line)
@@ -256,6 +257,7 @@ async function batchRefuse() {
 }
 async function loadClips() {
   const clips = await (await fetch('/api/clips')).json();
+  const cacheBust = Date.now();
   const v = clips.filter(c=>c.status==='validated').length;
   const r = clips.filter(c=>c.status==='refused').length;
   const p = clips.filter(c=>c.status==='pending').length;
@@ -273,14 +275,14 @@ async function loadClips() {
     div.className = cls; div.dataset.file = c.file;
     div.innerHTML = `
       <div class="card-top">
-        <video src="${c.url}" poster="/thumbs/${c.file}" preload="none" controls></video>
+        <video src="${c.url}?v=${cacheBust}" poster="/thumbs/${c.file}?v=${cacheBust}" preload="none" controls></video>
         <label><input type="checkbox" data-file="${c.file}" ${isSel?'checked':''}
                onchange="toggleSelect('${c.file}',this)"></label>
         ${badge}
       </div>
       <div class="card-body">
         <div class="name">${c.file}</div>
-        <div class="meta">${c.db ? c.db + ' dB' : ''}</div>
+        <div class="meta">${c.score != null ? 'score ' + c.score : (c.db ? c.db + ' dB' : (c.reason || ''))}</div>
       </div>
       <div class="card-actions">
         <button class="btn-v" onclick="setStatus('${c.file}','validate')">✅ Valider</button>
@@ -358,14 +360,18 @@ class Handler(BaseHTTPRequestHandler):
             clips_in_r2 = r2lib.list_clips(r2)
             state = r2lib.load_state(r2)
 
-            # Load dB info from moments if available
+            # Load dB / score / reason info from moments if available
             db_map = {}
+            score_map = {}
+            reason_map = {}
             if os.path.exists(MOMENTS_JSON):
                 with open(MOMENTS_JSON) as f:
                     moments = json.load(f)
-                all_starts = [m["start"] for m in moments]
                 for idx, m in enumerate(moments):
-                    db_map[f"clip_{idx+1:02d}.mp4"] = m["db"]
+                    fname = f"clip_{idx+1:02d}.mp4"
+                    db_map[fname] = m.get("db")
+                    score_map[fname] = m.get("score")
+                    reason_map[fname] = m.get("reason")
 
             clips = []
             for fname in clips_in_r2:
@@ -374,7 +380,10 @@ class Handler(BaseHTTPRequestHandler):
                     "url":  r2lib.clip_url(fname),
                     "status": state.get(fname, "pending"),
                     "db": db_map.get(fname),
+                    "score": score_map.get(fname),
+                    "reason": reason_map.get(fname),
                 })
+            clips.sort(key=lambda c: (c["score"] is None, -(c["score"] or c["db"] or 0)))
             self.send_json(clips)
 
         elif path == "/api/log":

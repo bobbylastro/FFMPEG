@@ -10,12 +10,13 @@ Usage: python3 src/urkl_filter_rounds.py <rounds_spec>
 Exemple (URKL 2026-07-17):
   python3 src/urkl_filter_rounds.py "48:00-56:00,1:08:00-1:16:00,1:22:00-1:30:00,1:37:00-1:45:00,1:49:00-1:57:00,1:58:00-2:08:00"
 """
-import json, sys
+import json, sys, os
 
-sys.path.insert(0, "/workspaces/FFMPEG/src")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
 
-MOMENTS_JSON = "/workspaces/FFMPEG/data/urkl_moments.json"
+MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
 
 
 def parse_ts(s: str) -> int:
@@ -68,4 +69,4 @@ if clips_in_r2:
     print("R2 nettoyé.")
 
 print(f"\nRelance le download :")
-print(f"  python3 /workspaces/FFMPEG/src/urkl_download.py 0")
+print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0")
