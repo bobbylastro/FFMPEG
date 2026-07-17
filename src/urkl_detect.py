@@ -2,6 +2,8 @@
 """
 Détecte les moments forts URKL par analyse audio RMS et sauvegarde dans R2 + local.
 Usage: python3 src/urkl_detect.py [min_db] [min_gap] [pre] [post] [start_frac]
+
+Après détection, filtrer sur les rounds avec urkl_filter_rounds.py
 """
 import sys, json, subprocess, struct, math, os
 
