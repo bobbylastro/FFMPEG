@@ -229,7 +229,7 @@ IMPORTANT — Choose an angle that is TIKTOK-NATIVE, not a generic news recap:
 
 Three GOOD angle categories — pick whichever the posts best support, don't default to one:
 1. REVEAL/THEORY: a hidden trailer detail, leak, or fan theory presented as an exclusive discovery. Only pick this if the post actually contains a specific surprising detail — do NOT invent mechanics that aren't mentioned in the posts.
-2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments.
+2. DEBATE/CONTROVERSY: a real news item people are already arguing about (price, a Rockstar decision, a comparison to another game, fan backlash) — take a clear side or pose it as a question to bait comments. Must be genuinely debatable, not a foregone conclusion. Skip anything that's common knowledge or entirely predictable to anyone who's followed a prior GTA launch (e.g. "GTA Online won't be available at GTA 6's launch" — this happened with GTA 5 too, everyone already expects it, there's no debate). If most fans would just shrug and say "yeah, obviously," it's not a DEBATE angle.
 3. HYPE/COMPARISON: confirmed official features, scale, visual fidelity, or world detail that makes the game look insane compared to GTA 5 or other games.
 
 AUDIENCE FILTER — before picking an angle, ask yourself: "Would someone who is hyped about playing GTA 6 care about this?"
@@ -239,7 +239,9 @@ AUDIENCE FILTER — before picking an angle, ask yourself: "Would someone who is
 PRIORITY ORDER — when multiple posts pass the audience filter:
 1. REVEAL first: confirmed features, leaked mechanics, "X details from info dump", Easter eggs, character reveals, new gameplay info → these always win
 2. HYPE second: official confirmed content, scale comparisons, graphical impressions
-3. DEBATE last: pricing drama, fan backlash, controversy — only if no REVEAL or HYPE angle is available with real content
+3. DEBATE last: pricing drama, fan backlash, controversy — only if no REVEAL or HYPE angle is available with real content, AND only if it's a genuinely contested topic (not an obvious, widely-expected fact — see NOVELTY CHECK below)
+
+NOVELTY CHECK — before finalizing any angle, ask: "Would a GTA fan who's been following the news already know this and consider it unsurprising?" If yes, don't use it, even as DEBATE. Predictable/expected facts (e.g. no online mode at launch, standard pre-order bonuses, expected release-week server issues) make for weak, generic content — skip them in favor of something more specific or surprising, or skip the run's post entirely if nothing qualifies.
 
 If an article says "10 new details", "X features confirmed", "leaked mechanic", "info dump", "things we learned" — that is your article. Don't pick a pricing debate when a feature reveal is sitting right there.
 {topic_hint}{history_block}{catalog_block}
