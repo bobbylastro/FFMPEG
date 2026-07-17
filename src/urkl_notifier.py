@@ -96,40 +96,111 @@ def _r2_client():
 
 
 def _delete_previous_r2(client) -> None:
-    """Delete the previous URKL compilation from R2 if it exists."""
+    """Delete the previous URKL compilation (video + player page) from R2 if exists."""
     if not os.path.exists(LAST_R2_STATE):
         return
     try:
         with open(LAST_R2_STATE) as f:
             state = json.load(f)
-        old_key = state.get("r2_key")
-        if old_key:
-            client.delete_object(Bucket=R2_BUCKET, Key=old_key)
-            print(f"[urkl_notifier] Ancienne vidéo supprimée du R2: {old_key}")
+        for key_field in ("r2_key", "player_key"):
+            old_key = state.get(key_field)
+            if old_key:
+                client.delete_object(Bucket=R2_BUCKET, Key=old_key)
+                print(f"[urkl_notifier] Supprimé du R2: {old_key}")
     except Exception as e:
         print(f"[urkl_notifier] Suppression R2 échouée (ignorée): {e}")
 
 
-def upload_to_r2(video_path: str) -> str:
-    """Upload video to R2, delete previous, and return public URL."""
+def _make_player_html(video_url: str, clip_count: int) -> str:
+    """Page HTML pour sauvegarder la compilation dans Photos sur iPhone."""
+    import json as _json
+    v = _json.dumps(video_url)
+    title = _json.dumps(f"URKL — {clip_count} clips")
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>URKL Compilation</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+html,body{{height:100%;background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}}
+body{{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;min-height:100vh}}
+video{{width:100%;max-width:480px;max-height:60vh;border-radius:12px;background:#111}}
+.title{{font-size:14px;font-weight:600;text-align:center;opacity:.6}}
+.btn{{width:100%;max-width:400px;background:#f59e0b;color:#000;border:none;border-radius:14px;padding:18px;font-size:17px;font-weight:700;cursor:pointer}}
+.btn:disabled{{opacity:.5}}
+.hint{{font-size:12px;color:#555;text-align:center;max-width:300px;line-height:1.5}}
+</style>
+</head>
+<body>
+<video id="v" playsinline controls preload="auto"></video>
+<p class="title">🤖 URKL Robot Fight Compilation</p>
+<button class="btn" id="btn" disabled>Chargement…</button>
+<p class="hint" id="hint">Si ça ne marche pas : appuie longuement sur la vidéo → "Enregistrer dans Photos"</p>
+<script>
+const videoUrl={v},videoTitle={title};
+const btn=document.getElementById('btn'),hint=document.getElementById('hint');
+document.getElementById('v').src=videoUrl;
+let readyBlob=null;
+fetch(videoUrl).then(r=>r.blob()).then(b=>{{
+  readyBlob=b;
+  btn.disabled=false;btn.textContent='⬇ Enregistrer dans Photos';
+}}).catch(()=>{{
+  btn.disabled=false;btn.textContent='⬇ Enregistrer dans Photos';
+  hint.textContent='Appuie longuement sur la vidéo → "Enregistrer dans Photos"';
+}});
+btn.onclick=function(){{
+  if(!readyBlob){{hint.textContent='Encore en chargement…';return;}}
+  const file=new File([readyBlob],'urkl_compilation.mp4',{{type:'video/mp4'}});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({{files:[file]}})){{
+    navigator.share({{files:[file],title:videoTitle}}).catch(()=>{{
+      hint.textContent='Appuie longuement sur la vidéo → "Enregistrer dans Photos"';
+    }});
+  }}else{{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(readyBlob);
+    a.download='urkl_compilation.mp4';
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{{URL.revokeObjectURL(a.href);document.body.removeChild(a)}},1000);
+  }}
+}};
+</script>
+</body>
+</html>"""
+
+
+def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
+    """Upload video + player page to R2, delete previous. Returns (video_url, player_url)."""
     client = _r2_client()
     _delete_previous_r2(client)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    r2_key = f"urkl/compilation_{ts}.mp4"
+    r2_key      = f"urkl/compilation_{ts}.mp4"
+    player_key  = f"urkl/player_{ts}.html"
 
     client.upload_file(
-        video_path,
-        R2_BUCKET,
-        r2_key,
+        video_path, R2_BUCKET, r2_key,
         ExtraArgs={"ContentType": "video/mp4"},
     )
 
+    video_url  = f"{R2_PUBLIC_BASE}/{r2_key}"
+    player_html = _make_player_html(video_url, clip_count)
+    client.put_object(
+        Bucket=R2_BUCKET, Key=player_key,
+        Body=player_html.encode(), ContentType="text/html; charset=utf-8",
+    )
+    player_url = f"{R2_PUBLIC_BASE}/{player_key}"
+
     os.makedirs(os.path.dirname(LAST_R2_STATE), exist_ok=True)
     with open(LAST_R2_STATE, "w") as f:
-        json.dump({"r2_key": r2_key, "uploaded_at": datetime.now(timezone.utc).isoformat()}, f)
+        json.dump({
+            "r2_key": r2_key,
+            "player_key": player_key,
+            "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        }, f)
 
-    return f"{R2_PUBLIC_BASE}/{r2_key}"
+    return video_url, player_url
 
 
 def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> bool:
@@ -170,15 +241,17 @@ def run(video_path: str, clip_count: int) -> dict:
 
     print(f"[urkl_notifier] Upload R2…")
     try:
-        video_url = upload_to_r2(video_path)
+        video_url, player_url = upload_to_r2(video_path, clip_count)
         result["video_url"] = video_url
-        print(f"[urkl_notifier] URL: {video_url}")
+        result["player_url"] = player_url
+        print(f"[urkl_notifier] Vidéo : {video_url}")
+        print(f"[urkl_notifier] Player: {player_url}")
     except Exception as e:
         result["error"] = f"r2: {e}"
         return result
 
     print(f"[urkl_notifier] Déclenchement email workflow…")
-    ok = trigger_email_workflow(video_url, caption, clip_count)
+    ok = trigger_email_workflow(player_url, caption, clip_count)
     if ok:
         result["ok"] = True
         print("[urkl_notifier] Email en route via GitHub Actions ✓")
