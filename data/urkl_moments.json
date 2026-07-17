@@ -1,138 +1,66 @@
 [
   {
-    "peak": 2999,
-    "start": 2992,
-    "end": 3002,
-    "db": -20.7,
-    "score": 7.4,
-    "reason": "Left foot kick lands dangerously on opponent; casters note it was a close call and very dangerous"
+    "peak": 4200,
+    "start": 4193,
+    "end": 4203,
+    "db": -21.3,
+    "score": 6.3,
+    "reason": "Dongning attacked by white's bear, scores three points"
   },
   {
-    "peak": 3016,
-    "start": 3009,
-    "end": 3019,
-    "db": -21.1,
-    "score": 7.7,
-    "reason": "Significant right foot side kick lands; casters react with 'Wow, this hit is big' and note opponent's stable defense"
-  },
-  {
-    "peak": 3127,
-    "start": 3120,
-    "end": 3130,
-    "db": -21.1,
-    "score": 6.6,
-    "reason": "White ball connects two points with strong attack; casters note this is effective scoring"
-  },
-  {
-    "peak": 3151,
-    "start": 3144,
-    "end": 3154,
-    "db": -21.0,
-    "score": 7.2,
-    "reason": "Left foot double kick lands heavily with two points added; casters emphasize continuous scoring"
-  },
-  {
-    "peak": 3164,
-    "start": 3157,
-    "end": 3167,
-    "db": -19.7,
-    "score": 7.6,
-    "reason": "Another kick in final moments; White-colored ball goes down as time runs out, creating dramatic finish"
-  },
-  {
-    "peak": 5935,
-    "start": 5928,
-    "end": 5938,
-    "db": -15.2,
-    "score": 8.7,
-    "reason": "Bai Seng lands repeated kicks on Dong Lin, knocking it down multiple times in succession (three to five times mentioned). Casters are alarmed, asking if Dong Lin will be KO'd. This is a dominant one-sided exchange with multiple knockdowns."
-  },
-  {
-    "peak": 6230,
-    "start": 6223,
-    "end": 6233,
-    "db": -17.4,
-    "score": 7.9,
-    "reason": "High-speed sweep kick from one robot connects with opponent's head. Dong Lin is knocked to the ground. Casters react with urgency ('Oh my god,' 'I'm angry')."
-  },
-  {
-    "peak": 6251,
-    "start": 6244,
-    "end": 6254,
-    "db": -15.9,
-    "score": 7.5,
-    "reason": "Dong Lin is hit by mid-tank strike to the head, shaking from the impact. Casters question if it will explode and whether Dong Lin can still hold on, indicating significant damage."
-  },
-  {
-    "peak": 6616,
-    "start": 6609,
-    "end": 6619,
-    "db": -21.4,
-    "score": 6.4,
-    "reason": "White robot (bean curd) gets hit with a flying kick, casters react with concern about the impact"
-  },
-  {
-    "peak": 6628,
-    "start": 6621,
-    "end": 6631,
-    "db": -22.0,
-    "score": 7.0,
-    "reason": "Opponent finds opportunity and lands continuous attacks on white robot, casters note white robot has no reaction"
-  },
-  {
-    "peak": 6668,
-    "start": 6661,
-    "end": 6671,
-    "db": -16.2,
+    "peak": 4240,
+    "start": 4233,
+    "end": 4243,
+    "db": -20.4,
     "score": 6.9,
-    "reason": "Wind robot cuts/attacks white robot's legs, control exchange happening"
+    "reason": "Left hand is broken - damage indication"
   },
   {
-    "peak": 6730,
-    "start": 6723,
-    "end": 6733,
-    "db": -19.3,
-    "score": 7.9,
-    "reason": "Casters react with excitement to a KO opportunity from an accurate kick from the front"
+    "peak": 4386,
+    "start": 4379,
+    "end": 4389,
+    "db": -21.0,
+    "score": 7.1,
+    "reason": "Hit the opponent's hand, directly hit by right hand, blister down"
   },
   {
-    "peak": 7146,
-    "start": 7139,
-    "end": 7149,
-    "db": -28.5,
-    "score": 6.7,
-    "reason": "K.O. moment confirmed - robot officially knocked out after the front door strike"
+    "peak": 4389,
+    "start": 4382,
+    "end": 4392,
+    "db": -21.0,
+    "score": 7.1,
+    "reason": "Blister is down after being hit, didn't open at 4 degrees"
   },
   {
-    "peak": 7154,
-    "start": 7147,
-    "end": 7157,
-    "db": -27.2,
-    "score": 6.1,
-    "reason": "Reference to robot being officially kicked/knocked down - a significant impact moment"
+    "peak": 5165,
+    "start": 5158,
+    "end": 5168,
+    "db": -21.5,
+    "score": 6.2,
+    "reason": "Casters identify 'This is a right-hand right-hand, this is fierce' - describes strong punch/strike"
   },
   {
-    "peak": 7156,
-    "start": 7149,
-    "end": 7159,
-    "db": -27.2,
-    "score": 6.1,
-    "reason": "Casters mention a whirlwind stick attack that was damaging to the opponent"
+    "peak": 5251,
+    "start": 5244,
+    "end": 5254,
+    "db": -19.0,
+    "score": 6.8,
+    "reason": "Casters state 'White Bear always did a super difficult move' followed by observation that 'Brother is a little bit shabby' - suggests impact from complex technique"
   },
   {
-    "peak": 7288,
-    "start": 7281,
-    "end": 7291,
-    "db": -27.5,
-    "score": 7.2,
-    "reason": "Reference to the final judge's K.O. move - the finishing strike that ended the match"
+    "peak": 5271,
+    "start": 5264,
+    "end": 5274,
+    "db": -19.8,
+    "score": 7.1,
+    "reason": "Casters emphasize 'In this fight, the machine's rule, still successfully stood up' - recovery from knockdown/knockback"
   },
   {
-    "peak": 7622,
-    "start": 7615,
-    "end": 7625,
-    "db": -25.8,
-    "score": 7.4,
-    "reason": "Reference to the end of the last fight where a wall breaks - significant impact damage"
+    "peak": 5317,
+    "start": 5310,
+    "end": 5320,
+    "db": -19.5,
+    "score": 6.6,
+    "reason": "Casters note 'the big leg is on the side, and then it almost fell again' - describes strike with near-knockdown result"
   }
 ]

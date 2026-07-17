@@ -97,18 +97,30 @@ TARGET (pick these):
 - A robot recovering from a knockdown CAUSED BY THE OPPONENT, especially if casters react with
   surprise at how fast/slow/dramatic the recovery is (e.g. beating a count) — this is a direct
   consequence of combat, unlike unprompted self-righting
+- A sudden, isolated caster exclamation ("Wow!", "Oh!", short shout) even WITHOUT a fully
+  described action — casters often react half a second before or instead of narrating what
+  happened. If nearby lines hint at impact (a word like "heavy", "dangerous", a score/number
+  changing, a name followed by a reaction), include it — don't require a full sentence
+  describing the hit. Give it a lower intensity if the context is thin.
 
 NOT interesting enough — DO NOT include:
 - A robot self-righting/getting up with NO preceding hit or knockdown from the opponent
 - Judges, rules, scoring explanations, pre-fight setup, replays, or dead air
-- Casters just narrating robot movement/positioning with no hit or clash happening
-- General hype words ("wow", "amazing") with no concrete combat action described
+- Casters just narrating robot movement/positioning with no hit, clash, or reaction happening
+
+The transcript is machine-translated from Chinese and can be garbled, fragmented, or even
+self-contradictory (e.g. "didn't hit" next to "hand is broken"). Don't require perfectly clear
+phrasing — infer the likely combat action from context: impact-related words, sudden score
+changes, a name followed by a caster reaction. When genuinely uncertain whether something
+qualifies, INCLUDE it with a lower intensity (2-3) rather than silently dropping it — the
+downstream scoring will filter out the weak ones. Do not return an empty list just because the
+transcript is hard to parse — if casters are reacting to the fight, something is worth flagging.
 
 For each moment, also rate its INTENSITY from 1 to 10 based on how the casters react and what
-happened: 1-3 = routine scoring hit, casual tone; 4-6 = solid hit, casters mildly excited;
-7-8 = big hit/knockdown, casters clearly excited or alarmed; 9-10 = KO, major damage, or
-casters extremely hyped/shouting. Be honest and use the full range — most moments should NOT
-be 9-10.
+happened: 1-3 = routine scoring hit or unclear/thin context, casual tone; 4-6 = solid hit,
+casters mildly excited; 7-8 = big hit/knockdown, casters clearly excited or alarmed; 9-10 = KO,
+major damage, or casters extremely hyped/shouting. Be honest and use the full range — most
+moments should NOT be 9-10.
 
 Transcript:
 {transcript}
