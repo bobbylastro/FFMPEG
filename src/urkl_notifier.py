@@ -134,6 +134,9 @@ def upload_to_r2(video_path: str) -> str:
 
 def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> bool:
     """Trigger the urkl_notify GitHub Actions workflow to send the email."""
+    env = os.environ.copy()
+    if os.getenv("GH_TOKEN"):
+        env["GH_TOKEN"] = os.getenv("GH_TOKEN")
     result = subprocess.run(
         [
             "gh", "workflow", "run", "urkl_notify.yml",
@@ -144,6 +147,7 @@ def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> boo
         capture_output=True,
         text=True,
         cwd="/workspaces/FFMPEG",
+        env=env,
     )
     if result.returncode != 0:
         print(f"[urkl_notifier] gh error: {result.stderr.strip()}")

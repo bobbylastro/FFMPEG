@@ -25,12 +25,39 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "🤖 URKL Compilation prête — ${{ github.event.inputs.clip_count }} clips"
+          subject: "🤖 URKL — ${{ github.event.inputs.clip_count }} clips prêts à poster"
           to: bobbylastronaute@gmail.com
           from: URKL Pipeline
-          body: |
-            Ta compilation URKL est prête — ouvre le lien sur ton iPhone et clique "Enregistrer dans Photos" :
-            ${{ github.event.inputs.video_url }}
+          convert_markdown: true
+          html_body: |
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body style="margin:0;padding:0;background:#0f0f0f;font-family:sans-serif;color:#eee;">
+              <div style="max-width:540px;margin:0 auto;padding:32px 20px;">
 
-            Caption TikTok à copier-coller :
-            ${{ github.event.inputs.caption }}
+                <h1 style="font-size:1.3rem;margin:0 0 4px;color:#fff;">🤖 Compilation URKL prête</h1>
+                <p style="color:#888;margin:0 0 28px;font-size:.9rem;">${{ github.event.inputs.clip_count }} clips · Robot Combat</p>
+
+                <a href="${{ github.event.inputs.video_url }}"
+                   style="display:block;background:#f59e0b;color:#000;text-align:center;
+                          padding:16px 24px;border-radius:10px;font-weight:bold;font-size:1rem;
+                          text-decoration:none;margin-bottom:12px;">
+                  ▶ Ouvrir la vidéo
+                </a>
+
+                <p style="color:#666;font-size:.78rem;text-align:center;margin:0 0 32px;">
+                  Ouvre sur iPhone → appuie longuement → "Enregistrer dans Photos"
+                </p>
+
+                <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:16px;">
+                  <p style="margin:0 0 8px;font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.05em;">Caption TikTok</p>
+                  <p style="margin:0;font-size:.95rem;line-height:1.5;color:#ddd;white-space:pre-wrap;">${{ github.event.inputs.caption }}</p>
+                </div>
+
+                <p style="color:#444;font-size:.72rem;text-align:center;margin:28px 0 0;">
+                  URKL Pipeline · ultimate-playground.com
+                </p>
+              </div>
+            </body>
+            </html>

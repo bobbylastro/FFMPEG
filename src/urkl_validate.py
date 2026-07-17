@@ -202,7 +202,11 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
   <div id="compile-box">
     <h2>Compilation…</h2>
     <div id="compile-log"></div>
-    <button id="compile-close" onclick="closeCompile()">Fermer</button>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
+      <button id="btn-cleanup" onclick="cleanupCompiled()"
+              style="display:none;background:#ef4444;color:#fff;">🗑️ Supprimer clips compilés</button>
+      <button id="compile-close" onclick="closeCompile()" style="background:#333;color:#eee;">Fermer</button>
+    </div>
   </div>
 </div>
 <script>
@@ -289,6 +293,7 @@ let pollInterval;
 function startCompile() {
   document.getElementById('compile-panel').classList.add('show');
   document.getElementById('compile-log').textContent = 'Démarrage...';
+  document.getElementById('btn-cleanup').style.display = 'none';
   fetch('/api/compile', {method:'POST'});
   pollInterval = setInterval(async () => {
     const d = await (await fetch('/api/log')).json();
@@ -296,10 +301,23 @@ function startCompile() {
     document.getElementById('compile-log').scrollTop = 9999;
     if (d.done) {
       clearInterval(pollInterval);
-      document.getElementById('compile-log').textContent +=
-        d.result?.ok ? '\n\n✅ Compilation terminée !' : '\n\n❌ ' + (d.result?.error||'?');
+      if (d.result?.ok) {
+        document.getElementById('compile-log').textContent += '\n\n✅ Compilation terminée !';
+        document.getElementById('btn-cleanup').style.display = 'inline-block';
+      } else {
+        document.getElementById('compile-log').textContent += '\n\n❌ ' + (d.result?.error||'?');
+      }
     }
   }, 1500);
+}
+async function cleanupCompiled() {
+  document.getElementById('btn-cleanup').textContent = 'Suppression...';
+  document.getElementById('btn-cleanup').disabled = true;
+  await fetch('/api/cleanup', {method:'POST'});
+  document.getElementById('compile-log').textContent += '\n🗑️ Clips compilés supprimés de R2.';
+  document.getElementById('btn-cleanup').style.display = 'none';
+  closeCompile();
+  loadClips();
 }
 function closeCompile() {
   document.getElementById('compile-panel').classList.remove('show');
@@ -417,6 +435,16 @@ class Handler(BaseHTTPRequestHandler):
                 THUMB_CACHE.pop(f, None)
             r2lib.save_state(state, r2)
             self.send_json({"ok": True})
+
+        elif path == "/api/cleanup":
+            r2 = r2lib.client()
+            state = r2lib.load_state(r2)
+            validated = [f for f, s in state.items() if s == "validated"]
+            for f in validated:
+                r2lib.delete_clip(f, r2)
+                THUMB_CACHE.pop(f, None)
+            r2lib.save_state({}, r2)
+            self.send_json({"ok": True, "deleted": len(validated)})
 
         elif path == "/api/compile":
             state = r2lib.load_state()
