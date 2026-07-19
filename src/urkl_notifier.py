@@ -33,20 +33,20 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 # Different caption angles to ensure variety across compilations
 CAPTION_ANGLES = [
-    "pure adrenaline — focus on the jaw-dropping speed and violence of the hits",
+    "pure adrenaline — focus on the jaw-dropping speed and power of the punches/kicks",
     "crowd/fan reaction — emphasise the insane crowd energy and hype moments",
-    "technical mastery — highlight the skill and precision of the robot controllers",
+    "technical mastery — highlight the skill and precision of the robot fighters' technique",
     "underdog story — the tension, the comeback, the unexpected moments",
     "cinematic — short, dramatic, almost poetic; makes the viewer feel the impact",
     "hype/call-to-action — get the viewer to share or tag a friend",
 ]
 
 HASHTAG_SETS = [
-    "#robotcombat #urkl #battlebot",
-    "#robotfight #urkl #combatrobots",
-    "#urkl #robotwars #fighting",
-    "#robotcombat #urkl #robots",
-    "#battlebot #urkl #robotfight",
+    "#robotmma #urkl #robotfight",
+    "#robotmma #urkl #combatrobots",
+    "#urkl #robotcombat #mma",
+    "#robotfight #urkl #robots",
+    "#urkl #robotmma #fighting",
     "#urkl #epicfights #robots",
 ]
 
@@ -54,12 +54,18 @@ HASHTAG_SETS = [
 def generate_caption(clip_count: int) -> str:
     """Generate a varied TikTok EN caption for a URKL robot fight compilation."""
     if not ANTHROPIC_API_KEY:
-        return f"🤖 TOP {clip_count} ROBOT FIGHT MOMENTS 🔥 Pure steel & sparks\n#robotcombat #urkl #battlebot"
+        return f"🤖 TOP {clip_count} ROBOT MMA MOMENTS 🔥 Pure knockout power\n#robotmma #urkl #robotfight"
 
     angle = random.choice(CAPTION_ANGLES)
     hashtags = random.choice(HASHTAG_SETS)
 
     prompt = f"""You write TikTok captions for robot combat highlight compilations (URKL league).
+
+IMPORTANT — what URKL actually is: two HUMANOID robots fighting like MMA/boxing/kickboxing
+fighters — punches, kicks, knockdowns, KOs. This is NOT BattleBots (no wheeled robots, no
+saws, no weapons, no sparks/fire). Frame it like robot MMA/combat sports, not mechanical
+destruction.
+
 The video contains the top {clip_count} best action moments from a live robot fight event.
 
 Today's angle: {angle}
@@ -71,6 +77,8 @@ Write a TikTok caption:
 - End with EXACTLY these hashtags on a new line: {hashtags}
 - No emoji in the caption text itself (emojis ok in hashtag line if needed)
 - Do NOT mention "compilation", "top {clip_count}", or numbers — be evocative, not descriptive
+- Do NOT use BattleBots-style imagery (sparks, steel, saws, machines tearing apart) — this is
+  MMA-style striking combat between humanoid robots
 
 Output ONLY the caption text, nothing else."""
 
