@@ -1,35 +1,19 @@
 [
   {
-    "peak": 2999,
-    "start": 2992,
-    "end": 3002,
-    "db": -20.7,
-    "score": 6.2,
-    "reason": "Continuous left foot kicks land in sequence, casters note dangerous striking"
-  },
-  {
-    "peak": 3000,
-    "start": 2993,
-    "end": 3003,
-    "db": -20.7,
-    "score": 6.2,
-    "reason": "Left foot kick described as 'hit very dangerously', casters note it narrowly connects"
-  },
-  {
     "peak": 3016,
     "start": 3009,
     "end": 3019,
     "db": -21.1,
     "score": 7.7,
-    "reason": "Caster exclaims 'Wow, this hit is big' - strong reaction to a significant strike landing"
+    "reason": "Caster exclaims 'Wow, this hit is big' - strong reaction to a significant strike"
   },
   {
-    "peak": 3046,
-    "start": 3039,
-    "end": 3049,
-    "db": -22.3,
-    "score": 6.2,
-    "reason": "Dounyoshi falls back after taking consecutive strikes, casters note the score shift and knockdown"
+    "peak": 3059,
+    "start": 3052,
+    "end": 3062,
+    "db": -21.8,
+    "score": 6.9,
+    "reason": "Robot knocked down/fell back, casters note score change and discuss the fall, then robot rises very quickly in about one second"
   },
   {
     "peak": 3074,
@@ -37,39 +21,55 @@
     "end": 3077,
     "db": -20.9,
     "score": 7.9,
-    "reason": "Dounyoshi knocked down and opponent awarded 3 points for a complete fall, casters confirm the knockdown occurred"
+    "reason": "Opponent completes a full knockdown, casters award 3 points for knockdown, robot rises quickly"
   },
   {
-    "peak": 3151,
-    "start": 3144,
-    "end": 3154,
+    "peak": 3096,
+    "start": 3089,
+    "end": 3099,
+    "db": -20.1,
+    "score": 7.0,
+    "reason": "White ball robot adds another point with a strike, score climbs to 21 to 13, indicating aggressive offense"
+  },
+  {
+    "peak": 3153,
+    "start": 3146,
+    "end": 3156,
     "db": -21.0,
-    "score": 7.2,
-    "reason": "White ball lands heavy left foot kick with double score awarded, casters note it as a strong continuous attack"
+    "score": 6.6,
+    "reason": "Left foot double strike landing, casters award two points for effective consecutive kicks"
   },
   {
-    "peak": 3172,
-    "start": 3165,
-    "end": 3175,
-    "db": -20.6,
-    "score": 7.4,
-    "reason": "White ball knocked down near end of round, dramatic moment as time runs out"
+    "peak": 4166,
+    "start": 4159,
+    "end": 4169,
+    "db": -20.5,
+    "score": 6.3,
+    "reason": "Casters mention 'He's got a kick' as part of strong one-shot attack"
   },
   {
-    "peak": 3198,
-    "start": 3191,
-    "end": 3201,
-    "db": -20.3,
-    "score": 6.9,
-    "reason": "Caster exclaims 'Wow' about the second round being exciting and the score being tight, reacting to the intensity of the exchange"
+    "peak": 4273,
+    "start": 4266,
+    "end": 4276,
+    "db": -20.2,
+    "score": 7.6,
+    "reason": "Casters react with 'Oh, beautiful. Very beautiful.' to a strike or exchange"
   },
   {
-    "peak": 4389,
-    "start": 4382,
-    "end": 4392,
+    "peak": 4295,
+    "start": 4288,
+    "end": 4298,
+    "db": -20.8,
+    "score": 6.1,
+    "reason": "Casters reference 'The third point is down. Add one point to the leader' indicating a scoring strike"
+  },
+  {
+    "peak": 4385,
+    "start": 4378,
+    "end": 4388,
     "db": -21.0,
     "score": 7.6,
-    "reason": "Robot hit by right hand and knocked down; casters react with 'My god' suggesting significant impact"
+    "reason": "Robot hit by right hand and knocked down; casters react with surprise ('My god')"
   },
   {
     "peak": 4393,
@@ -77,55 +77,71 @@
     "end": 4396,
     "db": -21.6,
     "score": 6.9,
-    "reason": "Caster exclamation 'My god' at knockdown moment; robot unable to open four-point guard immediately after being hit"
+    "reason": "Caster exclamation 'My god' during knockdown sequence, robot didn't get up on four-point"
   },
   {
-    "peak": 4394,
-    "start": 4387,
-    "end": 4397,
-    "db": -21.7,
-    "score": 6.2,
-    "reason": "Follow-up commentary on knockdown with remaining time concerns, indicating combat action just occurred"
+    "peak": 4988,
+    "start": 4981,
+    "end": 4991,
+    "db": -16.9,
+    "score": 8.1,
+    "reason": "Caster exclaims 'Wow, he got himself on the ground' - a robot knocked down or staggered by opponent strike"
   },
   {
-    "peak": 5114,
-    "start": 5107,
-    "end": 5117,
-    "db": -18.1,
-    "score": 6.9,
-    "reason": "Caster exclamation 'I'm going to blow up' suggesting a strong striking moment or reaction"
+    "peak": 5064,
+    "start": 5057,
+    "end": 5067,
+    "db": -17.2,
+    "score": 7.5,
+    "reason": "Caster exclaims 'Wow, I'm done' - sharp reaction to significant action"
   },
   {
-    "peak": 5124,
-    "start": 5117,
-    "end": 5127,
-    "db": -17.8,
-    "score": 6.9,
-    "reason": "White drink standing up after apparent knockdown or stagger ('The white drink is falling behind' then 'standing up')"
+    "peak": 5318,
+    "start": 5311,
+    "end": 5321,
+    "db": -19.5,
+    "score": 7.2,
+    "reason": "Caster describes 'The big leg is on the next side and almost fell' - a kick landing hard enough to nearly knock the robot down"
   },
   {
-    "peak": 5252,
-    "start": 5245,
-    "end": 5255,
-    "db": -19.1,
-    "score": 6.7,
-    "reason": "Reference to 'super difficult move' executed by white hand with apparent effect on opponent"
-  },
-  {
-    "peak": 5916,
-    "start": 5909,
-    "end": 5919,
-    "db": -17.5,
-    "score": 6.1,
-    "reason": "Casters remark 'handsome' strike with positive reaction to White Bear's technique"
+    "peak": 5878,
+    "start": 5871,
+    "end": 5881,
+    "db": -24.2,
+    "score": 6.5,
+    "reason": "Caster exclaims 'Wow' with sudden concern about Dong Lin potentially being KO'd"
   },
   {
     "peak": 5931,
     "start": 5924,
     "end": 5934,
     "db": -15.3,
-    "score": 8.7,
-    "reason": "Caster exclaims 'Wow' with clear concern - White Bear appears to be in serious trouble after sustained kicks, casters mention 'almost thought we were going to have the first K.O. today'"
+    "score": 8.1,
+    "reason": "Strong 'Wow' reaction from caster, White Bear dominance evident"
+  },
+  {
+    "peak": 5949,
+    "start": 5942,
+    "end": 5952,
+    "db": -21.9,
+    "score": 7.9,
+    "reason": "Casters nearly witness first KO of the stadium, White Bear keeps attacking"
+  },
+  {
+    "peak": 5955,
+    "start": 5948,
+    "end": 5958,
+    "db": -23.2,
+    "score": 7.5,
+    "reason": "Casters note Dong Lin knocked down multiple times (four knockdowns mentioned)"
+  },
+  {
+    "peak": 6017,
+    "start": 6010,
+    "end": 6020,
+    "db": -22.2,
+    "score": 6.6,
+    "reason": "Caster exclaims 'Wow, so cool' at acrobatic double back kick"
   },
   {
     "peak": 6230,
@@ -133,15 +149,39 @@
     "end": 6233,
     "db": -17.4,
     "score": 7.3,
-    "reason": "High-speed sweep kick to opponent's head landed, described as another kick to the head"
+    "reason": "High-speed sweep kick mentioned, opponent head kicked"
   },
   {
-    "peak": 6240,
-    "start": 6233,
-    "end": 6243,
-    "db": -13.7,
+    "peak": 6232,
+    "start": 6225,
+    "end": 6235,
+    "db": -17.4,
+    "score": 7.3,
+    "reason": "Head of opponent is kicked in a sweep"
+  },
+  {
+    "peak": 6237,
+    "start": 6230,
+    "end": 6240,
+    "db": -12.8,
     "score": 8.2,
-    "reason": "Caster exclaims 'Oh my god' with strong emotional reaction - Dong Niu appears to be in serious distress after being hit"
+    "reason": "Ground falling down after kicks, action intensifying"
+  },
+  {
+    "peak": 6241,
+    "start": 6234,
+    "end": 6244,
+    "db": -14.6,
+    "score": 8.2,
+    "reason": "Caster exclaims 'Oh my god' at action intensity"
+  },
+  {
+    "peak": 6246,
+    "start": 6239,
+    "end": 6249,
+    "db": -16.8,
+    "score": 8.0,
+    "reason": "Both sides at bottom of field, match escalating"
   },
   {
     "peak": 6251,
@@ -149,87 +189,63 @@
     "end": 6254,
     "db": -15.9,
     "score": 8.1,
-    "reason": "Dong Niu hit by mid-tank strike, shaking his head, casters assess whether robot can continue - visible impact and stagger"
+    "reason": "Dong Niu Shi's head is hit and in disarray from middle strike"
   },
   {
-    "peak": 6656,
-    "start": 6649,
-    "end": 6659,
-    "db": -23.8,
-    "score": 6.6,
-    "reason": "Casters suggest white bean curd is about to KO, indicating serious damage or knockdown"
-  },
-  {
-    "peak": 6682,
-    "start": 6675,
-    "end": 6685,
-    "db": -11.8,
+    "peak": 6263,
+    "start": 6256,
+    "end": 6266,
+    "db": -14.7,
     "score": 8.2,
-    "reason": "Sharp 'Wow' exclamation from casters indicating sudden action"
+    "reason": "Question of whether Dong Niu Shi can still hold on after sustained damage"
   },
   {
-    "peak": 6688,
-    "start": 6681,
-    "end": 6691,
-    "db": -13.7,
-    "score": 7.6,
-    "reason": "White robot gets knocked up/airborne, casters exclaim 'It's up' with excitement"
+    "peak": 6267,
+    "start": 6260,
+    "end": 6270,
+    "db": -19.5,
+    "score": 7.1,
+    "reason": "Casters note opponent is 'really too strong' and 'still working hard' despite damage"
+  },
+  {
+    "peak": 6636,
+    "start": 6629,
+    "end": 6639,
+    "db": -21.7,
+    "score": 6.4,
+    "reason": "White bean curd has no reaction to opponent's offense - being overwhelmed"
   },
   {
     "peak": 6698,
     "start": 6691,
     "end": 6701,
     "db": -16.6,
-    "score": 8.1,
-    "reason": "Two robots fighting in the air mentioned, casters note 'too powerful' - aerial exchange"
+    "score": 7.5,
+    "reason": "Both robots in the air, intense aerial exchange noted as fierce"
   },
   {
-    "peak": 6730,
-    "start": 6723,
-    "end": 6733,
-    "db": -19.3,
-    "score": 8.5,
-    "reason": "Casters exclaim 'Wow' regarding KO chance just landed from front strike, described as 'really accurate'"
+    "peak": 6732,
+    "start": 6725,
+    "end": 6735,
+    "db": -21.2,
+    "score": 7.7,
+    "reason": "Caster exclaims 'Wow, there is a chance to KO' - moment just now described as very accurate"
   },
   {
     "peak": 7142,
     "start": 7135,
     "end": 7145,
     "db": -28.2,
-    "score": 6.2,
-    "reason": "Casters reference a front and back fist that 'directly completed the K.O.' - describes the finishing blow of the match"
+    "score": 6.8,
+    "reason": "Casters describe a front and back fist combo that 'directly completed the K.O.' — a finishing knockout sequence"
   },
   {
-    "peak": 7146,
-    "start": 7139,
-    "end": 7149,
-    "db": -28.5,
-    "score": 6.1,
-    "reason": "Confirmation of K.O. finish - 'Hit the front door / Then directly completed the K.O.'"
-  },
-  {
-    "peak": 7286,
-    "start": 7279,
-    "end": 7289,
-    "db": -26.7,
-    "score": 7.0,
-    "reason": "Casters explicitly reference the final K.O. move that ended the match - 'I saw the final judge / K.O's move / After the move that K.O can't stand'"
-  },
-  {
-    "peak": 7592,
-    "start": 7585,
-    "end": 7595,
-    "db": -24.9,
-    "score": 7.2,
-    "reason": "Casters describe a crucial corner/exchange - 'this corner is the most cruel' - indicating a major turning point in the fight"
-  },
-  {
-    "peak": 7596,
-    "start": 7589,
-    "end": 7599,
-    "db": -23.8,
-    "score": 6.9,
-    "reason": "Description of head trauma from a striking exchange - 'After this corner / The head is a little shaking / This position'"
+    "peak": 7578,
+    "start": 7571,
+    "end": 7581,
+    "db": -24.5,
+    "score": 6.7,
+    "reason": "Detailed caster analysis of White Bear's accurate strikes and Douniu being 'war-saving' (barely surviving), suggesting heavy impacts landed"
   },
   {
     "peak": 7620,
@@ -237,6 +253,6 @@
     "end": 7623,
     "db": -24.4,
     "score": 7.3,
-    "reason": "Reference to the final decisive exchange - 'It's the end of the last fight / The wall is broken' suggesting a knockdown or major impact"
+    "reason": "End-of-round finishing sequence described as when 'the wall is broken' after impact, suggests a major final strike"
   }
 ]
