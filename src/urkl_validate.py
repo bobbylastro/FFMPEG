@@ -370,7 +370,8 @@ function startCompileYoutube() {
       clearInterval(pollIntervalYt);
       if (d.result?.ok) {
         document.getElementById('compile-log-yt').textContent +=
-          `\n\n✅ Terminé !\nCompilation : ${d.result.long_url}\nShort : ${d.result.short_url}`;
+          `\n\n✅ Terminé !\nCompilation : ${d.result.long_url}\n` +
+          (d.result.short_urls || []).map((u, i) => `Short ${i+1} : ${u}`).join('\n');
         document.getElementById('btn-cleanup-yt').style.display = 'inline-block';
       } else {
         document.getElementById('compile-log-yt').textContent += '\n\n❌ ' + (d.result?.error||'?');
