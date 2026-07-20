@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
 Détection des moments forts URKL par transcription + analyse IA (remplace urkl_detect.py
-+ urkl_filter_rounds.py) : transcrit l'audio des rounds (chinois -> anglais via Whisper)
-et demande à Claude Haiku de repérer les moments de combat réel d'après les réactions
-des casters, plutôt que par pic de volume brut.
++ urkl_filter_rounds.py) : transcrit l'audio des rounds (langue auto-détectée -> anglais
+via Whisper) et demande à Claude Haiku de repérer les moments de combat réel d'après les
+réactions des casters, plutôt que par pic de volume brut.
 
-Usage: python3 src/urkl_transcribe_moments.py "<rounds_spec>" [whisper_model]
+Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model]
+  video_url: URL YouTube de la vidéo/stream à analyser
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
+               (vide ou omis = toute la vidéo)
   whisper_model: tiny|base|small|medium|large (défaut: small)
 
 Écrit directement dans data/urkl_moments.json (même format que urkl_detect.py), prêt pour
-python3 src/urkl_download.py 0.
+python3 src/urkl_download.py 0 <video_url>.
 """
-import sys, os, json, subprocess, tempfile, shutil, re, struct, math
+import sys, os, json, subprocess, tempfile, shutil, re, struct, math, hashlib
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
@@ -22,14 +24,27 @@ import anthropic
 from config.settings import ANTHROPIC_API_KEY
 
 COOKIES          = os.path.join(BASE_DIR, "data/yt_cookies.txt")
-URL              = "https://www.youtube.com/watch?v=vpyO73jyx1g"
 MODEL_ID         = "claude-haiku-4-5-20251001"
 MOMENTS_JSON     = os.path.join(BASE_DIR, "data/urkl_moments.json")
-FULL_AUDIO_CACHE = "/tmp/urkl_full_audio_cache.webm"
 PRE, POST        = 7, 3      # secondes autour du timecode identifié par l'IA
 TEXT_WEIGHT      = 0.6       # poids de l'intensité texte (Haiku) dans le score combiné
 DB_WEIGHT        = 0.4       # poids du percentile dB (relatif au round) dans le score combiné
 SCORE_THRESHOLD  = 6.0       # score combiné mini (sur 10) pour garder un moment
+
+
+def _cache_path_for(url: str) -> str:
+    """Cache par URL — évite de réutiliser l'audio d'une autre vidéo par erreur."""
+    h = hashlib.md5(url.encode()).hexdigest()[:12]
+    return f"/tmp/urkl_full_audio_cache_{h}.webm"
+
+
+def get_video_duration(url: str) -> float:
+    cmd = [
+        "yt-dlp", "--cookies", COOKIES, "--no-update",
+        "--js-runtimes", "node", "--remote-components", "ejs:github",
+        "--print", "duration", url,
+    ]
+    return float(subprocess.check_output(cmd, text=True).strip())
 
 
 def parse_ts(s: str) -> int:
@@ -44,13 +59,14 @@ def fmt(s: float) -> str:
     return f"{s//3600:02d}:{(s%3600)//60:02d}:{s%60:02d}"
 
 
-def download_full_audio(cache_path: str = FULL_AUDIO_CACHE) -> str:
+def download_full_audio(url: str, cache_path: str = None) -> str:
     """Télécharge l'audio complet du stream EN CONTINU (rapide) et le met en cache.
 
     --download-sections fait un seek dans le flux DASH de YouTube, ce qui se fait
     beaucoup plus throttle par le CDN qu'un téléchargement séquentiel complet.
     On télécharge donc une seule fois en continu, puis on découpe localement.
     """
+    cache_path = cache_path or _cache_path_for(url)
     if os.path.exists(cache_path) and os.path.getsize(cache_path) > 1_000_000:
         print(f"  Audio complet déjà en cache ({os.path.getsize(cache_path)/1024/1024:.0f} MB), skip download")
         return cache_path
@@ -58,7 +74,7 @@ def download_full_audio(cache_path: str = FULL_AUDIO_CACHE) -> str:
     cmd = [
         "yt-dlp", "--cookies", COOKIES, "--no-update",
         "--js-runtimes", "node", "--remote-components", "ejs:github",
-        "-f", "bestaudio", "-o", cache_path, "--no-part", URL,
+        "-f", "bestaudio", "-o", cache_path, "--no-part", url,
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if not os.path.exists(cache_path):
@@ -151,7 +167,10 @@ Return at most 20 moments for this round. Return [] if nothing qualifies. No exp
 
 
 def transcribe_audio(model, audio_path, start_offset):
-    result = model.transcribe(audio_path, task="translate", language="zh", verbose=False)
+    # Pas de `language` fixé : Whisper détecte la langue automatiquement (le show peut être
+    # en chinois, anglais, ou autre selon l'évènement) ; task="translate" traduit vers
+    # l'anglais quelle que soit la langue source.
+    result = model.transcribe(audio_path, task="translate", verbose=False)
     lines = []
     for seg in result["segments"]:
         text = seg["text"].strip()
@@ -226,12 +245,20 @@ def main():
         print(__doc__)
         sys.exit(1)
 
-    windows = []
-    for r in sys.argv[1].split(","):
-        s, e = r.strip().split("-")
-        windows.append((parse_ts(s), parse_ts(e)))
+    video_url   = sys.argv[1]
+    rounds_spec = sys.argv[2] if len(sys.argv) > 2 else ""
+    whisper_model_name = sys.argv[3] if len(sys.argv) > 3 else "small"
 
-    whisper_model_name = sys.argv[2] if len(sys.argv) > 2 else "small"
+    if rounds_spec.strip():
+        windows = []
+        for r in rounds_spec.split(","):
+            s, e = r.strip().split("-")
+            windows.append((parse_ts(s), parse_ts(e)))
+    else:
+        print("Aucune plage de rounds fournie — analyse de la vidéo entière.")
+        duration = get_video_duration(video_url)
+        windows = [(0, int(duration))]
+
     total_min = sum(e - s for s, e in windows) / 60
     print(f"Rounds: {len(windows)}, total {total_min:.1f} min")
 
@@ -239,7 +266,7 @@ def main():
     model = whisper.load_model(whisper_model_name)
 
     print("\nTéléchargement de l'audio complet du stream (une seule fois)...", flush=True)
-    full_audio = download_full_audio()
+    full_audio = download_full_audio(video_url)
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -328,7 +355,7 @@ def main():
     with open(MOMENTS_JSON, "w") as f:
         json.dump(all_moments, f, indent=2, ensure_ascii=False)
     print(f"\nSauvegardé : {MOMENTS_JSON}")
-    print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0")
+    print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0 \"{video_url}\"")
 
 
 if __name__ == "__main__":

@@ -3,8 +3,10 @@
 Pipeline complet URKL (détection par IA) : nettoie R2, transcrit les rounds et upload
 les clips détectés, en une seule commande.
 
-Usage: python3 src/urkl_pipeline.py "<rounds_spec>" [whisper_model]
+Usage: python3 src/urkl_pipeline.py <video_url> ["<rounds_spec>"] [whisper_model]
+  video_url: URL YouTube de la vidéo/stream à analyser
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
+               (vide ou omis = toute la vidéo)
   whisper_model: tiny|base|small|medium|large (défaut: small)
 
 Étapes : nettoyage R2 -> urkl_transcribe_moments.py -> urkl_download.py 0
@@ -43,17 +45,19 @@ def main():
         print(__doc__)
         sys.exit(1)
 
-    rounds_spec = sys.argv[1]
-    whisper_model = sys.argv[2] if len(sys.argv) > 2 else "small"
+    video_url     = sys.argv[1]
+    rounds_spec   = sys.argv[2] if len(sys.argv) > 2 else ""
+    whisper_model = sys.argv[3] if len(sys.argv) > 3 else "small"
 
     print("=== 1/3 : Nettoyage R2 ===")
     clean_r2()
 
     print("\n=== 2/3 : Transcription + détection IA ===")
-    run(["python3", os.path.join(BASE_DIR, "src/urkl_transcribe_moments.py"), rounds_spec, whisper_model])
+    run(["python3", os.path.join(BASE_DIR, "src/urkl_transcribe_moments.py"),
+         video_url, rounds_spec, whisper_model])
 
     print("\n=== 3/3 : Download + upload R2 ===")
-    run(["python3", os.path.join(BASE_DIR, "src/urkl_download.py"), "0"])
+    run(["python3", os.path.join(BASE_DIR, "src/urkl_download.py"), "0", video_url])
 
     print("\nPipeline terminé. Lance le serveur de validation :")
     print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_validate.py')} 8888")

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Télécharge les clips URKL depuis YouTube et les stocke dans R2 (persistant).
-Usage: python3 src/urkl_download.py [max_clips]
+Usage: python3 src/urkl_download.py [max_clips] [video_url]
   max_clips: 0 = tous, sinon top N par dB (défaut 5 pour tests)
+  video_url: URL YouTube de la vidéo source (défaut : dernière connue)
 """
 import json, subprocess, os, sys, time, random, tempfile
 
@@ -12,9 +13,10 @@ import urkl_r2 as r2lib
 
 MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
 COOKIES      = os.path.join(BASE_DIR, "data/yt_cookies.txt")
-URL          = "https://www.youtube.com/watch?v=vpyO73jyx1g"
+DEFAULT_URL  = "https://www.youtube.com/watch?v=vpyO73jyx1g"
 
 MAX_CLIPS = int(sys.argv[1]) if len(sys.argv) > 1 else 5
+URL       = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_URL
 
 with open(MOMENTS_JSON) as f:
     all_moments = json.load(f)
@@ -64,7 +66,7 @@ for i, m in enumerate(moments_selected):
             "--remote-components", "ejs:github",
             "--download-sections", f"*{start_ts}-{end_ts}",
             "--force-keyframes-at-cuts",
-            "-f", "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720]",
+            "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
             "--merge-output-format", "mp4",
             "--no-part",
             "-o", tmp_path,
@@ -74,7 +76,7 @@ for i, m in enumerate(moments_selected):
         ok = os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 200_000
 
         if not ok:
-            cmd[cmd.index("-f") + 1] = "best[height<=720]/bestvideo[height<=720]+bestaudio/best"
+            cmd[cmd.index("-f") + 1] = "best[height<=1080]/bestvideo[height<=1080]+bestaudio/best"
             subprocess.run(cmd, capture_output=True, text=True)
             ok = os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 200_000
 

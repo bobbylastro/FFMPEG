@@ -3,9 +3,13 @@ name: URKL Pipeline (détection IA + upload R2)
 on:
   workflow_dispatch:
     inputs:
-      rounds_spec:
-        description: "Plages de rounds, ex: 48:00-56:00,1:08:00-1:16:00"
+      video_url:
+        description: "URL YouTube de la vidéo/stream à analyser"
         required: true
+      rounds_spec:
+        description: "Plages de rounds, ex: 48:00-56:00,1:08:00-1:16:00 (vide = toute la vidéo)"
+        required: false
+        default: ""
       whisper_model:
         description: "Modèle Whisper (tiny|base|small|medium|large)"
         required: false
@@ -50,7 +54,7 @@ jobs:
           R2_ACCESS_KEY:     ${{ secrets.R2_ACCESS_KEY }}
           R2_SECRET_KEY:     ${{ secrets.R2_SECRET_KEY }}
         run: |
-          python3 src/urkl_pipeline.py "${{ github.event.inputs.rounds_spec }}" "${{ github.event.inputs.whisper_model }}"
+          python3 src/urkl_pipeline.py "${{ github.event.inputs.video_url }}" "${{ github.event.inputs.rounds_spec }}" "${{ github.event.inputs.whisper_model }}"
 
       - name: Commit des moments détectés
         run: |
