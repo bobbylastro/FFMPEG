@@ -8,6 +8,7 @@ import os, sys, json, threading, subprocess, urllib.parse, tempfile
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
+import urkl_youtube_compile
 
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
@@ -20,6 +21,10 @@ compile_log    = []
 compile_result = {}
 compile_event  = threading.Event()
 compile_lock   = threading.Lock()
+
+yt_compile_log    = []
+yt_compile_result = {}
+yt_compile_event  = threading.Event()
 
 # ── Thumbs ─────────────────────────────────────────────────────────────────
 
@@ -124,6 +129,18 @@ def do_compile(validated_files: list):
         compile_event.set()
 
 
+def do_compile_youtube(validated_files: list):
+    global yt_compile_result
+    yt_compile_log.clear()
+    try:
+        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, log=yt_compile_log.append)
+    except Exception as e:
+        yt_compile_log.append(f"ERREUR: {e}")
+        yt_compile_result = {"ok": False, "error": str(e)}
+    finally:
+        yt_compile_event.set()
+
+
 # ── HTML ────────────────────────────────────────────────────────────────────
 
 HTML_PAGE = r"""<!DOCTYPE html>
@@ -146,6 +163,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 #btn-all          { background: #444; color: #eee; }
 #btn-none         { background: #333; color: #aaa; }
 #btn-compile      { background: #f59e0b; color: #000; }
+#btn-compile-yt   { background: #ff0000; color: #fff; }
 #btn-validate-sel:disabled,#btn-refuse-sel:disabled { opacity:.4; cursor:default; }
 
 #grid { display:flex; flex-wrap:wrap; gap:12px; padding:16px; }
@@ -174,13 +192,13 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 .btn-v { background:#16a34a; color:#fff; }
 .btn-r { background:#b91c1c; color:#fff; }
 
-#compile-panel { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
+#compile-panel, #compile-panel-yt { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85);
                  align-items:center; justify-content:center; z-index:100; }
-#compile-panel.show { display:flex; }
-#compile-box { background:#1a1a1a; border:1px solid #333; border-radius:10px;
+#compile-panel.show, #compile-panel-yt.show { display:flex; }
+#compile-box, #compile-box-yt { background:#1a1a1a; border:1px solid #333; border-radius:10px;
                padding:24px; width:580px; max-width:95vw; }
-#compile-box h2 { margin-bottom:12px; }
-#compile-log { background:#111; border:1px solid #222; padding:10px; border-radius:4px;
+#compile-box h2, #compile-box-yt h2 { margin-bottom:12px; }
+#compile-log, #compile-log-yt { background:#111; border:1px solid #222; padding:10px; border-radius:4px;
                font-family:monospace; font-size:.8rem; max-height:320px; overflow-y:auto;
                white-space:pre-wrap; }
 #compile-close { margin-top:14px; float:right; background:#333; color:#eee; }
@@ -196,6 +214,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
     <button id="btn-validate-sel" onclick="batchValidate()" disabled>Valider sélection</button>
     <button id="btn-refuse-sel"   onclick="batchRefuse()"   disabled>Refuser sélection</button>
     <button id="btn-compile" onclick="startCompile()">Compiler</button>
+    <button id="btn-compile-yt" onclick="startCompileYoutube()">🎬 Compiler YouTube</button>
   </div>
 </header>
 <div id="grid"></div>
@@ -207,6 +226,17 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
       <button id="btn-cleanup" onclick="cleanupCompiled()"
               style="display:none;background:#ef4444;color:#fff;">🗑️ Supprimer clips compilés</button>
       <button id="compile-close" onclick="closeCompile()" style="background:#333;color:#eee;">Fermer</button>
+    </div>
+  </div>
+</div>
+<div id="compile-panel-yt">
+  <div id="compile-box-yt">
+    <h2>Compilation YouTube (vidéo longue + Short)…</h2>
+    <div id="compile-log-yt"></div>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
+      <button id="btn-cleanup-yt" onclick="cleanupCompiledYt()"
+              style="display:none;background:#ef4444;color:#fff;">🗑️ Supprimer clips compilés</button>
+      <button onclick="closeCompileYt()" style="background:#333;color:#eee;">Fermer</button>
     </div>
   </div>
 </div>
@@ -325,6 +355,42 @@ function closeCompile() {
   document.getElementById('compile-panel').classList.remove('show');
   clearInterval(pollInterval);
 }
+
+let pollIntervalYt;
+function startCompileYoutube() {
+  document.getElementById('compile-panel-yt').classList.add('show');
+  document.getElementById('compile-log-yt').textContent = 'Démarrage...';
+  document.getElementById('btn-cleanup-yt').style.display = 'none';
+  fetch('/api/compile_youtube', {method:'POST'});
+  pollIntervalYt = setInterval(async () => {
+    const d = await (await fetch('/api/log_youtube')).json();
+    document.getElementById('compile-log-yt').textContent = d.log.join('\n');
+    document.getElementById('compile-log-yt').scrollTop = 9999;
+    if (d.done) {
+      clearInterval(pollIntervalYt);
+      if (d.result?.ok) {
+        document.getElementById('compile-log-yt').textContent +=
+          `\n\n✅ Terminé !\nCompilation : ${d.result.long_url}\nShort : ${d.result.short_url}`;
+        document.getElementById('btn-cleanup-yt').style.display = 'inline-block';
+      } else {
+        document.getElementById('compile-log-yt').textContent += '\n\n❌ ' + (d.result?.error||'?');
+      }
+    }
+  }, 1500);
+}
+async function cleanupCompiledYt() {
+  document.getElementById('btn-cleanup-yt').textContent = 'Suppression...';
+  document.getElementById('btn-cleanup-yt').disabled = true;
+  await fetch('/api/cleanup', {method:'POST'});
+  document.getElementById('compile-log-yt').textContent += '\n🗑️ Clips compilés supprimés de R2.';
+  document.getElementById('btn-cleanup-yt').style.display = 'none';
+  closeCompileYt();
+  loadClips();
+}
+function closeCompileYt() {
+  document.getElementById('compile-panel-yt').classList.remove('show');
+  clearInterval(pollIntervalYt);
+}
 loadClips();
 </script>
 </body>
@@ -391,6 +457,11 @@ class Handler(BaseHTTPRequestHandler):
                 done = compile_event.is_set()
             self.send_json({"log": list(compile_log), "done": done,
                             "result": compile_result if done else None})
+
+        elif path == "/api/log_youtube":
+            done = yt_compile_event.is_set()
+            self.send_json({"log": list(yt_compile_log), "done": done,
+                            "result": yt_compile_result if done else None})
 
         elif path.startswith("/thumbs/"):
             fname = path[len("/thumbs/"):]
@@ -465,6 +536,19 @@ class Handler(BaseHTTPRequestHandler):
             compile_result.clear()
             compile_log.clear()
             t = threading.Thread(target=do_compile, args=(validated,), daemon=True)
+            t.start()
+            self.send_json({"ok": True, "count": len(validated)})
+
+        elif path == "/api/compile_youtube":
+            state = r2lib.load_state()
+            validated = sorted(f for f, s in state.items() if s == "validated")
+            if not validated:
+                self.send_json({"ok": False, "error": "Aucun clip validé"}, 400)
+                return
+            yt_compile_event.clear()
+            yt_compile_result.clear()
+            yt_compile_log.clear()
+            t = threading.Thread(target=do_compile_youtube, args=(validated,), daemon=True)
             t.start()
             self.send_json({"ok": True, "count": len(validated)})
 
