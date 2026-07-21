@@ -1,9 +1,9 @@
 {
-  "ts": 1784327421.3074412,
+  "ts": 1784640852.6577246,
   "feeds": [
     [
-      "RockstarINTEL",
-      "https://rockstarintel.com/feed/"
+      "Wccftech",
+      "https://wccftech.com/feed/"
     ],
     [
       "ScreenRant",
@@ -14,84 +14,112 @@
       "https://www.thegamer.com/feed/"
     ],
     [
-      "centraljersey.com",
-      "https://centraljersey.com/feed/"
+      "Creative Bloq",
+      "https://www.creativebloq.com/feed/"
     ],
     [
-      "GamesIndustry.biz",
-      "https://www.gamesindustry.biz/feed/"
-    ],
-    [
-      "Polygon.com",
-      "https://www.polygon.com/feed/"
-    ],
-    [
-      "svg.com",
-      "https://www.svg.com/feed/"
-    ],
-    [
-      "PlayStation Universe",
-      "https://www.psu.com/feed/"
-    ],
-    [
-      "IGN Nordic",
-      "https://nordic.ign.com/rss"
-    ],
-    [
-      "Wccftech",
-      "https://wccftech.com/feed/"
+      "Northeast Times",
+      "https://northeasttimes.com/feed/"
     ],
     [
       "IGN Southeast Asia",
       "https://sea.ign.com/rss"
     ],
     [
-      "HotHardware",
-      "https://hothardware.com/rss/"
+      "player.one",
+      "https://www.player.one/rss/"
+    ],
+    [
+      "The Mary Sue",
+      "https://www.themarysue.com/feed/"
+    ],
+    [
+      "GamesIndustry.biz",
+      "https://www.gamesindustry.biz/feed/"
+    ],
+    [
+      "IGN India",
+      "https://in.ign.com/rss"
     ],
     [
       "Mashable",
       "https://mashable.com/feed/"
     ],
     [
-      "GamingBolt",
-      "https://gamingbolt.com/feed/"
+      "Collider",
+      "https://collider.com/feed/"
     ],
     [
       "KTLA",
       "https://ktla.com/feed/"
     ],
     [
-      "Collider",
-      "https://collider.com/feed/"
+      "Game Developer",
+      "https://www.gamedeveloper.com/rss.xml"
     ],
     [
       "Inverse",
       "https://www.inverse.com/rss/"
     ],
     [
-      "Insider Gaming",
-      "https://insider-gaming.com/feed/"
+      "GamingBolt",
+      "https://gamingbolt.com/feed/"
     ],
     [
-      "Game Developer",
-      "https://www.gamedeveloper.com/rss.xml"
+      "Game Informer",
+      "https://gameinformer.com/rss.xml"
     ],
     [
       "Man of Many",
       "https://manofmany.com/feed/"
     ],
     [
+      "9to5Toys",
+      "https://9to5toys.com/feed/"
+    ],
+    [
+      "Polygon.com",
+      "https://www.polygon.com/feed/"
+    ],
+    [
       "PlayStation.Blog",
       "https://blog.playstation.com/feed/"
     ],
     [
-      "DualShockers",
-      "https://www.dualshockers.com/feed/"
+      "Outlook Respawn",
+      "https://respawn.outlookindia.com/rss.xml"
     ],
     [
-      "9to5Toys",
-      "https://9to5toys.com/feed/"
+      "Yahoo Finance",
+      "https://finance.yahoo.com/rss/"
+    ],
+    [
+      "IGN Nordic",
+      "https://nordic.ign.com/rss"
+    ],
+    [
+      "Consequence of Sound",
+      "https://consequence.net/feed/"
+    ],
+    [
+      "LAmag",
+      "https://lamag.com/feed/"
+    ],
+    [
+      "Engadget",
+      "https://www.engadget.com/feed/"
+    ],
+    [
+      "Military.com",
+      "https://www.military.com/feed/"
+    ],
+    [
+      "RockstarINTEL",
+      "https://rockstarintel.com/feed/"
+    ],
+    [
+      "gHacks",
+      "https://www.ghacks.net/feed/"
     ]
   ]
 }
