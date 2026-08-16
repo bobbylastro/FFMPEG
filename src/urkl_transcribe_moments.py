@@ -16,7 +16,7 @@ Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whi
 Écrit directement dans data/<league>_moments.json (même format que urkl_detect.py), prêt
 pour python3 src/urkl_download.py 0 <video_url> <league>.
 """
-import sys, os, json, subprocess, tempfile, shutil, re, struct, math, hashlib
+import sys, os, json, subprocess, tempfile, shutil, re, struct, math, hashlib, glob
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
@@ -36,9 +36,10 @@ SCORE_THRESHOLD  = 6.0       # score combiné mini (sur 10) pour garder un momen
 
 
 def _cache_path_for(url: str) -> str:
-    """Cache par URL — évite de réutiliser l'audio d'une autre vidéo par erreur."""
+    """Base de cache par URL (sans extension — déterminée au téléchargement selon la
+    source) — évite de réutiliser l'audio d'une autre vidéo par erreur."""
     h = hashlib.md5(url.encode()).hexdigest()[:12]
-    return f"/tmp/urkl_full_audio_cache_{h}.webm"
+    return f"/tmp/urkl_full_audio_cache_{h}"
 
 
 def get_video_duration(url: str) -> float:
@@ -62,33 +63,42 @@ def fmt(s: float) -> str:
     return f"{s//3600:02d}:{(s%3600)//60:02d}:{s%60:02d}"
 
 
-def download_full_audio(url: str, cache_path: str = None) -> str:
+def download_full_audio(url: str, cache_base: str = None) -> str:
     """Télécharge l'audio complet du stream EN CONTINU (rapide) et le met en cache.
 
     --download-sections fait un seek dans le flux DASH de YouTube, ce qui se fait
     beaucoup plus throttle par le CDN qu'un téléchargement séquentiel complet.
     On télécharge donc une seule fois en continu, puis on découpe localement.
+
+    Fallback bestaudio/best : certaines sources (ex. broadcasts X/Twitter en HLS)
+    n'exposent pas de piste audio séparée, seulement un flux muxé vidéo+audio — dans ce
+    cas on télécharge le meilleur flux muxé disponible ; la vidéo est ignorée aux étapes
+    suivantes (Whisper/ffmpeg ne lisent que la piste audio).
     """
-    cache_path = cache_path or _cache_path_for(url)
-    if os.path.exists(cache_path) and os.path.getsize(cache_path) > 1_000_000:
-        print(f"  Audio complet déjà en cache ({os.path.getsize(cache_path)/1024/1024:.0f} MB), skip download")
-        return cache_path
+    cache_base = cache_base or _cache_path_for(url)
+    cached = glob.glob(cache_base + ".*")
+    if cached and os.path.getsize(cached[0]) > 1_000_000:
+        print(f"  Audio complet déjà en cache ({os.path.getsize(cached[0])/1024/1024:.0f} MB), skip download")
+        return cached[0]
 
     cmd = [
         "yt-dlp", "--cookies", COOKIES, "--no-update",
         "--js-runtimes", "node", "--remote-components", "ejs:github",
-        "-f", "bestaudio", "-o", cache_path, "--no-part", url,
+        "-f", "bestaudio/best", "-o", cache_base + ".%(ext)s", "--no-part", url,
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
-    if not os.path.exists(cache_path):
+    downloaded = glob.glob(cache_base + ".*")
+    if not downloaded:
         raise RuntimeError(f"Download audio complet échoué: {result.stderr[-500:]}")
+    cache_path = downloaded[0]
     print(f"  Audio complet téléchargé ({os.path.getsize(cache_path)/1024/1024:.0f} MB)")
     return cache_path
 
 
 def slice_round_audio(full_audio: str, start: int, end: int, tmp_dir: str, idx: int) -> str:
     """Découpe un round localement depuis l'audio complet (instantané, pas de réseau)."""
-    out_path = os.path.join(tmp_dir, f"round_{idx}.webm")
+    ext = os.path.splitext(full_audio)[1] or ".mkv"
+    out_path = os.path.join(tmp_dir, f"round_{idx}{ext}")
     cmd = [
         "ffmpeg", "-y", "-i", full_audio,
         "-ss", str(start), "-to", str(end),
