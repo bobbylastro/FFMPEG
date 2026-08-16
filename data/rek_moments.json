@@ -5,7 +5,7 @@
     "end": 367,
     "db": -18.0,
     "score": 6.9,
-    "reason": "LA robot lands a kick at the beginning of the match; casters react with 'Oh!'"
+    "reason": "LA robot lands a kick at the beginning of the match"
   },
   {
     "peak": 416,
@@ -13,7 +13,7 @@
     "end": 419,
     "db": -20.0,
     "score": 6.2,
-    "reason": "Great shot landed on Andy; casters explicitly call it 'a great shot'"
+    "reason": "Great shot landed on Andy by opponent"
   },
   {
     "peak": 438,
@@ -21,6 +21,262 @@
     "end": 441,
     "db": -19.6,
     "score": 6.4,
-    "reason": "Casters react 'Oh, that was a great knee' by Suss; clear landing"
+    "reason": "Great knee strike landed by Suss"
+  },
+  {
+    "peak": 578,
+    "start": 571,
+    "end": 581,
+    "db": -21.3,
+    "score": 6.4,
+    "reason": "Nice trade by Andy - direct exchange of punches"
+  },
+  {
+    "peak": 592,
+    "start": 585,
+    "end": 595,
+    "db": -22.5,
+    "score": 6.7,
+    "reason": "Great kick straight to the chest, caster hears impact from distance"
+  },
+  {
+    "peak": 618,
+    "start": 611,
+    "end": 621,
+    "db": -21.2,
+    "score": 7.1,
+    "reason": "Andy capitalizing against opponent against wall, attempting serious damage"
+  },
+  {
+    "peak": 630,
+    "start": 623,
+    "end": 633,
+    "db": -19.7,
+    "score": 8.8,
+    "reason": "Leg almost broke off - visible damage/malfunction from strikes"
+  },
+  {
+    "peak": 690,
+    "start": 683,
+    "end": 693,
+    "db": -21.2,
+    "score": 7.2,
+    "reason": "Red hitting a 360 strike during active exchange"
+  },
+  {
+    "peak": 701,
+    "start": 694,
+    "end": 704,
+    "db": -20.8,
+    "score": 6.1,
+    "reason": "Damage to glass from strike impact"
+  },
+  {
+    "peak": 713,
+    "start": 706,
+    "end": 716,
+    "db": -21.8,
+    "score": 6.1,
+    "reason": "Nice one by Andy again - solid strike while opponent against wall"
+  },
+  {
+    "peak": 742,
+    "start": 735,
+    "end": 745,
+    "db": -20.6,
+    "score": 8.0,
+    "reason": "Huge kick right there from Sus into the wall"
+  },
+  {
+    "peak": 901,
+    "start": 894,
+    "end": 904,
+    "db": -19.3,
+    "score": 8.4,
+    "reason": "Casters react with shock ('Oh my God') to Sus landing a huge kick that causes visible damage and staggers Andy back significantly"
+  },
+  {
+    "peak": 929,
+    "start": 922,
+    "end": 932,
+    "db": -18.8,
+    "score": 8.0,
+    "reason": "Sus's leg gets staggered from a strike, casters note the leg 'almost broke off' and was 'really staggered' — significant impact damage"
+  },
+  {
+    "peak": 961,
+    "start": 954,
+    "end": 964,
+    "db": -17.9,
+    "score": 8.8,
+    "reason": "Casters exclaim 'Oh my God' as Andy's head partially comes off at the final moment — major damage near round end"
+  },
+  {
+    "peak": 1101,
+    "start": 1094,
+    "end": 1104,
+    "db": -18.3,
+    "score": 6.2,
+    "reason": "Early exchange with two points potentially scored on both sides — casters note solid opening striking"
+  },
+  {
+    "peak": 1145,
+    "start": 1138,
+    "end": 1148,
+    "db": -19.5,
+    "score": 8.8,
+    "reason": "Red robot takes heavy damage, a part of its head comes off — casters react with shock ('absolutely insane damage') and call the round over"
+  },
+  {
+    "peak": 1811,
+    "start": 1804,
+    "end": 1814,
+    "db": -20.4,
+    "score": 6.8,
+    "reason": "Caster exclaims 'Oh, that was a good one!' — sudden reaction to a notable strike or exchange"
+  },
+  {
+    "peak": 1843,
+    "start": 1836,
+    "end": 1846,
+    "db": -21.0,
+    "score": 7.3,
+    "reason": "Caster says 'Huge connections right there so they falling backwards' — robot knocked back/staggered from a strike"
+  },
+  {
+    "peak": 1964,
+    "start": 1957,
+    "end": 1967,
+    "db": -18.8,
+    "score": 6.4,
+    "reason": "Second 'Oh!' exclamation as Asone continues early aggression with kicks"
+  },
+  {
+    "peak": 1966,
+    "start": 1959,
+    "end": 1969,
+    "db": -18.8,
+    "score": 7.6,
+    "reason": "Caster reaction 'Oh my God!' suggests significant damage or knockdown; casters then mention robots are 'really stable' but being knocked down by hitting against wall with follow-ups"
+  },
+  {
+    "peak": 1975,
+    "start": 1968,
+    "end": 1978,
+    "db": -22.3,
+    "score": 6.5,
+    "reason": "Blue robot's chest plate comes completely off as a result of strikes—visible structural damage from combat impact"
+  },
+  {
+    "peak": 1988,
+    "start": 1981,
+    "end": 1991,
+    "db": -20.5,
+    "score": 7.0,
+    "reason": "Casters celebrate the breakage ('Bouchin' dope! Bouchin' dope!') and mention Japan 'coming to embarrass the United States', indicating dominant offensive exchange"
+  },
+  {
+    "peak": 2045,
+    "start": 2038,
+    "end": 2048,
+    "db": -16.4,
+    "score": 9.3,
+    "reason": "Casters react with extreme surprise and excitement ('Oh! Oh my God! Oh my God!'), suggesting a major strike or knockdown just occurred"
+  },
+  {
+    "peak": 2050,
+    "start": 2043,
+    "end": 2053,
+    "db": -15.3,
+    "score": 8.8,
+    "reason": "After knockdown, casters react with surprise ('He's going on! Oh, he's back!') at how fast the Japanese robot recovers from being downed—dramatic comeback moment"
+  },
+  {
+    "peak": 2054,
+    "start": 2047,
+    "end": 2057,
+    "db": -16.7,
+    "score": 8.6,
+    "reason": "Casters exclaim 'Holy shit! Holy shit!' in response to the fast recovery, showing genuine shock at the turnaround"
+  },
+  {
+    "peak": 2063,
+    "start": 2056,
+    "end": 2066,
+    "db": -19.2,
+    "score": 7.5,
+    "reason": "Casters acknowledge 'He got his robot up super fast. He was not guessing out'—emphasizing the dramatic speed of recovery after knockdown"
+  },
+  {
+    "peak": 2073,
+    "start": 2066,
+    "end": 2076,
+    "db": -18.4,
+    "score": 7.1,
+    "reason": "Final 'Oh!' exclamation as round concludes, followed by casters calling it 'definitely the best round I've seen'"
+  },
+  {
+    "peak": 2173,
+    "start": 2166,
+    "end": 2176,
+    "db": -23.2,
+    "score": 6.2,
+    "reason": "Reference to Asone being 'down for the count' but 'came back up' — robot recovered from a knockdown caused by opponent"
+  },
+  {
+    "peak": 2200,
+    "start": 2193,
+    "end": 2203,
+    "db": -21.7,
+    "score": 6.1,
+    "reason": "Double roundhouse kick exchange between Asone and Dash, with Asone lining up first — direct striking action"
+  },
+  {
+    "peak": 2204,
+    "start": 2197,
+    "end": 2207,
+    "db": -17.8,
+    "score": 8.7,
+    "reason": "Caster exclamation 'Oh, my God!' followed by description of 'one hell of a fucking recovery' and 'insane' stability — indicates a robot was knocked down and recovered dramatically from a strike"
+  },
+  {
+    "peak": 3303,
+    "start": 3296,
+    "end": 3306,
+    "db": -20.1,
+    "score": 6.2,
+    "reason": "Caster exclaims 'Holy shit!' at the start of action, suggesting opening exchanges or an impressive early strike"
+  },
+  {
+    "peak": 3316,
+    "start": 3309,
+    "end": 3319,
+    "db": -20.4,
+    "score": 6.6,
+    "reason": "Casters exclaim 'Holy shit!' with clear excitement, indicating a significant strike or exchange has just occurred"
+  },
+  {
+    "peak": 3318,
+    "start": 3311,
+    "end": 3321,
+    "db": -20.4,
+    "score": 6.0,
+    "reason": "Casters announce 'Two points to both sides right there' indicating both robots have landed scoring strikes in rapid exchange"
+  },
+  {
+    "peak": 3330,
+    "start": 3323,
+    "end": 3333,
+    "db": -18.3,
+    "score": 8.8,
+    "reason": "Robot gets knocked down hard; casters react with urgent exclamations 'Oh! Oh, shit!' followed by 'Is he gonna get back up? He's down!' indicating a major knockdown from opponent's strike"
+  },
+  {
+    "peak": 3528,
+    "start": 3521,
+    "end": 3531,
+    "db": -21.1,
+    "score": 6.4,
+    "reason": "Casters call out 'that was a great kick right there' with SasLike scoring two points on a kick"
   }
 ]
