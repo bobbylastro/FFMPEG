@@ -1,0 +1,26 @@
+[
+  {
+    "peak": 364,
+    "start": 357,
+    "end": 367,
+    "db": -18.0,
+    "score": 6.9,
+    "reason": "LA robot lands a kick at the beginning of the match; casters react with 'Oh!'"
+  },
+  {
+    "peak": 416,
+    "start": 409,
+    "end": 419,
+    "db": -20.0,
+    "score": 6.2,
+    "reason": "Great shot landed on Andy; casters explicitly call it 'a great shot'"
+  },
+  {
+    "peak": 438,
+    "start": 431,
+    "end": 441,
+    "db": -19.6,
+    "score": 6.4,
+    "reason": "Casters react 'Oh, that was a great knee' by Suss; clear landing"
+  }
+]
