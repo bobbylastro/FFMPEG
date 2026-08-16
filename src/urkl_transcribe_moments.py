@@ -1,31 +1,34 @@
 #!/usr/bin/env python3
 """
-Détection des moments forts URKL par transcription + analyse IA (remplace urkl_detect.py
-+ urkl_filter_rounds.py) : transcrit l'audio des rounds (langue auto-détectée -> anglais
-via Whisper) et demande à Claude Haiku de repérer les moments de combat réel d'après les
-réactions des casters, plutôt que par pic de volume brut.
+Détection des moments forts d'une ligue de combat de robots (URKL, REK, ...) par
+transcription + analyse IA (remplace urkl_detect.py + urkl_filter_rounds.py) : transcrit
+l'audio des rounds (langue auto-détectée -> anglais via Whisper) et demande à Claude Haiku
+de repérer les moments de combat réel d'après les réactions des casters, plutôt que par
+pic de volume brut.
 
-Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model]
-  video_url: URL YouTube de la vidéo/stream à analyser
+Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league]
+  video_url: URL de la vidéo/stream à analyser (YouTube, X/Twitter broadcast, ...)
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
                (vide ou omis = toute la vidéo)
   whisper_model: tiny|base|small|medium|large (défaut: small)
+  league: urkl|rek (défaut: urkl) — sépare les données/clips par ligue
 
-Écrit directement dans data/urkl_moments.json (même format que urkl_detect.py), prêt pour
-python3 src/urkl_download.py 0 <video_url>.
+Écrit directement dans data/<league>_moments.json (même format que urkl_detect.py), prêt
+pour python3 src/urkl_download.py 0 <video_url> <league>.
 """
 import sys, os, json, subprocess, tempfile, shutil, re, struct, math, hashlib
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 
 import whisper
 import anthropic
 from config.settings import ANTHROPIC_API_KEY
+import urkl_r2 as r2lib
 
 COOKIES          = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 MODEL_ID         = "claude-haiku-4-5-20251001"
-MOMENTS_JSON     = os.path.join(BASE_DIR, "data/urkl_moments.json")
 PRE, POST        = 7, 3      # secondes autour du timecode identifié par l'IA
 TEXT_WEIGHT      = 0.6       # poids de l'intensité texte (Haiku) dans le score combiné
 DB_WEIGHT        = 0.4       # poids du percentile dB (relatif au round) dans le score combiné
@@ -98,11 +101,11 @@ def slice_round_audio(full_audio: str, start: int, end: int, tmp_dir: str, idx: 
     return out_path
 
 
-def build_prompt(transcript: str) -> str:
-    return f"""You are analyzing a caster transcript (translated from Chinese) of URKL, a robot combat show.
+def build_prompt(transcript: str, league_name: str = "URKL") -> str:
+    return f"""You are analyzing a caster transcript (translated from Chinese) of {league_name}, a robot combat show.
 
-IMPORTANT — what URKL actually is: this is NOT a BattleBots-style show with wheeled robots,
-saws, hammers, or flamethrowers. URKL features two HUMANOID robots striking each other —
+IMPORTANT — what {league_name} actually is: this is NOT a BattleBots-style show with wheeled robots,
+saws, hammers, or flamethrowers. {league_name} features two HUMANOID robots striking each other —
 mostly punches, and jumping or standing kicks, with occasional acrobatic strikes — scored like
 a point-fighting combat sport (points for landed strikes and knockdowns). There are no onboard
 weapons. These are robots, not trained human fighters: don't expect or look for grappling,
@@ -218,7 +221,7 @@ def db_percentile(db_timeline: dict, db: float) -> float:
     return 100.0 * below / len(values)
 
 
-def ask_haiku(client, transcript, max_retries: int = 2):
+def ask_haiku(client, transcript, league_name: str = "URKL", max_retries: int = 2):
     """Appelle Haiku ; si la réponse est vide ([]), retente (variance d'échantillonnage
     du LLM sur des transcripts ambigus/mal traduits — souvent un faux négatif)."""
     total_in = total_out = 0
@@ -226,7 +229,7 @@ def ask_haiku(client, transcript, max_retries: int = 2):
         resp = client.messages.create(
             model=MODEL_ID,
             max_tokens=4096,
-            messages=[{"role": "user", "content": build_prompt(transcript)}],
+            messages=[{"role": "user", "content": build_prompt(transcript, league_name)}],
         )
         total_in += resp.usage.input_tokens
         total_out += resp.usage.output_tokens
@@ -248,6 +251,9 @@ def main():
     video_url   = sys.argv[1]
     rounds_spec = sys.argv[2] if len(sys.argv) > 2 else ""
     whisper_model_name = sys.argv[3] if len(sys.argv) > 3 else "small"
+    league      = sys.argv[4] if len(sys.argv) > 4 else "urkl"
+    league_name = r2lib.display_name(league)
+    moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
 
     if rounds_spec.strip():
         windows = []
@@ -272,7 +278,7 @@ def main():
     step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if step_summary:
         with open(step_summary, "a") as f:
-            f.write("\n## URKL — moments détectés par round\n\n")
+            f.write(f"\n## {league_name} — moments détectés par round\n\n")
             f.write("| Round | Plage | Segments | Proposés | Gardés |\n")
             f.write("|---|---|---|---|---|\n")
 
@@ -302,7 +308,7 @@ def main():
             transcript = "\n".join(line for _, line in lines)
 
             print("  Analyse Haiku...", flush=True)
-            round_moments, in_tok, out_tok = ask_haiku(client, transcript)
+            round_moments, in_tok, out_tok = ask_haiku(client, transcript, league_name)
             total_in += in_tok
             total_out += out_tok
 
@@ -351,11 +357,11 @@ def main():
     print(f"Total : {total_kept} moments gardés / {total_rejected} rejetés (seuil score {SCORE_THRESHOLD}), sur {len(windows)} rounds")
     print(f"Tokens Haiku — input: {total_in}, output: {total_out}")
 
-    os.makedirs(os.path.dirname(MOMENTS_JSON), exist_ok=True)
-    with open(MOMENTS_JSON, "w") as f:
+    os.makedirs(os.path.dirname(moments_json), exist_ok=True)
+    with open(moments_json, "w") as f:
         json.dump(all_moments, f, indent=2, ensure_ascii=False)
-    print(f"\nSauvegardé : {MOMENTS_JSON}")
-    print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0 \"{video_url}\"")
+    print(f"\nSauvegardé : {moments_json}")
+    print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0 \"{video_url}\" {league}")
 
 
 if __name__ == "__main__":

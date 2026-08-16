@@ -1,6 +1,8 @@
 """
-Compile les clips URKL validés en vidéo YouTube (compilation longue + Shorts) et upload
-le tout, avec titre/description/miniature générés comme pour les autres jeux.
+Compile les clips d'une ligue de combat de robots (URKL, REK, ...) validés en vidéo
+YouTube (compilation longue + Shorts) et upload le tout, avec titre/description/miniature
+générés comme pour les autres jeux. `league` (urkl|rek) sert de game_slug — il isole
+l'historique d'épisodes, les clips R2 et le contenu généré entre les deux ligues.
 
 - Compilation longue : tous les clips validés, concaténation brute + musique de fond
   UNIQUEMENT (pas d'overlay titre/logo, pas de chapitres — contrairement à R6, ce sont
@@ -29,17 +31,16 @@ from generate_thumbnail import generate_thumbnail, bump_episode
 from process_long import _add_background_music
 from upload_youtube import upload_video
 
-MOMENTS_JSON     = os.path.join(BASE_DIR, "data/urkl_moments.json")
-GAME_SLUG        = "urkl"
 SHORT_GROUP_SIZE = 4   # clips par Short
 SHORT_SPACING    = timedelta(days=2)   # intervalle entre deux Shorts
 FIRST_SHORT_DELAY = timedelta(hours=2)  # délai avant le tout premier Short
 
 
-def _load_moments_by_fname() -> dict:
-    if not os.path.exists(MOMENTS_JSON):
+def _load_moments_by_fname(league: str = "urkl") -> dict:
+    moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
+    if not os.path.exists(moments_json):
         return {}
-    with open(MOMENTS_JSON) as f:
+    with open(moments_json) as f:
         moments = _json.load(f)
     return {f"clip_{idx+1:02d}.mp4": m for idx, m in enumerate(moments)}
 
@@ -48,11 +49,11 @@ def _group_clips(clips: list[dict], size: int = SHORT_GROUP_SIZE) -> list[list[d
     return [clips[i:i + size] for i in range(0, len(clips), size)]
 
 
-def _build_urkl_long(clips: list[dict]) -> str:
+def _build_urkl_long(clips: list[dict], league: str = "urkl") -> str:
     """Concatène les clips bruts (pas d'overlay titre/logo) + musique de fond."""
     os.makedirs(OUTPUT_LONG, exist_ok=True)
     date_str = datetime.now().strftime("%Y-%m-%d")
-    output_path = os.path.abspath(f"{OUTPUT_LONG}/{date_str}_urkl_compilation.mp4")
+    output_path = os.path.abspath(f"{OUTPUT_LONG}/{date_str}_{league}_compilation.mp4")
 
     with tempfile.TemporaryDirectory() as tmpdir:
         list_path = os.path.join(tmpdir, "list.txt")
@@ -72,7 +73,7 @@ def _build_urkl_long(clips: list[dict]) -> str:
     return _add_background_music(output_path)
 
 
-def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "") -> str:
+def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "", league: str = "urkl") -> str:
     """Concatène les clips donnés en une seule vidéo verticale 9:16."""
     cropped = []
     for i, c in enumerate(clips):
@@ -95,7 +96,7 @@ def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "") -> str:
 
     os.makedirs(OUTPUT_SHORTS, exist_ok=True)
     date_str = datetime.now().strftime("%Y-%m-%d")
-    out_path = os.path.abspath(f"{OUTPUT_SHORTS}/{date_str}_urkl_short_{suffix}.mp4")
+    out_path = os.path.abspath(f"{OUTPUT_SHORTS}/{date_str}_{league}_short_{suffix}.mp4")
     subprocess.run([
         "ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", list_path,
         "-c", "copy", "-movflags", "+faststart", out_path,
@@ -106,11 +107,14 @@ def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "") -> str:
     return out_path
 
 
-def compile_youtube(validated_files: list[str], log=print) -> dict:
+def compile_youtube(validated_files: list[str], league: str = "urkl", log=print) -> dict:
     """Télécharge les clips validés, monte compilation + Shorts, génère le contenu et
-    upload le tout sur YouTube. Retourne {"ok": bool, "long_url", "short_urls", "error"}."""
+    upload le tout sur YouTube. `league` (urkl|rek) sert de game_slug : épisode, R2,
+    thème/miniature et contenu générés sont tous isolés par ligue.
+    Retourne {"ok": bool, "long_url", "short_urls", "error"}."""
+    game_slug = league
     r2 = r2lib.client()
-    moments_by_fname = _load_moments_by_fname()
+    moments_by_fname = _load_moments_by_fname(league)
     tmp_dir = tempfile.mkdtemp(prefix="urkl_yt_compile_")
 
     try:
@@ -118,7 +122,7 @@ def compile_youtube(validated_files: list[str], log=print) -> dict:
         for fname in validated_files:
             local_path = os.path.join(tmp_dir, fname)
             log(f"Téléchargement {fname}...")
-            r2lib.download_clip(fname, local_path, r2)
+            r2lib.download_clip(fname, local_path, r2, league)
 
             moment = moments_by_fname.get(fname, {})
             score  = moment.get("score", 0) or 0
@@ -127,10 +131,10 @@ def compile_youtube(validated_files: list[str], log=print) -> dict:
                 "id":               fname.replace(".mp4", ""),
                 "local_path":       local_path,
                 "title":            reason[:80],
-                "broadcaster_name": "URKL",
+                "broadcaster_name": r2lib.display_name(league),
                 "view_count":       int(score * 100),  # proxy pour choisir le meilleur clip (thumbnail)
                 "duration":         10,
-                "_game":            GAME_SLUG,
+                "_game":            game_slug,
             })
 
         if not clips:
@@ -140,16 +144,16 @@ def compile_youtube(validated_files: list[str], log=print) -> dict:
         log(f"{len(short_groups)} Short(s) prévu(s) ({SHORT_GROUP_SIZE} clips max par Short)")
 
         log(f"Montage de la compilation longue ({len(clips)} clips, sans overlay)...")
-        long_path = _build_urkl_long(clips)
+        long_path = _build_urkl_long(clips, league)
 
         short_paths = []
         for i, group in enumerate(short_groups):
             log(f"Montage du Short {i+1}/{len(short_groups)} ({len(group)} clips)...")
-            short_paths.append(_build_urkl_short(group, tmp_dir, suffix=str(i)))
+            short_paths.append(_build_urkl_short(group, tmp_dir, suffix=str(i), league=league))
 
-        episode     = bump_episode(GAME_SLUG)
-        title       = get_youtube_title(GAME_SLUG, episode)
-        description = get_youtube_description(GAME_SLUG, episode)
+        episode     = bump_episode(game_slug)
+        title       = get_youtube_title(game_slug, episode)
+        description = get_youtube_description(game_slug, episode)
 
         # Un pseudo-clip par groupe (titre = raisons combinées) pour que generate_ai_content
         # génère un titre/description par Short plutôt que par clip individuel.
@@ -162,14 +166,14 @@ def compile_youtube(validated_files: list[str], log=print) -> dict:
         _chapters, short_descs, short_titles = generate_ai_content(clips, group_pseudo_clips)
 
         log("Génération de la miniature...")
-        thumb_path = generate_thumbnail(clips, GAME_SLUG, episode)
+        thumb_path = generate_thumbnail(clips, game_slug, episode)
 
         tags = re.findall(r"#(\w+)", description)[:15]
 
         log("Upload YouTube — compilation longue...")
         long_id  = upload_video(
             video_path=long_path, title=title, description=description,
-            thumbnail_path=thumb_path, tags=tags, privacy="public", game_slug=GAME_SLUG,
+            thumbnail_path=thumb_path, tags=tags, privacy="public", game_slug=game_slug,
         )
         long_url = f"https://youtu.be/{long_id}"
         log(f"Compilation uploadée → {long_url}")
@@ -186,7 +190,7 @@ def compile_youtube(validated_files: list[str], log=print) -> dict:
             short_id = upload_video(
                 video_path=short_path, title=f"{short_title} #Shorts"[:100],
                 description=short_desc, tags=short_tags, privacy="public",
-                game_slug=GAME_SLUG, publish_at=publish_at,
+                game_slug=game_slug, publish_at=publish_at,
             )
             short_url = f"https://youtu.be/{short_id}"
             short_urls.append(short_url)

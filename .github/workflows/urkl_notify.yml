@@ -1,4 +1,4 @@
-name: URKL TikTok Email Notification
+name: Robot Combat TikTok Email Notification
 
 on:
   workflow_dispatch:
@@ -13,11 +13,23 @@ on:
         description: "Number of clips in the compilation"
         required: false
         default: "?"
+      league:
+        description: "Ligue (urkl|rek)"
+        required: false
+        default: "urkl"
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Compute display name
+        id: league
+        run: |
+          case "${{ github.event.inputs.league }}" in
+            rek) echo "name=REK" >> "$GITHUB_OUTPUT" ;;
+            *)   echo "name=URKL" >> "$GITHUB_OUTPUT" ;;
+          esac
+
       - name: Send email
         uses: dawidd6/action-send-mail@v3
         with:
@@ -25,11 +37,11 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "🤖 URKL — ${{ github.event.inputs.clip_count }} clips prêts à poster"
+          subject: "🤖 ${{ steps.league.outputs.name }} — ${{ github.event.inputs.clip_count }} clips prêts à poster"
           to: bobbylastronaute@gmail.com
-          from: URKL Pipeline
+          from: Robot Combat Pipeline
           body: |
-            🤖 Compilation URKL prête — ${{ github.event.inputs.clip_count }} clips
+            🤖 Compilation ${{ steps.league.outputs.name }} prête — ${{ github.event.inputs.clip_count }} clips
 
             Ouvre ce lien sur ton iPhone pour enregistrer dans Photos :
             ${{ github.event.inputs.video_url }}

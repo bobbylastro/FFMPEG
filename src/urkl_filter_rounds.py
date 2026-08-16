@@ -3,9 +3,10 @@
 Filtre les moments détectés pour ne garder que ceux dans les rounds de combat.
 Nettoie R2 et relance le download sur les moments filtrés.
 
-Usage: python3 src/urkl_filter_rounds.py <rounds_spec>
+Usage: python3 src/urkl_filter_rounds.py <rounds_spec> [league]
   rounds_spec: liste de plages "MM:SS-MM:SS,MM:SS-MM:SS,..."
                ou "HH:MM:SS-HH:MM:SS,..."
+  league: urkl|rek (défaut: urkl)
 
 Exemple (URKL 2026-07-17):
   python3 src/urkl_filter_rounds.py "48:00-56:00,1:08:00-1:16:00,1:22:00-1:30:00,1:37:00-1:45:00,1:49:00-1:57:00,1:58:00-2:08:00"
@@ -16,7 +17,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
 
-MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
+LEAGUE = sys.argv[2] if len(sys.argv) > 2 else "urkl"
+MOMENTS_JSON = os.path.join(BASE_DIR, f"data/{LEAGUE}_moments.json")
 
 
 def parse_ts(s: str) -> int:
@@ -60,13 +62,13 @@ print(f"\nSauvegardé : {MOMENTS_JSON}")
 
 # Nettoyer les clips R2 qui ne sont plus dans la liste
 r2 = r2lib.client()
-clips_in_r2 = r2lib.list_clips(r2)
+clips_in_r2 = r2lib.list_clips(r2, LEAGUE)
 if clips_in_r2:
     print(f"\nNettoyage R2 ({len(clips_in_r2)} clips)...")
     for c in clips_in_r2:
-        r2lib.delete_clip(c, r2)
-    r2lib.save_state({}, r2)
+        r2lib.delete_clip(c, r2, LEAGUE)
+    r2lib.save_state({}, r2, LEAGUE)
     print("R2 nettoyé.")
 
 print(f"\nRelance le download :")
-print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0")
+print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0 \"\" {LEAGUE}")

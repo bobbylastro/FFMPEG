@@ -108,6 +108,16 @@ GAME_HEADLINES = {
         "UNREAL MOMENTS",
         "WEEKLY HIGHLIGHTS",
     ],
+    "rek": [
+        "BEST KNOCKOUTS",
+        "INSANE KOs",
+        "ROBOT MMA",
+        "TOP KNOCKDOWNS",
+        "BRUTAL COMBOS",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "WEEKLY HIGHLIGHTS",
+    ],
 }
 
 GAME_THEMES = {
@@ -146,6 +156,11 @@ GAME_THEMES = {
         "secondary": (255, 255, 255),
         "overlay":   (10,   5,   5,  140),
     },
+    "rek": {
+        "primary":   (0,   200, 220),
+        "secondary": (255, 255, 255),
+        "overlay":   (5,   10,  15,  140),
+    },
 }
 _FALLBACK_THEME = {
     "primary":   (255, 200,  50),
@@ -162,6 +177,7 @@ GAME_DISPLAY_NAMES = {
     "rainbow-six-siege": "RAINBOW SIX SIEGE",
     "r6-siege":          "RAINBOW SIX SIEGE",
     "urkl":              "URKL",
+    "rek":               "REK",
 }
 
 

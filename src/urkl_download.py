@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Télécharge les clips URKL depuis YouTube et les stocke dans R2 (persistant).
-Usage: python3 src/urkl_download.py [max_clips] [video_url]
+Télécharge les clips d'une ligue de combat de robots (URKL, REK, ...) et les stocke dans
+R2 (persistant).
+Usage: python3 src/urkl_download.py [max_clips] [video_url] [league]
   max_clips: 0 = tous, sinon top N par dB (défaut 5 pour tests)
-  video_url: URL YouTube de la vidéo source (défaut : dernière connue)
+  video_url: URL de la vidéo source, YouTube ou X/Twitter broadcast (défaut : dernière connue)
+  league: urkl|rek (défaut: urkl)
 """
 import json, subprocess, os, sys, time, random, tempfile
 
@@ -11,12 +13,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 import urkl_r2 as r2lib
 
-MOMENTS_JSON = os.path.join(BASE_DIR, "data/urkl_moments.json")
 COOKIES      = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 DEFAULT_URL  = "https://www.youtube.com/watch?v=vpyO73jyx1g"
 
 MAX_CLIPS = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 URL       = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_URL
+LEAGUE    = sys.argv[3] if len(sys.argv) > 3 else "urkl"
+MOMENTS_JSON = os.path.join(BASE_DIR, f"data/{LEAGUE}_moments.json")
 
 with open(MOMENTS_JSON) as f:
     all_moments = json.load(f)
@@ -47,7 +50,7 @@ for i, m in enumerate(moments_selected):
     start_ts = sec_to_hms(m["start"])
     end_ts   = sec_to_hms(m["end"])
 
-    if r2lib.clip_exists(fname, r2):
+    if r2lib.clip_exists(fname, r2, LEAGUE):
         print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  déjà dans R2 ✓")
         continue
 
@@ -83,7 +86,7 @@ for i, m in enumerate(moments_selected):
         if ok:
             size_kb = os.path.getsize(tmp_path) // 1024
             print(f"  téléchargé ({size_kb}KB) → upload R2...", end=" ", flush=True)
-            r2lib.upload_clip(tmp_path, fname, r2)
+            r2lib.upload_clip(tmp_path, fname, r2, LEAGUE)
             print("OK ✓")
             sleep = random.uniform(4, 9)
             time.sleep(sleep)
@@ -97,9 +100,9 @@ for i, m in enumerate(moments_selected):
             os.unlink(tmp_path)
 
 print(f"\n{'='*50}")
-clips_in_r2 = r2lib.list_clips(r2)
+clips_in_r2 = r2lib.list_clips(r2, LEAGUE)
 print(f"Clips dans R2 : {len(clips_in_r2)}")
 if failed:
     print(f"Clips échoués : {failed}")
 print(f"\nTéléchargement terminé. Lance le serveur :")
-print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_validate.py')} 8888")
+print(f"  python3 {os.path.join(BASE_DIR, 'src/urkl_validate.py')} 8888 {LEAGUE}")

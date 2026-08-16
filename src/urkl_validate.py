@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Serveur de validation des clips URKL. Les clips sont streamés depuis R2.
-Usage: python3 src/urkl_validate.py [port]
+Serveur de validation des clips d'une ligue de combat de robots (URKL, REK, ...). Les
+clips sont streamés depuis R2.
+Usage: python3 src/urkl_validate.py [port] [league]
+  league: urkl|rek (défaut: urkl) — isole les clips/état R2 et les données de cette ligue
 """
 import os, sys, json, threading, subprocess, urllib.parse, tempfile
 
@@ -13,7 +15,9 @@ import urkl_youtube_compile
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 PORT          = int(sys.argv[1]) if len(sys.argv) > 1 else 8888
-MOMENTS_JSON  = os.path.join(BASE_DIR, "data/urkl_moments.json")
+LEAGUE        = sys.argv[2] if len(sys.argv) > 2 else "urkl"
+LEAGUE_NAME   = r2lib.display_name(LEAGUE)
+MOMENTS_JSON  = os.path.join(BASE_DIR, f"data/{LEAGUE}_moments.json")
 URKL_NOTIFIER = os.path.join(BASE_DIR, "src/urkl_notifier.py")
 COOKIES       = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 
@@ -37,21 +41,21 @@ def get_or_make_thumb(fname: str) -> bytes | None:
 
     r2 = r2lib.client()
 
-    if not r2lib.thumb_exists(fname, r2):
+    if not r2lib.thumb_exists(fname, r2, LEAGUE):
         # Download clip to tmp, extract frame, upload thumb
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tf:
             clip_tmp = tf.name
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tf:
             thumb_tmp = tf.name
         try:
-            r2lib.download_clip(fname, clip_tmp, r2)
+            r2lib.download_clip(fname, clip_tmp, r2, LEAGUE)
             subprocess.run(
                 ["ffmpeg", "-y", "-ss", "7", "-i", clip_tmp,
                  "-vframes", "1", "-q:v", "4", "-vf", "scale=320:-1", thumb_tmp],
                 capture_output=True
             )
             if os.path.exists(thumb_tmp) and os.path.getsize(thumb_tmp) > 0:
-                r2lib.upload_thumb(thumb_tmp, fname, r2)
+                r2lib.upload_thumb(thumb_tmp, fname, r2, LEAGUE)
         finally:
             for p in (clip_tmp, thumb_tmp):
                 try: os.unlink(p)
@@ -59,7 +63,7 @@ def get_or_make_thumb(fname: str) -> bytes | None:
 
     # Fetch from R2
     try:
-        obj = r2lib.client().get_object(Bucket=r2lib.R2_BUCKET, Key=r2lib.thumb_key(fname))
+        obj = r2lib.client().get_object(Bucket=r2lib.R2_BUCKET, Key=r2lib.thumb_key(fname, LEAGUE))
         data = obj["Body"].read()
         THUMB_CACHE[fname] = data
         return data
@@ -82,12 +86,12 @@ def do_compile(validated_files: list):
         for fname in validated_files:
             local_path = os.path.join(tmp_dir, fname)
             compile_log.append(f"  Téléchargement {fname} depuis R2...")
-            r2lib.download_clip(fname, local_path, r2)
+            r2lib.download_clip(fname, local_path, r2, LEAGUE)
             local_clips.append(local_path)
 
         compile_log.append("ffmpeg concat en cours...")
         list_path = os.path.join(tmp_dir, "_concat.txt")
-        out_path  = os.path.join(tmp_dir, "compilation_urkl.mp4")
+        out_path  = os.path.join(tmp_dir, f"compilation_{LEAGUE}.mp4")
 
         with open(list_path, "w") as f:
             for p in local_clips:
@@ -110,7 +114,7 @@ def do_compile(validated_files: list):
 
         compile_log.append("Envoi notification (R2 + email)...")
         nr = subprocess.run(
-            ["python3", URKL_NOTIFIER, out_path, str(len(validated_files))],
+            ["python3", URKL_NOTIFIER, out_path, str(len(validated_files)), LEAGUE],
             capture_output=True, text=True, cwd=BASE_DIR
         )
         for line in (nr.stdout or "").strip().split("\n"):
@@ -133,7 +137,7 @@ def do_compile_youtube(validated_files: list):
     global yt_compile_result
     yt_compile_log.clear()
     try:
-        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, log=yt_compile_log.append)
+        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, league=LEAGUE, log=yt_compile_log.append)
     except Exception as e:
         yt_compile_log.append(f"ERREUR: {e}")
         yt_compile_result = {"ok": False, "error": str(e)}
@@ -147,7 +151,7 @@ HTML_PAGE = r"""<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>URKL — Validation</title>
+<title>__LEAGUE_NAME__ — Validation</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; color: #eee; font-family: sans-serif; }
@@ -206,7 +210,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 </head>
 <body>
 <header>
-  <h1>🤖 URKL — Validation</h1>
+  <h1>🤖 __LEAGUE_NAME__ — Validation</h1>
   <span id="stats">Chargement...</span>
   <div class="toolbar">
     <button id="btn-all"  onclick="selectAll()">Tout cocher</button>
@@ -415,7 +419,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
 
         if path in ("/", "/index.html"):
-            body = HTML_PAGE.encode()
+            body = HTML_PAGE.replace("__LEAGUE_NAME__", LEAGUE_NAME).encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", len(body))
@@ -424,8 +428,8 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/clips":
             r2 = r2lib.client()
-            clips_in_r2 = r2lib.list_clips(r2)
-            state = r2lib.load_state(r2)
+            clips_in_r2 = r2lib.list_clips(r2, LEAGUE)
+            state = r2lib.load_state(r2, LEAGUE)
 
             # Load dB / score / reason info from moments if available
             db_map = {}
@@ -444,7 +448,7 @@ class Handler(BaseHTTPRequestHandler):
             for fname in clips_in_r2:
                 clips.append({
                     "file": fname,
-                    "url":  r2lib.clip_url(fname),
+                    "url":  r2lib.clip_url(fname, LEAGUE),
                     "status": state.get(fname, "pending"),
                     "db": db_map.get(fname),
                     "score": score_map.get(fname),
@@ -486,49 +490,49 @@ class Handler(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(length)) if length else {}
 
         if path == "/api/validate":
-            state = r2lib.load_state()
+            state = r2lib.load_state(league=LEAGUE)
             state[body["file"]] = "validated"
-            r2lib.save_state(state)
+            r2lib.save_state(state, league=LEAGUE)
             self.send_json({"ok": True})
 
         elif path == "/api/refuse":
             fname = body["file"]
             r2 = r2lib.client()
-            state = r2lib.load_state(r2)
+            state = r2lib.load_state(r2, LEAGUE)
             state.pop(fname, None)
-            r2lib.save_state(state, r2)
-            r2lib.delete_clip(fname, r2)
+            r2lib.save_state(state, r2, LEAGUE)
+            r2lib.delete_clip(fname, r2, LEAGUE)
             THUMB_CACHE.pop(fname, None)
             self.send_json({"ok": True})
 
         elif path == "/api/validate_batch":
-            state = r2lib.load_state()
+            state = r2lib.load_state(league=LEAGUE)
             for f in body.get("files", []): state[f] = "validated"
-            r2lib.save_state(state)
+            r2lib.save_state(state, league=LEAGUE)
             self.send_json({"ok": True})
 
         elif path == "/api/refuse_batch":
             r2 = r2lib.client()
-            state = r2lib.load_state(r2)
+            state = r2lib.load_state(r2, LEAGUE)
             for f in body.get("files", []):
                 state.pop(f, None)
-                r2lib.delete_clip(f, r2)
+                r2lib.delete_clip(f, r2, LEAGUE)
                 THUMB_CACHE.pop(f, None)
-            r2lib.save_state(state, r2)
+            r2lib.save_state(state, r2, LEAGUE)
             self.send_json({"ok": True})
 
         elif path == "/api/cleanup":
             r2 = r2lib.client()
-            state = r2lib.load_state(r2)
+            state = r2lib.load_state(r2, LEAGUE)
             validated = [f for f, s in state.items() if s == "validated"]
             for f in validated:
-                r2lib.delete_clip(f, r2)
+                r2lib.delete_clip(f, r2, LEAGUE)
                 THUMB_CACHE.pop(f, None)
-            r2lib.save_state({}, r2)
+            r2lib.save_state({}, r2, LEAGUE)
             self.send_json({"ok": True, "deleted": len(validated)})
 
         elif path == "/api/compile":
-            state = r2lib.load_state()
+            state = r2lib.load_state(league=LEAGUE)
             validated = sorted(f for f, s in state.items() if s == "validated")
             if not validated:
                 self.send_json({"ok": False, "error": "Aucun clip validé"}, 400)
@@ -541,7 +545,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"ok": True, "count": len(validated)})
 
         elif path == "/api/compile_youtube":
-            state = r2lib.load_state()
+            state = r2lib.load_state(league=LEAGUE)
             validated = sorted(f for f, s in state.items() if s == "validated")
             if not validated:
                 self.send_json({"ok": False, "error": "Aucun clip validé"}, 400)
@@ -559,9 +563,9 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     r2 = r2lib.client()
-    clips_count = len(r2lib.list_clips(r2))
-    state = r2lib.load_state(r2)
+    clips_count = len(r2lib.list_clips(r2, LEAGUE))
+    state = r2lib.load_state(r2, LEAGUE)
     v = sum(1 for s in state.values() if s == "validated")
-    print(f"Serveur URKL démarré sur http://0.0.0.0:{PORT}")
+    print(f"Serveur {LEAGUE_NAME} démarré sur http://0.0.0.0:{PORT}")
     print(f"Clips dans R2 : {clips_count}  (validés: {v})")
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

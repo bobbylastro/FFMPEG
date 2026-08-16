@@ -1,12 +1,12 @@
 """
-Post-compilation notifier for URKL robot fight compilations.
+Post-compilation notifier for robot fight compilations (URKL, REK, ...).
 After a compilation is done in validate_server.py:
   1. Generates a varied TikTok EN caption via Claude
   2. Uploads the video to R2
   3. Triggers urkl_notify.yml GitHub workflow to send the email
 
 Usage (standalone test):
-  python3 src/urkl_notifier.py /path/to/compilation.mp4 5
+  python3 src/urkl_notifier.py /path/to/compilation.mp4 5 [league]
 """
 import os
 import sys
@@ -20,14 +20,20 @@ from dotenv import load_dotenv
 import anthropic
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, "src"))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
+import urkl_r2 as r2lib
 
 R2_ENDPOINT   = os.getenv("R2_ENDPOINT", "https://04b6deea0b051f8adfb8273b37d9861f.r2.cloudflarestorage.com")
 R2_BUCKET     = os.getenv("R2_BUCKET", "clips")
 R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY")
 R2_SECRET_KEY = os.getenv("R2_SECRET_KEY")
 R2_PUBLIC_BASE = "https://clips.ultimate-playground.com"
-LAST_R2_STATE  = os.path.join(BASE_DIR, "data/urkl_last_r2.json")
+
+
+def _last_r2_state_path(league: str = "urkl") -> str:
+    return os.path.join(BASE_DIR, f"data/{league}_last_r2.json")
+
 
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
@@ -41,27 +47,30 @@ CAPTION_ANGLES = [
     "hype/call-to-action — get the viewer to share or tag a friend",
 ]
 
-HASHTAG_SETS = [
-    "#robotmma #urkl #robotfight",
-    "#robotmma #urkl #combatrobots",
-    "#urkl #robotcombat #mma",
-    "#robotfight #urkl #robots",
-    "#urkl #robotmma #fighting",
-    "#urkl #epicfights #robots",
-]
+
+def _hashtag_sets(league: str = "urkl") -> list[str]:
+    return [
+        f"#robotmma #{league} #robotfight",
+        f"#robotmma #{league} #combatrobots",
+        f"#{league} #robotcombat #mma",
+        f"#robotfight #{league} #robots",
+        f"#{league} #robotmma #fighting",
+        f"#{league} #epicfights #robots",
+    ]
 
 
-def generate_caption(clip_count: int) -> str:
-    """Generate a varied TikTok EN caption for a URKL robot fight compilation."""
+def generate_caption(clip_count: int, league: str = "urkl") -> str:
+    """Generate a varied TikTok EN caption for a robot fight compilation."""
+    league_name = r2lib.display_name(league)
     if not ANTHROPIC_API_KEY:
-        return f"🤖 TOP {clip_count} ROBOT MMA MOMENTS 🔥 Pure knockout power\n#robotmma #urkl #robotfight"
+        return f"🤖 TOP {clip_count} ROBOT MMA MOMENTS 🔥 Pure knockout power\n#robotmma #{league} #robotfight"
 
     angle = random.choice(CAPTION_ANGLES)
-    hashtags = random.choice(HASHTAG_SETS)
+    hashtags = random.choice(_hashtag_sets(league))
 
-    prompt = f"""You write TikTok captions for robot combat highlight compilations (URKL league).
+    prompt = f"""You write TikTok captions for robot combat highlight compilations ({league_name} league).
 
-IMPORTANT — what URKL actually is: two HUMANOID robots fighting like MMA/boxing/kickboxing
+IMPORTANT — what {league_name} actually is: two HUMANOID robots fighting like MMA/boxing/kickboxing
 fighters — punches, kicks, knockdowns, KOs. This is NOT BattleBots (no wheeled robots, no
 saws, no weapons, no sparks/fire). Frame it like robot MMA/combat sports, not mechanical
 destruction.
@@ -104,12 +113,13 @@ def _r2_client():
     )
 
 
-def _delete_previous_r2(client) -> None:
-    """Delete the previous URKL compilation (video + player page) from R2 if exists."""
-    if not os.path.exists(LAST_R2_STATE):
+def _delete_previous_r2(client, league: str = "urkl") -> None:
+    """Delete the previous compilation (video + player page) from R2 if exists."""
+    last_r2_state = _last_r2_state_path(league)
+    if not os.path.exists(last_r2_state):
         return
     try:
-        with open(LAST_R2_STATE) as f:
+        with open(last_r2_state) as f:
             state = json.load(f)
         for key_field in ("r2_key", "player_key"):
             old_key = state.get(key_field)
@@ -120,17 +130,17 @@ def _delete_previous_r2(client) -> None:
         print(f"[urkl_notifier] Suppression R2 échouée (ignorée): {e}")
 
 
-def _make_player_html(video_url: str, clip_count: int) -> str:
+def _make_player_html(video_url: str, clip_count: int, league: str = "urkl") -> str:
     """Page HTML pour sauvegarder la compilation dans Photos sur iPhone."""
     import json as _json
     v = _json.dumps(video_url)
-    title = _json.dumps(f"URKL — {clip_count} clips")
+    title = _json.dumps(f"{r2lib.display_name(league)} — {clip_count} clips")
     return f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>URKL Compilation</title>
+<title>{r2lib.display_name(league)} Compilation</title>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 html,body{{height:100%;background:#0a0a0a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}}
@@ -144,7 +154,7 @@ video{{width:100%;max-width:480px;max-height:60vh;border-radius:12px;background:
 </head>
 <body>
 <video id="v" playsinline controls preload="auto"></video>
-<p class="title">🤖 URKL Robot Fight Compilation</p>
+<p class="title">🤖 {r2lib.display_name(league)} Robot Fight Compilation</p>
 <button class="btn" id="btn" disabled>Chargement…</button>
 <p class="hint" id="hint">Si ça ne marche pas : appuie longuement sur la vidéo → "Enregistrer dans Photos"</p>
 <script>
@@ -161,7 +171,7 @@ fetch(videoUrl).then(r=>r.blob()).then(b=>{{
 }});
 btn.onclick=function(){{
   if(!readyBlob){{hint.textContent='Encore en chargement…';return;}}
-  const file=new File([readyBlob],'urkl_compilation.mp4',{{type:'video/mp4'}});
+  const file=new File([readyBlob],'{league}_compilation.mp4',{{type:'video/mp4'}});
   if(navigator.share&&navigator.canShare&&navigator.canShare({{files:[file]}})){{
     navigator.share({{files:[file],title:videoTitle}}).catch(()=>{{
       hint.textContent='Appuie longuement sur la vidéo → "Enregistrer dans Photos"';
@@ -169,7 +179,7 @@ btn.onclick=function(){{
   }}else{{
     const a=document.createElement('a');
     a.href=URL.createObjectURL(readyBlob);
-    a.download='urkl_compilation.mp4';
+    a.download='{league}_compilation.mp4';
     document.body.appendChild(a);a.click();
     setTimeout(()=>{{URL.revokeObjectURL(a.href);document.body.removeChild(a)}},1000);
   }}
@@ -179,14 +189,14 @@ btn.onclick=function(){{
 </html>"""
 
 
-def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
+def upload_to_r2(video_path: str, clip_count: int, league: str = "urkl") -> tuple[str, str]:
     """Upload video + player page to R2, delete previous. Returns (video_url, player_url)."""
     client = _r2_client()
-    _delete_previous_r2(client)
+    _delete_previous_r2(client, league)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    r2_key     = f"urkl/compilation_{ts}.mp4"
-    player_key = "urkl/player_latest.html"  # URL fixe — cache-busting via headers
+    r2_key     = f"{league}/compilation_{ts}.mp4"
+    player_key = f"{league}/player_latest.html"  # URL fixe — cache-busting via headers
 
     client.upload_file(
         video_path, R2_BUCKET, r2_key,
@@ -194,7 +204,7 @@ def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
     )
 
     video_url   = f"{R2_PUBLIC_BASE}/{r2_key}"
-    player_html = _make_player_html(video_url, clip_count)
+    player_html = _make_player_html(video_url, clip_count, league)
     client.put_object(
         Bucket=R2_BUCKET, Key=player_key,
         Body=player_html.encode(),
@@ -203,8 +213,9 @@ def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
     )
     player_url = f"{R2_PUBLIC_BASE}/{player_key}?v={ts}"  # query string force-busts browser cache
 
-    os.makedirs(os.path.dirname(LAST_R2_STATE), exist_ok=True)
-    with open(LAST_R2_STATE, "w") as f:
+    last_r2_state = _last_r2_state_path(league)
+    os.makedirs(os.path.dirname(last_r2_state), exist_ok=True)
+    with open(last_r2_state, "w") as f:
         json.dump({
             "r2_key": r2_key,
             "player_key": player_key,
@@ -214,7 +225,7 @@ def upload_to_r2(video_path: str, clip_count: int) -> tuple[str, str]:
     return video_url, player_url
 
 
-def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> bool:
+def trigger_email_workflow(video_url: str, caption: str, clip_count: int, league: str = "urkl") -> bool:
     """Trigger the urkl_notify GitHub Actions workflow to send the email."""
     env = os.environ.copy()
     if os.getenv("GH_TOKEN"):
@@ -225,6 +236,7 @@ def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> boo
             "-f", f"video_url={video_url}",
             "-f", f"caption={caption}",
             "-f", f"clip_count={clip_count}",
+            "-f", f"league={league}",
         ],
         capture_output=True,
         text=True,
@@ -237,13 +249,13 @@ def trigger_email_workflow(video_url: str, caption: str, clip_count: int) -> boo
     return True
 
 
-def run(video_path: str, clip_count: int) -> dict:
+def run(video_path: str, clip_count: int, league: str = "urkl") -> dict:
     """Full post-compilation notification flow. Returns result dict."""
     result = {"ok": False, "caption": "", "video_url": "", "error": ""}
 
-    print(f"[urkl_notifier] Génération caption ({clip_count} clips)…")
+    print(f"[urkl_notifier] Génération caption ({clip_count} clips, {league})…")
     try:
-        caption = generate_caption(clip_count)
+        caption = generate_caption(clip_count, league)
         result["caption"] = caption
         print(f"[urkl_notifier] Caption: {caption[:80]}…")
     except Exception as e:
@@ -252,7 +264,7 @@ def run(video_path: str, clip_count: int) -> dict:
 
     print(f"[urkl_notifier] Upload R2…")
     try:
-        video_url, player_url = upload_to_r2(video_path, clip_count)
+        video_url, player_url = upload_to_r2(video_path, clip_count, league)
         result["video_url"] = video_url
         result["player_url"] = player_url
         print(f"[urkl_notifier] Vidéo : {video_url}")
@@ -262,7 +274,7 @@ def run(video_path: str, clip_count: int) -> dict:
         return result
 
     print(f"[urkl_notifier] Déclenchement email workflow…")
-    ok = trigger_email_workflow(player_url, caption, clip_count)
+    ok = trigger_email_workflow(player_url, caption, clip_count, league)
     if ok:
         result["ok"] = True
         print("[urkl_notifier] Email en route via GitHub Actions ✓")
@@ -274,7 +286,8 @@ def run(video_path: str, clip_count: int) -> dict:
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: python3 urkl_notifier.py /path/video.mp4 <clip_count>")
+        print("Usage: python3 urkl_notifier.py /path/video.mp4 <clip_count> [league]")
         sys.exit(1)
-    r = run(sys.argv[1], int(sys.argv[2]))
+    league_arg = sys.argv[3] if len(sys.argv) > 3 else "urkl"
+    r = run(sys.argv[1], int(sys.argv[2]), league_arg)
     print(json.dumps(r, indent=2, ensure_ascii=False))
