@@ -454,7 +454,7 @@ class Handler(BaseHTTPRequestHandler):
                     "score": score_map.get(fname),
                     "reason": reason_map.get(fname),
                 })
-            clips.sort(key=lambda c: (c["score"] is None, -(c["score"] or c["db"] or 0)))
+            clips.sort(key=lambda c: c["file"])  # chronologique (clip_01, clip_02, ... = ordre de détection)
             self.send_json(clips)
 
         elif path == "/api/log":
