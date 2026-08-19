@@ -461,7 +461,7 @@ class Handler(BaseHTTPRequestHandler):
             reason_map = {}
             moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
             if os.path.exists(moments_json):
-                with open(moments_json) as f:
+                with open(moments_json, encoding="utf-8") as f:
                     moments = json.load(f)
                 for idx, m in enumerate(moments):
                     fname = f"clip_{idx+1:02d}.mp4"

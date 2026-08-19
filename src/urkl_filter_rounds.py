@@ -48,7 +48,7 @@ print(f"Plages de rounds ({len(windows)}) :")
 for lo, hi in windows:
     print(f"  {fmt(lo)} → {fmt(hi)}")
 
-with open(MOMENTS_JSON) as f:
+with open(MOMENTS_JSON, encoding="utf-8") as f:
     moments = json.load(f)
 
 filtered = [m for m in moments if any(lo <= m["start"] <= hi for lo, hi in windows)]
@@ -56,7 +56,7 @@ print(f"\nMoments : {len(moments)} → {len(filtered)} dans les rounds")
 for m in filtered:
     print(f"  {fmt(m['start'])} → {fmt(m['end'])}  ({m['db']:+.0f} dB)")
 
-with open(MOMENTS_JSON, "w") as f:
+with open(MOMENTS_JSON, "w", encoding="utf-8") as f:
     json.dump(filtered, f, indent=2)
 print(f"\nSauvegardé : {MOMENTS_JSON}")
 

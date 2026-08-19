@@ -40,7 +40,7 @@ def _load_moments_by_fname(league: str = "urkl") -> dict:
     moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
     if not os.path.exists(moments_json):
         return {}
-    with open(moments_json) as f:
+    with open(moments_json, encoding="utf-8") as f:
         moments = _json.load(f)
     return {f"clip_{idx+1:02d}.mp4": m for idx, m in enumerate(moments)}
 

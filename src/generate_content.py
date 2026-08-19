@@ -17,7 +17,7 @@ def _load_content(game: str) -> dict:
     path = os.path.join(CONTENT_DIR, f"{slug}.json")
     if not os.path.exists(path):
         raise FileNotFoundError(f"No content file for game: {game} (expected {path})")
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 

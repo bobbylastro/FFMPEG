@@ -21,7 +21,7 @@ URL       = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_URL
 LEAGUE    = sys.argv[3] if len(sys.argv) > 3 else "urkl"
 MOMENTS_JSON = os.path.join(BASE_DIR, f"data/{LEAGUE}_moments.json")
 
-with open(MOMENTS_JSON) as f:
+with open(MOMENTS_JSON, encoding="utf-8") as f:
     all_moments = json.load(f)
 
 if MAX_CLIPS and MAX_CLIPS < len(all_moments):

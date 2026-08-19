@@ -368,7 +368,7 @@ def main():
     print(f"Tokens Haiku — input: {total_in}, output: {total_out}")
 
     os.makedirs(os.path.dirname(moments_json), exist_ok=True)
-    with open(moments_json, "w") as f:
+    with open(moments_json, "w", encoding="utf-8") as f:
         json.dump(all_moments, f, indent=2, ensure_ascii=False)
     print(f"\nSauvegardé : {moments_json}")
     print(f"Lance le download : python3 {os.path.join(BASE_DIR, 'src/urkl_download.py')} 0 \"{video_url}\" {league}")

@@ -119,7 +119,7 @@ def _delete_previous_r2(client, league: str = "urkl") -> None:
     if not os.path.exists(last_r2_state):
         return
     try:
-        with open(last_r2_state) as f:
+        with open(last_r2_state, encoding="utf-8") as f:
             state = json.load(f)
         for key_field in ("r2_key", "player_key"):
             old_key = state.get(key_field)
@@ -215,7 +215,7 @@ def upload_to_r2(video_path: str, clip_count: int, league: str = "urkl") -> tupl
 
     last_r2_state = _last_r2_state_path(league)
     os.makedirs(os.path.dirname(last_r2_state), exist_ok=True)
-    with open(last_r2_state, "w") as f:
+    with open(last_r2_state, "w", encoding="utf-8") as f:
         json.dump({
             "r2_key": r2_key,
             "player_key": player_key,
