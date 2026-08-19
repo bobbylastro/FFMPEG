@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Serveur de validation des clips d'une ligue de combat de robots (URKL, REK, ...). Les
-clips sont streamés depuis R2.
+Serveur de validation des clips de combats de robots (URKL, REK, ...). Les clips sont
+streamés depuis R2. La ligue affichée est sélectionnable dynamiquement dans l'UI (menu
+déroulant en haut de page) sans redémarrer le serveur — chaque action (validation,
+compilation...) suit la ligue actuellement sélectionnée.
 Usage: python3 src/urkl_validate.py [port] [league]
-  league: urkl|rek (défaut: urkl) — isole les clips/état R2 et les données de cette ligue
+  league: urkl|rek (défaut: urkl) — ligue pré-sélectionnée au chargement de la page
 """
 import os, sys, json, threading, subprocess, urllib.parse, tempfile
 
@@ -15,9 +17,9 @@ import urkl_youtube_compile
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 PORT          = int(sys.argv[1]) if len(sys.argv) > 1 else 8888
-LEAGUE        = sys.argv[2] if len(sys.argv) > 2 else "urkl"
+LEAGUE        = sys.argv[2] if len(sys.argv) > 2 else "urkl"  # ligue par défaut au démarrage —
+                                                                # sélectionnable dynamiquement dans l'UI
 LEAGUE_NAME   = r2lib.display_name(LEAGUE)
-MOMENTS_JSON  = os.path.join(BASE_DIR, f"data/{LEAGUE}_moments.json")
 URKL_NOTIFIER = os.path.join(BASE_DIR, "src/urkl_notifier.py")
 COOKIES       = os.path.join(BASE_DIR, "data/yt_cookies.txt")
 
@@ -34,28 +36,29 @@ yt_compile_event  = threading.Event()
 
 THUMB_CACHE = {}
 
-def get_or_make_thumb(fname: str) -> bytes | None:
+def get_or_make_thumb(fname: str, league: str) -> bytes | None:
     """Returns JPEG bytes for the thumbnail, generating + uploading if needed."""
-    if fname in THUMB_CACHE:
-        return THUMB_CACHE[fname]
+    cache_key = f"{league}/{fname}"
+    if cache_key in THUMB_CACHE:
+        return THUMB_CACHE[cache_key]
 
     r2 = r2lib.client()
 
-    if not r2lib.thumb_exists(fname, r2, LEAGUE):
+    if not r2lib.thumb_exists(fname, r2, league):
         # Download clip to tmp, extract frame, upload thumb
         with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tf:
             clip_tmp = tf.name
         with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tf:
             thumb_tmp = tf.name
         try:
-            r2lib.download_clip(fname, clip_tmp, r2, LEAGUE)
+            r2lib.download_clip(fname, clip_tmp, r2, league)
             subprocess.run(
                 ["ffmpeg", "-y", "-ss", "7", "-i", clip_tmp,
                  "-vframes", "1", "-q:v", "4", "-vf", "scale=320:-1", thumb_tmp],
                 capture_output=True
             )
             if os.path.exists(thumb_tmp) and os.path.getsize(thumb_tmp) > 0:
-                r2lib.upload_thumb(thumb_tmp, fname, r2, LEAGUE)
+                r2lib.upload_thumb(thumb_tmp, fname, r2, league)
         finally:
             for p in (clip_tmp, thumb_tmp):
                 try: os.unlink(p)
@@ -63,9 +66,9 @@ def get_or_make_thumb(fname: str) -> bytes | None:
 
     # Fetch from R2
     try:
-        obj = r2lib.client().get_object(Bucket=r2lib.R2_BUCKET, Key=r2lib.thumb_key(fname, LEAGUE))
+        obj = r2lib.client().get_object(Bucket=r2lib.R2_BUCKET, Key=r2lib.thumb_key(fname, league))
         data = obj["Body"].read()
-        THUMB_CACHE[fname] = data
+        THUMB_CACHE[cache_key] = data
         return data
     except Exception:
         return None
@@ -73,10 +76,10 @@ def get_or_make_thumb(fname: str) -> bytes | None:
 
 # ── Compilation ─────────────────────────────────────────────────────────────
 
-def do_compile(validated_files: list):
+def do_compile(validated_files: list, league: str):
     global compile_result
     compile_log.clear()
-    compile_log.append(f"Compilation de {len(validated_files)} clips depuis R2...")
+    compile_log.append(f"Compilation de {len(validated_files)} clips depuis R2 ({r2lib.display_name(league)})...")
 
     r2 = r2lib.client()
     tmp_dir = tempfile.mkdtemp(prefix="urkl_compile_")
@@ -86,12 +89,12 @@ def do_compile(validated_files: list):
         for fname in validated_files:
             local_path = os.path.join(tmp_dir, fname)
             compile_log.append(f"  Téléchargement {fname} depuis R2...")
-            r2lib.download_clip(fname, local_path, r2, LEAGUE)
+            r2lib.download_clip(fname, local_path, r2, league)
             local_clips.append(local_path)
 
         compile_log.append("ffmpeg concat en cours...")
         list_path = os.path.join(tmp_dir, "_concat.txt")
-        out_path  = os.path.join(tmp_dir, f"compilation_{LEAGUE}.mp4")
+        out_path  = os.path.join(tmp_dir, f"compilation_{league}.mp4")
 
         with open(list_path, "w") as f:
             for p in local_clips:
@@ -114,7 +117,7 @@ def do_compile(validated_files: list):
 
         compile_log.append("Envoi notification (R2 + email)...")
         nr = subprocess.run(
-            ["python3", URKL_NOTIFIER, out_path, str(len(validated_files)), LEAGUE],
+            ["python3", URKL_NOTIFIER, out_path, str(len(validated_files)), league],
             capture_output=True, text=True, cwd=BASE_DIR
         )
         for line in (nr.stdout or "").strip().split("\n"):
@@ -133,11 +136,11 @@ def do_compile(validated_files: list):
         compile_event.set()
 
 
-def do_compile_youtube(validated_files: list):
+def do_compile_youtube(validated_files: list, league: str):
     global yt_compile_result
     yt_compile_log.clear()
     try:
-        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, league=LEAGUE, log=yt_compile_log.append)
+        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, league=league, log=yt_compile_log.append)
     except Exception as e:
         yt_compile_log.append(f"ERREUR: {e}")
         yt_compile_result = {"ok": False, "error": str(e)}
@@ -151,14 +154,16 @@ HTML_PAGE = r"""<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>__LEAGUE_NAME__ — Validation</title>
+<title>Validation — Robot Combat</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; color: #eee; font-family: sans-serif; }
 header { background: #1a1a1a; padding: 14px 20px; border-bottom: 1px solid #333;
          display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-header h1 { font-size: 1.1rem; flex: 1; }
-#stats { font-size: .85rem; color: #aaa; white-space: nowrap; }
+header h1 { font-size: 1.1rem; }
+#league-sel { background: #2a2a2a; color: #eee; border: 1px solid #444; border-radius: 4px;
+              padding: 6px 10px; font-size: .9rem; font-weight: bold; cursor: pointer; }
+#stats { font-size: .85rem; color: #aaa; white-space: nowrap; flex: 1; }
 .toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
 button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
          font-size: .85rem; font-weight: bold; }
@@ -210,7 +215,11 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 </head>
 <body>
 <header>
-  <h1>🤖 __LEAGUE_NAME__ — Validation</h1>
+  <h1>🤖 Validation</h1>
+  <select id="league-sel" onchange="switchLeague(this.value)">
+    <option value="urkl">URKL</option>
+    <option value="rek">REK</option>
+  </select>
   <span id="stats">Chargement...</span>
   <div class="toolbar">
     <button id="btn-all"  onclick="selectAll()">Tout cocher</button>
@@ -224,7 +233,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 <div id="grid"></div>
 <div id="compile-panel">
   <div id="compile-box">
-    <h2>Compilation…</h2>
+    <h2 id="compile-title">Compilation…</h2>
     <div id="compile-log"></div>
     <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
       <button id="btn-cleanup" onclick="cleanupCompiled()"
@@ -235,7 +244,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 </div>
 <div id="compile-panel-yt">
   <div id="compile-box-yt">
-    <h2>Compilation YouTube (vidéo longue + Short)…</h2>
+    <h2 id="compile-title-yt">Compilation YouTube (vidéo longue + Short)…</h2>
     <div id="compile-log-yt"></div>
     <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
       <button id="btn-cleanup-yt" onclick="cleanupCompiledYt()"
@@ -246,6 +255,16 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 </div>
 <script>
 const selected = new Set();
+let currentLeague = localStorage.getItem('league') || '__LEAGUE_DEFAULT__';
+document.getElementById('league-sel').value = currentLeague;
+
+function switchLeague(v) {
+  currentLeague = v;
+  localStorage.setItem('league', v);
+  selected.clear();
+  updateSelButtons();
+  loadClips();
+}
 
 function updateSelButtons() {
   const d = selected.size === 0;
@@ -273,7 +292,7 @@ function selectNone() {
 }
 async function api(path, body) {
   return fetch(path, {method:'POST', headers:{'Content-Type':'application/json'},
-                      body: JSON.stringify(body)});
+                      body: JSON.stringify({...body, league: currentLeague})});
 }
 async function setStatus(fname, action) {
   await api('/api/' + action, {file: fname});
@@ -290,7 +309,7 @@ async function batchRefuse() {
   selectNone(); loadClips();
 }
 async function loadClips() {
-  const clips = await (await fetch('/api/clips')).json();
+  const clips = await (await fetch('/api/clips?league=' + encodeURIComponent(currentLeague))).json();
   const cacheBust = Date.now();
   const v = clips.filter(c=>c.status==='validated').length;
   const r = clips.filter(c=>c.status==='refused').length;
@@ -309,7 +328,7 @@ async function loadClips() {
     div.className = cls; div.dataset.file = c.file;
     div.innerHTML = `
       <div class="card-top">
-        <video src="${c.url}?v=${cacheBust}" poster="/thumbs/${c.file}?v=${cacheBust}" preload="none" controls></video>
+        <video src="${c.url}?v=${cacheBust}" poster="/thumbs/${c.file}?league=${currentLeague}&v=${cacheBust}" preload="none" controls></video>
         <label><input type="checkbox" data-file="${c.file}" ${isSel?'checked':''}
                onchange="toggleSelect('${c.file}',this)"></label>
         ${badge}
@@ -327,10 +346,11 @@ async function loadClips() {
 }
 let pollInterval;
 function startCompile() {
+  document.getElementById('compile-title').textContent = `Compilation (${currentLeague.toUpperCase()})…`;
   document.getElementById('compile-panel').classList.add('show');
   document.getElementById('compile-log').textContent = 'Démarrage...';
   document.getElementById('btn-cleanup').style.display = 'none';
-  fetch('/api/compile', {method:'POST'});
+  api('/api/compile', {});
   pollInterval = setInterval(async () => {
     const d = await (await fetch('/api/log')).json();
     document.getElementById('compile-log').textContent = d.log.join('\n');
@@ -349,7 +369,7 @@ function startCompile() {
 async function cleanupCompiled() {
   document.getElementById('btn-cleanup').textContent = 'Suppression...';
   document.getElementById('btn-cleanup').disabled = true;
-  await fetch('/api/cleanup', {method:'POST'});
+  await api('/api/cleanup', {});
   document.getElementById('compile-log').textContent += '\n🗑️ Clips compilés supprimés de R2.';
   document.getElementById('btn-cleanup').style.display = 'none';
   closeCompile();
@@ -362,10 +382,11 @@ function closeCompile() {
 
 let pollIntervalYt;
 function startCompileYoutube() {
+  document.getElementById('compile-title-yt').textContent = `Compilation YouTube (${currentLeague.toUpperCase()}, vidéo longue + Short)…`;
   document.getElementById('compile-panel-yt').classList.add('show');
   document.getElementById('compile-log-yt').textContent = 'Démarrage...';
   document.getElementById('btn-cleanup-yt').style.display = 'none';
-  fetch('/api/compile_youtube', {method:'POST'});
+  api('/api/compile_youtube', {});
   pollIntervalYt = setInterval(async () => {
     const d = await (await fetch('/api/log_youtube')).json();
     document.getElementById('compile-log-yt').textContent = d.log.join('\n');
@@ -386,7 +407,7 @@ function startCompileYoutube() {
 async function cleanupCompiledYt() {
   document.getElementById('btn-cleanup-yt').textContent = 'Suppression...';
   document.getElementById('btn-cleanup-yt').disabled = true;
-  await fetch('/api/cleanup', {method:'POST'});
+  await api('/api/cleanup', {});
   document.getElementById('compile-log-yt').textContent += '\n🗑️ Clips compilés supprimés de R2.';
   document.getElementById('btn-cleanup-yt').style.display = 'none';
   closeCompileYt();
@@ -416,10 +437,13 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        path = urllib.parse.urlparse(self.path).path
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        query = urllib.parse.parse_qs(parsed.query)
+        league = query.get("league", [LEAGUE])[0]
 
         if path in ("/", "/index.html"):
-            body = HTML_PAGE.replace("__LEAGUE_NAME__", LEAGUE_NAME).encode()
+            body = HTML_PAGE.replace("__LEAGUE_DEFAULT__", LEAGUE).encode()
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", len(body))
@@ -428,15 +452,16 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path == "/api/clips":
             r2 = r2lib.client()
-            clips_in_r2 = r2lib.list_clips(r2, LEAGUE)
-            state = r2lib.load_state(r2, LEAGUE)
+            clips_in_r2 = r2lib.list_clips(r2, league)
+            state = r2lib.load_state(r2, league)
 
             # Load dB / score / reason info from moments if available
             db_map = {}
             score_map = {}
             reason_map = {}
-            if os.path.exists(MOMENTS_JSON):
-                with open(MOMENTS_JSON) as f:
+            moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
+            if os.path.exists(moments_json):
+                with open(moments_json) as f:
                     moments = json.load(f)
                 for idx, m in enumerate(moments):
                     fname = f"clip_{idx+1:02d}.mp4"
@@ -448,7 +473,7 @@ class Handler(BaseHTTPRequestHandler):
             for fname in clips_in_r2:
                 clips.append({
                     "file": fname,
-                    "url":  r2lib.clip_url(fname, LEAGUE),
+                    "url":  r2lib.clip_url(fname, league),
                     "status": state.get(fname, "pending"),
                     "db": db_map.get(fname),
                     "score": score_map.get(fname),
@@ -470,7 +495,7 @@ class Handler(BaseHTTPRequestHandler):
 
         elif path.startswith("/thumbs/"):
             fname = path[len("/thumbs/"):]
-            data = get_or_make_thumb(fname)
+            data = get_or_make_thumb(fname, league)
             if data:
                 self.send_response(200)
                 self.send_header("Content-Type", "image/jpeg")
@@ -488,51 +513,52 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         length = int(self.headers.get("Content-Length", 0))
         body = json.loads(self.rfile.read(length)) if length else {}
+        league = body.get("league", LEAGUE)
 
         if path == "/api/validate":
-            state = r2lib.load_state(league=LEAGUE)
+            state = r2lib.load_state(league=league)
             state[body["file"]] = "validated"
-            r2lib.save_state(state, league=LEAGUE)
+            r2lib.save_state(state, league=league)
             self.send_json({"ok": True})
 
         elif path == "/api/refuse":
             fname = body["file"]
             r2 = r2lib.client()
-            state = r2lib.load_state(r2, LEAGUE)
+            state = r2lib.load_state(r2, league)
             state.pop(fname, None)
-            r2lib.save_state(state, r2, LEAGUE)
-            r2lib.delete_clip(fname, r2, LEAGUE)
-            THUMB_CACHE.pop(fname, None)
+            r2lib.save_state(state, r2, league)
+            r2lib.delete_clip(fname, r2, league)
+            THUMB_CACHE.pop(f"{league}/{fname}", None)
             self.send_json({"ok": True})
 
         elif path == "/api/validate_batch":
-            state = r2lib.load_state(league=LEAGUE)
+            state = r2lib.load_state(league=league)
             for f in body.get("files", []): state[f] = "validated"
-            r2lib.save_state(state, league=LEAGUE)
+            r2lib.save_state(state, league=league)
             self.send_json({"ok": True})
 
         elif path == "/api/refuse_batch":
             r2 = r2lib.client()
-            state = r2lib.load_state(r2, LEAGUE)
+            state = r2lib.load_state(r2, league)
             for f in body.get("files", []):
                 state.pop(f, None)
-                r2lib.delete_clip(f, r2, LEAGUE)
-                THUMB_CACHE.pop(f, None)
-            r2lib.save_state(state, r2, LEAGUE)
+                r2lib.delete_clip(f, r2, league)
+                THUMB_CACHE.pop(f"{league}/{f}", None)
+            r2lib.save_state(state, r2, league)
             self.send_json({"ok": True})
 
         elif path == "/api/cleanup":
             r2 = r2lib.client()
-            state = r2lib.load_state(r2, LEAGUE)
+            state = r2lib.load_state(r2, league)
             validated = [f for f, s in state.items() if s == "validated"]
             for f in validated:
-                r2lib.delete_clip(f, r2, LEAGUE)
-                THUMB_CACHE.pop(f, None)
-            r2lib.save_state({}, r2, LEAGUE)
+                r2lib.delete_clip(f, r2, league)
+                THUMB_CACHE.pop(f"{league}/{f}", None)
+            r2lib.save_state({}, r2, league)
             self.send_json({"ok": True, "deleted": len(validated)})
 
         elif path == "/api/compile":
-            state = r2lib.load_state(league=LEAGUE)
+            state = r2lib.load_state(league=league)
             validated = sorted(f for f, s in state.items() if s == "validated")
             if not validated:
                 self.send_json({"ok": False, "error": "Aucun clip validé"}, 400)
@@ -540,12 +566,12 @@ class Handler(BaseHTTPRequestHandler):
             compile_event.clear()
             compile_result.clear()
             compile_log.clear()
-            t = threading.Thread(target=do_compile, args=(validated,), daemon=True)
+            t = threading.Thread(target=do_compile, args=(validated, league), daemon=True)
             t.start()
             self.send_json({"ok": True, "count": len(validated)})
 
         elif path == "/api/compile_youtube":
-            state = r2lib.load_state(league=LEAGUE)
+            state = r2lib.load_state(league=league)
             validated = sorted(f for f, s in state.items() if s == "validated")
             if not validated:
                 self.send_json({"ok": False, "error": "Aucun clip validé"}, 400)
@@ -553,7 +579,7 @@ class Handler(BaseHTTPRequestHandler):
             yt_compile_event.clear()
             yt_compile_result.clear()
             yt_compile_log.clear()
-            t = threading.Thread(target=do_compile_youtube, args=(validated,), daemon=True)
+            t = threading.Thread(target=do_compile_youtube, args=(validated, league), daemon=True)
             t.start()
             self.send_json({"ok": True, "count": len(validated)})
 
@@ -566,6 +592,6 @@ if __name__ == "__main__":
     clips_count = len(r2lib.list_clips(r2, LEAGUE))
     state = r2lib.load_state(r2, LEAGUE)
     v = sum(1 for s in state.values() if s == "validated")
-    print(f"Serveur {LEAGUE_NAME} démarré sur http://0.0.0.0:{PORT}")
-    print(f"Clips dans R2 : {clips_count}  (validés: {v})")
+    print(f"Serveur démarré sur http://0.0.0.0:{PORT} (URKL/REK sélectionnables dans l'UI, défaut: {LEAGUE_NAME})")
+    print(f"Clips dans R2 ({LEAGUE_NAME}) : {clips_count}  (validés: {v})")
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
