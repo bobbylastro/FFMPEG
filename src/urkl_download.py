@@ -95,9 +95,14 @@ for i, m in enumerate(moments_selected):
             # Recadrage local à la durée exacte : la marge téléchargée en plus à la fin
             # absorbe la troncature audio de yt-dlp, ce recoupage ne touche plus le bord
             # problématique (il est maintenant bien après la fin réelle du clip).
+            # Ré-encodage (pas -c copy) : couper à une durée arbitraire tombe rarement pile
+            # sur une keyframe, et une copie de flux sur un point hors-GOP produit un arrêt
+            # sur image en fin de clip (frames de référence manquantes pour le décodeur).
             trim = subprocess.run(
                 ["ffmpeg", "-y", "-i", tmp_path_raw, "-t", str(duration),
-                 "-c", "copy", tmp_path, "-hide_banner", "-loglevel", "error"],
+                 "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+                 "-c:a", "aac", "-b:a", "128k",
+                 tmp_path, "-hide_banner", "-loglevel", "error"],
                 capture_output=True, text=True,
             )
             ok = os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 100_000
