@@ -9,6 +9,7 @@ on:
         options:
           - urkl
           - rek
+          - divers
         default: urkl
       video_url:
         description: "URL de la vidéo/stream à analyser (YouTube ou replay X/Twitter)"

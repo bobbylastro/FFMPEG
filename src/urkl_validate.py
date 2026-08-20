@@ -219,6 +219,7 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
   <select id="league-sel" onchange="switchLeague(this.value)">
     <option value="urkl">URKL</option>
     <option value="rek">REK</option>
+    <option value="divers">Divers</option>
   </select>
   <span id="stats">Chargement...</span>
   <div class="toolbar">

@@ -118,6 +118,16 @@ GAME_HEADLINES = {
         "UNREAL MOMENTS",
         "WEEKLY HIGHLIGHTS",
     ],
+    "divers": [
+        "BEST KNOCKOUTS",
+        "INSANE KOs",
+        "ROBOT MMA",
+        "EXHIBITION FIGHT",
+        "BRUTAL COMBOS",
+        "MUST WATCH",
+        "UNREAL MOMENTS",
+        "RARE FOOTAGE",
+    ],
 }
 
 GAME_THEMES = {
@@ -161,6 +171,11 @@ GAME_THEMES = {
         "secondary": (255, 255, 255),
         "overlay":   (5,   10,  15,  140),
     },
+    "divers": {
+        "primary":   (170,  90, 255),
+        "secondary": (255, 255, 255),
+        "overlay":   (10,   5,  20,  140),
+    },
 }
 _FALLBACK_THEME = {
     "primary":   (255, 200,  50),
@@ -178,6 +193,7 @@ GAME_DISPLAY_NAMES = {
     "r6-siege":          "RAINBOW SIX SIEGE",
     "urkl":              "URKL",
     "rek":               "REK",
+    "divers":            "ROBOT COMBAT",
 }
 
 

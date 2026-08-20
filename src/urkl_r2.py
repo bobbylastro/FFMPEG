@@ -21,7 +21,7 @@ R2_ACCESS_KEY  = os.getenv("R2_ACCESS_KEY")
 R2_SECRET_KEY  = os.getenv("R2_SECRET_KEY")
 R2_PUBLIC_BASE = "https://clips.ultimate-playground.com"
 
-LEAGUE_DISPLAY_NAMES = {"urkl": "URKL", "rek": "REK"}
+LEAGUE_DISPLAY_NAMES = {"urkl": "URKL", "rek": "REK", "divers": "Robot Combat"}
 
 
 def display_name(league: str = "urkl") -> str:

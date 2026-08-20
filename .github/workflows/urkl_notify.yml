@@ -14,7 +14,7 @@ on:
         required: false
         default: "?"
       league:
-        description: "Ligue (urkl|rek)"
+        description: "Ligue (urkl|rek|divers)"
         required: false
         default: "urkl"
 
@@ -26,8 +26,9 @@ jobs:
         id: league
         run: |
           case "${{ github.event.inputs.league }}" in
-            rek) echo "name=REK" >> "$GITHUB_OUTPUT" ;;
-            *)   echo "name=URKL" >> "$GITHUB_OUTPUT" ;;
+            rek)    echo "name=REK" >> "$GITHUB_OUTPUT" ;;
+            divers) echo "name=Robot Combat" >> "$GITHUB_OUTPUT" ;;
+            *)      echo "name=URKL" >> "$GITHUB_OUTPUT" ;;
           esac
 
       - name: Send email
