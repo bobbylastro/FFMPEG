@@ -1,0 +1,106 @@
+[
+  {
+    "peak": 2736,
+    "start": 2729,
+    "end": 2739,
+    "db": -19.4,
+    "score": 6.6,
+    "reason": "Caster exclamation 'Wow, Little black' with sudden intensity spike suggesting a notable strike landed"
+  },
+  {
+    "peak": 2741,
+    "start": 2734,
+    "end": 2744,
+    "db": -19.1,
+    "score": 6.7,
+    "reason": "Multiple consecutive 'Wow' exclamations indicating rapid striking exchanges between robots"
+  },
+  {
+    "peak": 2772,
+    "start": 2765,
+    "end": 2775,
+    "db": -19.1,
+    "score": 6.8,
+    "reason": "Excited 'Wow left and right, very beautiful white' indicating successful combination strikes"
+  },
+  {
+    "peak": 2780,
+    "start": 2773,
+    "end": 2783,
+    "db": -19.1,
+    "score": 6.2,
+    "reason": "Caster exclamation 'Wow, Little black' with reaction to described action"
+  },
+  {
+    "peak": 2800,
+    "start": 2793,
+    "end": 2803,
+    "db": -21.7,
+    "score": 6.1,
+    "reason": "Strong 'Wow, Little blue' followed by praise for 'very beautiful side-drying' (side kick)"
+  },
+  {
+    "peak": 2820,
+    "start": 2813,
+    "end": 2823,
+    "db": -20.7,
+    "score": 6.5,
+    "reason": "Little blue lands strong point on Little black's head, directly mentioned impact"
+  },
+  {
+    "peak": 2836,
+    "start": 2829,
+    "end": 2839,
+    "db": -20.1,
+    "score": 6.2,
+    "reason": "Casters emphasize 'very beautiful back and forth' with 'Wow, very intense' suggesting heated exchange"
+  },
+  {
+    "peak": 2886,
+    "start": 2879,
+    "end": 2889,
+    "db": -19.6,
+    "score": 6.5,
+    "reason": "Excited reaction to Little blue's side-drying kick with 'Wu' exclamation"
+  },
+  {
+    "peak": 3168,
+    "start": 3161,
+    "end": 3171,
+    "db": -18.8,
+    "score": 6.2,
+    "reason": "Casters praise Little black's movement and technique with 'very beautiful'"
+  },
+  {
+    "peak": 3186,
+    "start": 3179,
+    "end": 3189,
+    "db": -19.2,
+    "score": 6.7,
+    "reason": "Multiple excited mentions of Little black being 'very strong' with points being awarded"
+  },
+  {
+    "peak": 3218,
+    "start": 3211,
+    "end": 3221,
+    "db": -19.1,
+    "score": 7.4,
+    "reason": "Casters react 'Very handsome, the two players are in the air' to acrobatic striking exchange"
+  },
+  {
+    "peak": 3262,
+    "start": 3255,
+    "end": 3265,
+    "db": -20.1,
+    "score": 6.8,
+    "reason": "Excited description 'Xiao Hui has a big move' with left hand strike praised as 'very beautiful'"
+  },
+  {
+    "peak": 3304,
+    "start": 3297,
+    "end": 3307,
+    "db": -19.7,
+    "score": 6.4,
+    "reason": "Caster exclamation 'Xiao Hui is so handsome' suggesting impressive striking execution"
+  }
+]
