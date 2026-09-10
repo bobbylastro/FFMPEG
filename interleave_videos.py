@@ -81,6 +81,11 @@ def main():
     p.add_argument("--gap-max", type=float, default=4, help="Saut maxi (non utilisé) entre 2 extraits d'une même source (s)")
     p.add_argument("--start-a", type=float, default=0, help="Point de départ dans la vidéo A (s)")
     p.add_argument("--start-b", type=float, default=0, help="Point de départ dans la vidéo B (s)")
+    p.add_argument("--end-a", type=float, default=None, help="Point de fin dans la vidéo A (s ; défaut = fin)")
+    p.add_argument("--end-b", type=float, default=None, help="Point de fin dans la vidéo B (s ; défaut = fin)")
+    p.add_argument("--target-duration", type=float, default=None,
+                   help="Durée de sortie visée (s). Si une source s'épuise avant, on continue "
+                        "avec l'autre jusqu'à l'atteindre ; on s'arrête dès qu'on la dépasse.")
     p.add_argument("--width", type=int, default=1920)
     p.add_argument("--height", type=int, default=1080)
     p.add_argument("--fps", type=int, default=30)
@@ -102,10 +107,15 @@ def main():
         focus.append({"src": src, "lo": parse_tc(start), "hi": parse_tc(end),
                       "ratio": (max(0, int(ra)), max(0, int(rb)))})
 
-    dur = {"a": probe_duration(args.video_a), "b": probe_duration(args.video_b)}
+    full_dur = {"a": probe_duration(args.video_a), "b": probe_duration(args.video_b)}
+    end = {"a": args.end_a if args.end_a is not None else full_dur["a"],
+           "b": args.end_b if args.end_b is not None else full_dur["b"]}
     src_path = {"a": args.video_a, "b": args.video_b}
     pos = {"a": args.start_a, "b": args.start_b}
-    print(f"A ({args.video_a}): {dur['a']:.1f}s   B ({args.video_b}): {dur['b']:.1f}s")
+    exhausted = {"a": False, "b": False}
+    out_dur = 0.0
+    print(f"A ({args.video_a}): {full_dur['a']:.1f}s (usable {pos['a']:.0f}-{end['a']:.0f})   "
+          f"B ({args.video_b}): {full_dur['b']:.1f}s (usable {pos['b']:.0f}-{end['b']:.0f})")
     if focus:
         for fw in focus:
             print(f"  focus {fw['src'].upper()} {fw['lo']:.0f}-{fw['hi']:.0f}s -> ratio {fw['ratio'][0]}:{fw['ratio'][1]}")
@@ -116,6 +126,7 @@ def main():
     done = False
     try:
         while not done:
+            n_before = len(segments)
             na, nb = normal_ratio
             for fw in focus:
                 if fw["lo"] <= pos[fw["src"]] <= fw["hi"]:
@@ -123,21 +134,36 @@ def main():
                     break
 
             for src, count in (("a", na), ("b", nb)):
+                if exhausted[src]:
+                    continue
                 for _ in range(count):
                     ext = random.uniform(args.extract_min, args.extract_max)
-                    if pos[src] + ext > dur[src]:
-                        print(f"[{i}] Fin de la vidéo {src.upper()} atteinte ({pos[src]:.1f}s).")
-                        done = True
+                    if pos[src] + ext > end[src]:
+                        print(f"[{i}] Fin de la zone utile {src.upper()} atteinte ({pos[src]:.1f}s).")
+                        exhausted[src] = True
                         break
                     seg = os.path.join(tmp_dir, f"seg_{i:04d}_{src}.mp4")
                     print(f"[{i}] {src.upper()} {pos[src]:.1f}-{pos[src]+ext:.1f}s", flush=True)
                     extract_segment(src_path[src], pos[src], ext, seg,
                                     args.width, args.height, args.fps)
                     segments.append(seg)
+                    out_dur += ext
                     pos[src] += ext + random.uniform(args.gap_min, args.gap_max)
                     i += 1
+                    if args.target_duration and out_dur >= args.target_duration:
+                        done = True
+                        break
                 if done:
                     break
+
+            if exhausted["a"] and exhausted["b"]:
+                done = True
+            elif (exhausted["a"] or exhausted["b"]) and not args.target_duration:
+                # comportement historique : on s'arrête dès qu'une source est épuisée
+                done = True
+            elif len(segments) == n_before:
+                # cycle sans progression (ratio 0:0 ?) — évite la boucle infinie
+                done = True
 
         if not segments:
             print("Aucun extrait généré — vidéos trop courtes pour les paramètres donnés ?")
