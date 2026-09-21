@@ -5,15 +5,15 @@
     "end": 51,
     "db": -23.1,
     "score": 6.1,
-    "reason": "Bai Suxiong lands the first point of the round"
+    "reason": "Bai Suxiong lands first scoring strike, takes a point"
   },
   {
     "peak": 80,
     "start": 73,
     "end": 83,
     "db": -21.3,
-    "score": 7.0,
-    "reason": "Multiple rapid point exchanges; Bai Suxiong is down, then Golden Flash scores again"
+    "score": 6.4,
+    "reason": "Bai Suxiong takes another point, he's down"
   },
   {
     "peak": 101,
@@ -21,7 +21,7 @@
     "end": 104,
     "db": -23.7,
     "score": 6.4,
-    "reason": "Golden Flash executes a right kick; Bai Suxiong has no effective counter"
+    "reason": "Golden Flash executes a right kick, Bai Suxiong has no defensive response"
   },
   {
     "peak": 124,
@@ -29,15 +29,31 @@
     "end": 127,
     "db": -20.5,
     "score": 8.8,
-    "reason": "Golden Flash lands a backhand that knocks Bai Suxiong down hard; casters react with urgency about whether Bai Suxiong can get up"
+    "reason": "Golden Flash lands a backhand kick, Bai Suxiong is knocked down hard to the ground"
   },
   {
-    "peak": 312,
-    "start": 305,
-    "end": 315,
-    "db": -22.9,
-    "score": 6.2,
-    "reason": "Return kick is executed and scored; game commentary indicates this was significant"
+    "peak": 126,
+    "start": 119,
+    "end": 129,
+    "db": -20.5,
+    "score": 8.2,
+    "reason": "Bai Suxiong jumps up after being knocked down, casters react to the recovery speed"
+  },
+  {
+    "peak": 272,
+    "start": 265,
+    "end": 275,
+    "db": -23.8,
+    "score": 6.9,
+    "reason": "Golden Flash lands a return kick directly to Bai Suxiong's face"
+  },
+  {
+    "peak": 284,
+    "start": 277,
+    "end": 287,
+    "db": -23.7,
+    "score": 6.4,
+    "reason": "Bai Suxiong executes a counterattack sequence"
   },
   {
     "peak": 448,
@@ -45,47 +61,55 @@
     "end": 451,
     "db": -24.8,
     "score": 6.1,
-    "reason": "White Xiong Ying lands a high kick and scores 5 points"
+    "reason": "White Xiong Ying lands a high kick, casters confirm a scored hit worth 5 points"
   },
   {
     "peak": 480,
     "start": 473,
     "end": 483,
     "db": -22.0,
-    "score": 7.4,
-    "reason": "White Xiong Ying continues scoring strikes, reaches 10 points"
+    "score": 6.8,
+    "reason": "White Xiong Ying continues scoring, reaching 10 points total with consecutive striking"
   },
   {
     "peak": 711,
     "start": 704,
     "end": 714,
     "db": -22.4,
-    "score": 7.3,
-    "reason": "Caster exclamation 'Oh my god' - robot (white bear) gets up from being down, casters react with surprise"
+    "score": 6.7,
+    "reason": "Caster exclaims 'Oh my god' with apparent alarm or surprise at white Xiong's action or state"
   },
   {
-    "peak": 796,
-    "start": 789,
-    "end": 799,
-    "db": -22.0,
-    "score": 6.8,
-    "reason": "Opponent lands a back kick on white bear, casters note 'The opponent just kicked back the 8-footer dragon'"
+    "peak": 743,
+    "start": 736,
+    "end": 746,
+    "db": -23.3,
+    "score": 6.3,
+    "reason": "White Xiong creates/lands a leg strike (kick), casters call out 'Get the score' twice indicating a landed hit"
   },
   {
-    "peak": 818,
-    "start": 811,
-    "end": 821,
+    "peak": 817,
+    "start": 810,
+    "end": 820,
     "db": -21.7,
-    "score": 6.9,
-    "reason": "White bear lands a kick but falls down after, gets up - casters describe the exchange and recovery"
+    "score": 6.3,
+    "reason": "One kick lands but lower body panics/reacts, suggesting a kicked robot is affected or damaged by the strike"
   },
   {
-    "peak": 1216,
-    "start": 1209,
-    "end": 1219,
+    "peak": 822,
+    "start": 815,
+    "end": 825,
+    "db": -22.7,
+    "score": 7.1,
+    "reason": "White bear's left side shows damage or malfunction ('the left halfway post has occurred' / 'the light is gone'), direct consequence of combat exchange"
+  },
+  {
+    "peak": 1217,
+    "start": 1210,
+    "end": 1220,
     "db": -23.3,
     "score": 6.6,
-    "reason": "Return punch landed, casters explicitly state 'this punch was hit'"
+    "reason": "Casters confirm 'this punch was hit' - direct landing strike"
   },
   {
     "peak": 1260,
@@ -93,7 +117,7 @@
     "end": 1263,
     "db": -22.6,
     "score": 7.4,
-    "reason": "Golden Flash executes fast movement and strike with speed noted as 8 points, body repositioning from impact"
+    "reason": "Casters describe 'Golden flash' with body positioning and rebound - significant impact"
   },
   {
     "peak": 1292,
@@ -101,87 +125,103 @@
     "end": 1295,
     "db": -23.4,
     "score": 6.6,
-    "reason": "Kick lands in the right place, casters noting successful placement"
+    "reason": "Caster states 'The kick is in the right place' - confirmed landing kick"
   },
   {
     "peak": 1301,
     "start": 1294,
     "end": 1304,
     "db": -21.1,
+    "score": 7.6,
+    "reason": "Casters note robot head/position 'is down' - knockdown or stagger from strike"
+  },
+  {
+    "peak": 1303,
+    "start": 1296,
+    "end": 1306,
+    "db": -21.1,
     "score": 8.2,
-    "reason": "Machine gun head position goes down from strike, robot taking visible damage/knockdown effect"
+    "reason": "Repeated 'It's down' - robot knocked down or severely staggered"
   },
   {
-    "peak": 1314,
-    "start": 1307,
-    "end": 1317,
+    "peak": 1317,
+    "start": 1310,
+    "end": 1320,
     "db": -22.2,
-    "score": 8.0,
-    "reason": "Robot goes down, unable to hold position, knockdown from strike exchange"
+    "score": 6.8,
+    "reason": "Casters describe 'The white bear's continuous half-time' attack - sustained offensive exchange"
   },
   {
-    "peak": 1320,
-    "start": 1313,
-    "end": 1323,
-    "db": -23.7,
-    "score": 7.0,
-    "reason": "White bear using previously injured part in continued offensive strikes during vulnerable opponent state"
-  },
-  {
-    "peak": 1348,
-    "start": 1341,
-    "end": 1351,
+    "peak": 1346,
+    "start": 1339,
+    "end": 1349,
     "db": -24.2,
     "score": 8.0,
-    "reason": "Referee countdown indicates opponent unable to stand up, knockout or major knockdown situation"
-  },
-  {
-    "peak": 1358,
-    "start": 1351,
-    "end": 1361,
-    "db": -25.8,
-    "score": 6.1,
-    "reason": "Foot strike to the head landed, casters referencing significant head impact"
+    "reason": "Caster states 'The referee is also in the countdown' and 'unable to stand up' - potential knockdown or KO scenario"
   },
   {
     "peak": 1623,
     "start": 1616,
     "end": 1626,
     "db": -19.7,
-    "score": 7.4,
-    "reason": "White-skinned man lands a back-up kick to the head of the golden flash"
+    "score": 6.8,
+    "reason": "Back-up kick from white-skinned man targeting golden flash's head"
   },
   {
     "peak": 1652,
     "start": 1645,
     "end": 1655,
     "db": -21.2,
-    "score": 6.3,
-    "reason": "Caster exclamation 'Wow' reacting to the metal-on-metal impact sound, indicating a significant strike just landed"
+    "score": 6.9,
+    "reason": "Caster exclamation 'Wow' reacting to metal-on-metal impact sound and collision intensity"
   },
   {
-    "peak": 1693,
-    "start": 1686,
-    "end": 1696,
+    "peak": 1692,
+    "start": 1685,
+    "end": 1695,
     "db": -21.0,
-    "score": 7.0,
-    "reason": "Back-up kick to the edge of the face of the white-skinned man"
+    "score": 6.4,
+    "reason": "Back-up kick targeting white-skinned man's head/face edge"
   },
   {
-    "peak": 1716,
-    "start": 1709,
-    "end": 1719,
-    "db": -20.2,
-    "score": 7.3,
-    "reason": "White-skinned man lands an edge kick, scoring noted as 2-0"
+    "peak": 1709,
+    "start": 1702,
+    "end": 1712,
+    "db": -21.3,
+    "score": 6.8,
+    "reason": "Two robots fighting on the edge of leg strikes, connection appears broken/damaged"
+  },
+  {
+    "peak": 1715,
+    "start": 1708,
+    "end": 1718,
+    "db": -19.7,
+    "score": 7.4,
+    "reason": "Right and left leg both show failure/malfunction after leg-based striking exchange"
+  },
+  {
+    "peak": 1778,
+    "start": 1771,
+    "end": 1781,
+    "db": -19.5,
+    "score": 8.0,
+    "reason": "Golden flash goes down after back-side strike, casters note 'It's down'"
   },
   {
     "peak": 1780,
     "start": 1773,
     "end": 1783,
     "db": -18.9,
-    "score": 6.9,
-    "reason": "Back-up kick directed at the head, casters note repeated head targeting"
+    "score": 7.5,
+    "reason": "Head impact mentioned again, golden flash taking repeated head strikes"
+  },
+  {
+    "peak": 2008,
+    "start": 2001,
+    "end": 2011,
+    "db": -21.3,
+    "score": 6.1,
+    "reason": "Caster describes 'Two feet and a kick' - robot landing a striking attack"
   },
   {
     "peak": 2011,
@@ -189,7 +229,7 @@
     "end": 2014,
     "db": -21.1,
     "score": 7.4,
-    "reason": "Caster exclaims 'Oh, the fall' — indicates a knockdown or significant strike landed"
+    "reason": "Caster exclaims 'Oh, the fall' - indicates a knockdown or stagger from a strike"
   },
   {
     "peak": 2016,
@@ -197,70 +237,46 @@
     "end": 2019,
     "db": -22.0,
     "score": 6.3,
-    "reason": "Caster notes 'This foot is broken' — visible damage/malfunction to robot's limb after strike"
+    "reason": "Caster notes 'This foot is broken' - visible damage/malfunction to robot's limb after being struck"
   },
   {
-    "peak": 2331,
-    "start": 2324,
-    "end": 2334,
-    "db": -23.8,
+    "peak": 2143,
+    "start": 2136,
+    "end": 2146,
+    "db": -21.3,
     "score": 6.2,
-    "reason": "High kick directly to head mentioned, casters react with intensity"
+    "reason": "White robot lands a hook strike"
   },
   {
-    "peak": 2401,
-    "start": 2394,
-    "end": 2404,
-    "db": -23.5,
-    "score": 7.2,
-    "reason": "Robot described as kicked multiple times (third time today), visible distress from repeated head strikes"
-  },
-  {
-    "peak": 2494,
-    "start": 2487,
-    "end": 2497,
-    "db": -23.1,
-    "score": 6.8,
-    "reason": "Robot staggers and barely manages to stay standing after being knocked down"
-  },
-  {
-    "peak": 2571,
-    "start": 2564,
-    "end": 2574,
-    "db": -22.4,
-    "score": 7.7,
-    "reason": "High kick attack, one robot hit and knocked to ground first"
-  },
-  {
-    "peak": 2574,
-    "start": 2567,
-    "end": 2577,
-    "db": -23.3,
-    "score": 6.7,
-    "reason": "Blue bear hit to ground, cow flying - direct strike consequence"
-  },
-  {
-    "peak": 2586,
-    "start": 2579,
-    "end": 2589,
+    "peak": 2570,
+    "start": 2563,
+    "end": 2573,
     "db": -22.1,
-    "score": 7.2,
-    "reason": "Blue bear hurt in corner, described as broken skin - visible damage from strike"
+    "score": 7.8,
+    "reason": "High kick lands, yellow bear is hit and pushed back, white bear hit to ground"
   },
   {
-    "peak": 2605,
-    "start": 2598,
-    "end": 2608,
-    "db": -19.5,
-    "score": 7.6,
-    "reason": "Cow defeated by kick and flying again - repeated knockdown from strikes"
+    "peak": 2581,
+    "start": 2574,
+    "end": 2584,
+    "db": -22.5,
+    "score": 6.5,
+    "reason": "Right hand striking exchange, blocks mentioned but white bear shows injury"
   },
   {
-    "peak": 2616,
-    "start": 2609,
-    "end": 2619,
-    "db": -22.6,
-    "score": 8.2,
-    "reason": "Caster exclamation 'Oh, what a pity' - cow can't stand up, suggests final knockout or TKO"
+    "peak": 2657,
+    "start": 2650,
+    "end": 2660,
+    "db": -22.9,
+    "score": 6.9,
+    "reason": "Side-to-side kick described as cool, white bear about to be beaten again"
+  },
+  {
+    "peak": 2743,
+    "start": 2736,
+    "end": 2746,
+    "db": -20.8,
+    "score": 8.1,
+    "reason": "Caster exclaims 'It's a red circle!' with strong emphasis and exclamation marks"
   }
 ]
