@@ -98,10 +98,14 @@ for i, m in enumerate(moments_selected):
             # Ré-encodage (pas -c copy) : couper à une durée arbitraire tombe rarement pile
             # sur une keyframe, et une copie de flux sur un point hors-GOP produit un arrêt
             # sur image en fin de clip (frames de référence manquantes pour le décodeur).
+            # CRF bas + preset lent : ce ré-encodage est une 2e génération de compression
+            # (par-dessus celle déjà faite par la source/yt-dlp) — sur de l'action rapide
+            # (combat), les pertes de "fast"+CRF20 étaient visibles. Le coût en temps est
+            # négligeable vu la durée d'un clip (~10s).
             trim = subprocess.run(
                 ["ffmpeg", "-y", "-i", tmp_path_raw, "-t", str(duration),
-                 "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-                 "-c:a", "aac", "-b:a", "128k",
+                 "-c:v", "libx264", "-preset", "slow", "-crf", "16",
+                 "-c:a", "aac", "-b:a", "192k",
                  tmp_path, "-hide_banner", "-loglevel", "error"],
                 capture_output=True, text=True,
             )
