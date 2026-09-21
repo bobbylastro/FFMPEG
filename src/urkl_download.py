@@ -88,7 +88,7 @@ for i, m in enumerate(moments_selected):
 
         if not ok:
             cmd[cmd.index("-f") + 1] = "best[height<=1080]/bestvideo[height<=1080]+bestaudio/best"
-            subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
             ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
 
         if ok:
