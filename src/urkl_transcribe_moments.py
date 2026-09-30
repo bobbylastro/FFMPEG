@@ -195,13 +195,30 @@ def transcribe_audio(model, audio_path, start_offset):
     # Pas de `language` fixé : Whisper détecte la langue automatiquement (le show peut être
     # en chinois, anglais, ou autre selon l'évènement) ; task="translate" traduit vers
     # l'anglais quelle que soit la langue source.
-    result = model.transcribe(audio_path, task="translate", verbose=False)
+    # condition_on_previous_text=False : sur de l'audio bruyant (foule, musique) avec peu de
+    # parole claire, Whisper peut entrer en boucle et répéter indéfiniment le même segment
+    # halluciné — il se base sur son propre texte précédent pour prédire la suite, donc une
+    # hallucination s'auto-renforce. Sans ce contexte, chaque segment est transcrit
+    # indépendamment et la boucle ne peut pas s'installer.
+    result = model.transcribe(audio_path, task="translate", verbose=False,
+                              condition_on_previous_text=False)
     lines = []
+    prev_text, repeat_run = None, 0
     for seg in result["segments"]:
         text = seg["text"].strip()
-        if text:
-            abs_start = start_offset + seg["start"]
-            lines.append((abs_start, f"{fmt(abs_start)}: {text}"))
+        if not text:
+            continue
+        # Garde-fou supplémentaire : si un même segment se répète 3+ fois d'affilée malgré
+        # tout, c'est très probablement encore une hallucination — on ne garde que les 2
+        # premières occurrences plutôt que de noyer le prompt Haiku avec du bruit répété.
+        if text == prev_text:
+            repeat_run += 1
+            if repeat_run >= 2:
+                continue
+        else:
+            prev_text, repeat_run = text, 0
+        abs_start = start_offset + seg["start"]
+        lines.append((abs_start, f"{fmt(abs_start)}: {text}"))
     return lines
 
 
