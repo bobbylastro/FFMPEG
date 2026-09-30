@@ -6,7 +6,7 @@ l'audio des rounds (langue auto-détectée -> anglais via Whisper) et demande à
 de repérer les moments de combat réel d'après les réactions des casters, plutôt que par
 pic de volume brut.
 
-Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league] [score_threshold]
+Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league] [score_threshold] [matchup]
   video_url: URL de la vidéo/stream à analyser (YouTube, X/Twitter broadcast, ...)
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
                (vide ou omis = toute la vidéo)
@@ -15,6 +15,10 @@ Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whi
   score_threshold: score combiné mini /10 pour garder un moment (défaut 6.0) — à baisser
                     (ex. 3.0-4.0) pour une vidéo courte où l'on veut garder presque tout
                     le combat plutôt que ne piocher que les meilleurs pics
+  matchup: description du combat à donner à l'IA, pour remplacer le "deux robots
+           humanoïdes" par défaut — nécessaire pour un affrontement exceptionnel (ex.
+           humain vs robot), sinon l'IA rejette tout car ça ne correspond pas à ce
+           qu'on lui dit d'attendre. Vide/omis = comportement normal (URKL/REK)
 
 Écrit directement dans data/<league>_moments.json (même format que urkl_detect.py), prêt
 pour python3 src/urkl_download.py 0 <video_url> <league>.
@@ -114,10 +118,7 @@ def slice_round_audio(full_audio: str, start: int, end: int, tmp_dir: str, idx: 
     return out_path
 
 
-def build_prompt(transcript: str, league_name: str = "URKL") -> str:
-    return f"""You are analyzing a caster transcript (translated from Chinese) of {league_name}, a robot combat show.
-
-IMPORTANT — what {league_name} actually is: this is NOT a BattleBots-style show with wheeled robots,
+DEFAULT_MATCHUP_DESC = """this is NOT a BattleBots-style show with wheeled robots,
 saws, hammers, or flamethrowers. {league_name} features two HUMANOID robots striking each other —
 mostly punches, and jumping or standing kicks, with occasional acrobatic strikes — scored like
 a point-fighting combat sport (points for landed strikes and knockdowns). There are no onboard
@@ -125,7 +126,14 @@ weapons. These are robots, not trained human fighters: don't expect or look for 
 clinches, throws, or submission-style moves — the technique level is limited to striking.
 Do not expect or look for sparks, fire, blades, or mechanical weapon damage either — the
 "damage" here is a robot getting staggered, knocked down, or a limb/hand no longer functioning
-correctly after taking strikes.
+correctly after taking strikes."""
+
+
+def build_prompt(transcript: str, league_name: str = "URKL", matchup: str = None) -> str:
+    matchup_desc = (matchup or DEFAULT_MATCHUP_DESC).format(league_name=league_name)
+    return f"""You are analyzing a caster transcript of {league_name}, a robot combat show.
+
+IMPORTANT — what {league_name} actually is: {matchup_desc}
 
 Below is a timestamped transcript of the casters' commentary during one combat round.
 
@@ -157,13 +165,14 @@ NOT interesting enough — DO NOT include:
 - Judges, rules, scoring explanations, pre-fight setup, replays, or dead air
 - Casters just narrating robot movement/positioning with no hit, clash, or reaction happening
 
-The transcript is machine-translated from Chinese and can be garbled, fragmented, or even
-self-contradictory (e.g. "didn't hit" next to "hand is broken"). Don't require perfectly clear
-phrasing — infer the likely combat action from context: impact-related words, sudden score
-changes, a name followed by a caster reaction. When genuinely uncertain whether something
-qualifies, INCLUDE it with a lower intensity (2-3) rather than silently dropping it — the
-downstream scoring will filter out the weak ones. Do not return an empty list just because the
-transcript is hard to parse — if casters are reacting to the fight, something is worth flagging.
+The transcript comes from automatic speech recognition (machine-translated into English when the
+source isn't English already) and can be garbled, fragmented, or even self-contradictory (e.g.
+"didn't hit" next to "hand is broken"). Don't require perfectly clear phrasing — infer the likely
+combat action from context: impact-related words, sudden score changes, a name followed by a
+caster reaction. When genuinely uncertain whether something qualifies, INCLUDE it with a lower
+intensity (2-3) rather than silently dropping it — the downstream scoring will filter out the
+weak ones. Do not return an empty list just because the transcript is hard to parse — if casters
+are reacting to the fight, something is worth flagging.
 
 For each moment, also rate its INTENSITY from 1 to 10 based on how the casters react — NOT on
 how much text surrounds it: 1-3 = routine scoring hit, casual tone, or genuinely unclear
@@ -234,7 +243,7 @@ def db_percentile(db_timeline: dict, db: float) -> float:
     return 100.0 * below / len(values)
 
 
-def ask_haiku(client, transcript, league_name: str = "URKL", max_retries: int = 2):
+def ask_haiku(client, transcript, league_name: str = "URKL", max_retries: int = 2, matchup: str = None):
     """Appelle Haiku ; si la réponse est vide ([]), retente (variance d'échantillonnage
     du LLM sur des transcripts ambigus/mal traduits — souvent un faux négatif)."""
     total_in = total_out = 0
@@ -242,7 +251,7 @@ def ask_haiku(client, transcript, league_name: str = "URKL", max_retries: int = 
         resp = client.messages.create(
             model=MODEL_ID,
             max_tokens=4096,
-            messages=[{"role": "user", "content": build_prompt(transcript, league_name)}],
+            messages=[{"role": "user", "content": build_prompt(transcript, league_name, matchup)}],
         )
         total_in += resp.usage.input_tokens
         total_out += resp.usage.output_tokens
@@ -266,6 +275,7 @@ def main():
     whisper_model_name = sys.argv[3] if len(sys.argv) > 3 else "small"
     league      = sys.argv[4] if len(sys.argv) > 4 else "urkl"
     score_threshold = float(sys.argv[5]) if len(sys.argv) > 5 else SCORE_THRESHOLD
+    matchup     = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6].strip() else None
     league_name = r2lib.display_name(league)
     moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
     if score_threshold != SCORE_THRESHOLD:
@@ -324,7 +334,7 @@ def main():
             transcript = "\n".join(line for _, line in lines)
 
             print("  Analyse Haiku...", flush=True)
-            round_moments, in_tok, out_tok = ask_haiku(client, transcript, league_name)
+            round_moments, in_tok, out_tok = ask_haiku(client, transcript, league_name, matchup=matchup)
             total_in += in_tok
             total_out += out_tok
 
