@@ -6,12 +6,15 @@ l'audio des rounds (langue auto-détectée -> anglais via Whisper) et demande à
 de repérer les moments de combat réel d'après les réactions des casters, plutôt que par
 pic de volume brut.
 
-Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league]
+Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league] [score_threshold]
   video_url: URL de la vidéo/stream à analyser (YouTube, X/Twitter broadcast, ...)
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
                (vide ou omis = toute la vidéo)
   whisper_model: tiny|base|small|medium|large (défaut: small)
-  league: urkl|rek (défaut: urkl) — sépare les données/clips par ligue
+  league: urkl|rek|divers (défaut: urkl) — sépare les données/clips par ligue
+  score_threshold: score combiné mini /10 pour garder un moment (défaut 6.0) — à baisser
+                    (ex. 3.0-4.0) pour une vidéo courte où l'on veut garder presque tout
+                    le combat plutôt que ne piocher que les meilleurs pics
 
 Écrit directement dans data/<league>_moments.json (même format que urkl_detect.py), prêt
 pour python3 src/urkl_download.py 0 <video_url> <league>.
@@ -262,8 +265,11 @@ def main():
     rounds_spec = sys.argv[2] if len(sys.argv) > 2 else ""
     whisper_model_name = sys.argv[3] if len(sys.argv) > 3 else "small"
     league      = sys.argv[4] if len(sys.argv) > 4 else "urkl"
+    score_threshold = float(sys.argv[5]) if len(sys.argv) > 5 else SCORE_THRESHOLD
     league_name = r2lib.display_name(league)
     moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
+    if score_threshold != SCORE_THRESHOLD:
+        print(f"Seuil de score personnalisé : {score_threshold} (défaut {SCORE_THRESHOLD})")
 
     if rounds_spec.strip():
         windows = []
@@ -335,10 +341,10 @@ def main():
                 scored.append((score, peak, db, pct, intensity, m.get("reason", "")))
 
             scored.sort(key=lambda x: -x[0])
-            print(f"  {len(scored)} moments proposés (score = {TEXT_WEIGHT}*intensité + {DB_WEIGHT}*percentile_dB, seuil {SCORE_THRESHOLD})")
+            print(f"  {len(scored)} moments proposés (score = {TEXT_WEIGHT}*intensité + {DB_WEIGHT}*percentile_dB, seuil {score_threshold})")
             round_kept = 0
             for score, peak, db, pct, intensity, reason in scored:
-                kept = score >= SCORE_THRESHOLD
+                kept = score >= score_threshold
                 mark = "✓ gardé " if kept else "✗ rejeté"
                 print(f"    [{fmt(peak)}] {mark} score={score:.1f} (intensité={intensity:.0f}, dB={db:+.1f}/{pct:.0f}e pctl) {reason}")
                 if kept:
@@ -364,7 +370,7 @@ def main():
 
     all_moments.sort(key=lambda m: m["start"])
     print(f"\n{'='*50}")
-    print(f"Total : {total_kept} moments gardés / {total_rejected} rejetés (seuil score {SCORE_THRESHOLD}), sur {len(windows)} rounds")
+    print(f"Total : {total_kept} moments gardés / {total_rejected} rejetés (seuil score {score_threshold}), sur {len(windows)} rounds")
     print(f"Tokens Haiku — input: {total_in}, output: {total_out}")
 
     os.makedirs(os.path.dirname(moments_json), exist_ok=True)

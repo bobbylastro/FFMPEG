@@ -107,10 +107,15 @@ def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "", league:
     return out_path
 
 
-def compile_youtube(validated_files: list[str], league: str = "urkl", log=print) -> dict:
+def compile_youtube(validated_files: list[str], league: str = "urkl", log=print,
+                     title_override: str = None, description_override: str = None) -> dict:
     """Télécharge les clips validés, monte compilation + Shorts, génère le contenu et
-    upload le tout sur YouTube. `league` (urkl|rek) sert de game_slug : épisode, R2,
-    thème/miniature et contenu générés sont tous isolés par ligue.
+    upload le tout sur YouTube. `league` (urkl|rek|divers) sert de game_slug : épisode,
+    R2, thème/miniature et contenu générés sont tous isolés par ligue.
+    `title_override`/`description_override` : pour une vidéo exceptionnelle (ex. un
+    affrontement humain vs robot ponctuel) dont le titre/la description générique de la
+    ligue ne conviennent pas — remplace la rotation automatique pour CETTE compilation
+    uniquement (les Shorts gardent leurs titres/descriptions générés normalement).
     Retourne {"ok": bool, "long_url", "short_urls", "error"}."""
     game_slug = league
     r2 = r2lib.client()
@@ -152,8 +157,8 @@ def compile_youtube(validated_files: list[str], league: str = "urkl", log=print)
             short_paths.append(_build_urkl_short(group, tmp_dir, suffix=str(i), league=league))
 
         episode     = bump_episode(game_slug)
-        title       = get_youtube_title(game_slug, episode)
-        description = get_youtube_description(game_slug, episode)
+        title       = title_override or get_youtube_title(game_slug, episode)
+        description = description_override or get_youtube_description(game_slug, episode)
 
         # Un pseudo-clip par groupe (titre = raisons combinées) pour que generate_ai_content
         # génère un titre/description par Short plutôt que par clip individuel.

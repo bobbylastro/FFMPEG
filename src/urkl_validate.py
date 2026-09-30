@@ -136,11 +136,14 @@ def do_compile(validated_files: list, league: str):
         compile_event.set()
 
 
-def do_compile_youtube(validated_files: list, league: str):
+def do_compile_youtube(validated_files: list, league: str, title_override: str = None, description_override: str = None):
     global yt_compile_result
     yt_compile_log.clear()
     try:
-        yt_compile_result = urkl_youtube_compile.compile_youtube(validated_files, league=league, log=yt_compile_log.append)
+        yt_compile_result = urkl_youtube_compile.compile_youtube(
+            validated_files, league=league, log=yt_compile_log.append,
+            title_override=title_override, description_override=description_override,
+        )
     except Exception as e:
         yt_compile_log.append(f"ERREUR: {e}")
         yt_compile_result = {"ok": False, "error": str(e)}
@@ -245,12 +248,25 @@ button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
 </div>
 <div id="compile-panel-yt">
   <div id="compile-box-yt">
-    <h2 id="compile-title-yt">Compilation YouTube (vidéo longue + Short)…</h2>
-    <div id="compile-log-yt"></div>
-    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
-      <button id="btn-cleanup-yt" onclick="cleanupCompiledYt()"
-              style="display:none;background:#ef4444;color:#fff;">🗑️ Supprimer clips compilés</button>
-      <button onclick="closeCompileYt()" style="background:#333;color:#eee;">Fermer</button>
+    <div id="compile-form-yt">
+      <h2>🎬 Compiler YouTube (vidéo longue + Shorts)</h2>
+      <p style="font-size:.8rem;color:#888;margin:12px 0 4px;">Titre personnalisé (optionnel — laisse vide pour la rotation automatique de la ligue)</p>
+      <input id="yt-title-override" type="text" style="width:100%;padding:8px;background:#111;border:1px solid #333;color:#eee;border-radius:4px;box-sizing:border-box;" placeholder="ex : HUMAN vs ROBOT — Full Fight Highlights">
+      <p style="font-size:.8rem;color:#888;margin:12px 0 4px;">Description personnalisée (optionnel)</p>
+      <textarea id="yt-desc-override" rows="4" style="width:100%;padding:8px;background:#111;border:1px solid #333;color:#eee;border-radius:4px;font-family:inherit;box-sizing:border-box;" placeholder="Laisse vide pour la description générique de la ligue"></textarea>
+      <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="closeCompileYt()" style="background:#333;color:#eee;">Annuler</button>
+        <button onclick="launchCompileYoutube()" style="background:#ff0000;color:#fff;">🎬 Lancer</button>
+      </div>
+    </div>
+    <div id="compile-progress-yt" style="display:none;">
+      <h2 id="compile-title-yt">Compilation YouTube (vidéo longue + Short)…</h2>
+      <div id="compile-log-yt"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;">
+        <button id="btn-cleanup-yt" onclick="cleanupCompiledYt()"
+                style="display:none;background:#ef4444;color:#fff;">🗑️ Supprimer clips compilés</button>
+        <button onclick="closeCompileYt()" style="background:#333;color:#eee;">Fermer</button>
+      </div>
     </div>
   </div>
 </div>
@@ -383,11 +399,21 @@ function closeCompile() {
 
 let pollIntervalYt;
 function startCompileYoutube() {
-  document.getElementById('compile-title-yt').textContent = `Compilation YouTube (${currentLeague.toUpperCase()}, vidéo longue + Short)…`;
+  document.getElementById('yt-title-override').value = '';
+  document.getElementById('yt-desc-override').value = '';
+  document.getElementById('compile-form-yt').style.display = 'block';
+  document.getElementById('compile-progress-yt').style.display = 'none';
   document.getElementById('compile-panel-yt').classList.add('show');
+}
+function launchCompileYoutube() {
+  const title = document.getElementById('yt-title-override').value;
+  const description = document.getElementById('yt-desc-override').value;
+  document.getElementById('compile-title-yt').textContent = `Compilation YouTube (${currentLeague.toUpperCase()}, vidéo longue + Short)…`;
+  document.getElementById('compile-form-yt').style.display = 'none';
+  document.getElementById('compile-progress-yt').style.display = 'block';
   document.getElementById('compile-log-yt').textContent = 'Démarrage...';
   document.getElementById('btn-cleanup-yt').style.display = 'none';
-  api('/api/compile_youtube', {});
+  api('/api/compile_youtube', {title, description});
   pollIntervalYt = setInterval(async () => {
     const d = await (await fetch('/api/log_youtube')).json();
     document.getElementById('compile-log-yt').textContent = d.log.join('\n');
@@ -580,7 +606,10 @@ class Handler(BaseHTTPRequestHandler):
             yt_compile_event.clear()
             yt_compile_result.clear()
             yt_compile_log.clear()
-            t = threading.Thread(target=do_compile_youtube, args=(validated, league), daemon=True)
+            title_override = (body.get("title") or "").strip() or None
+            description_override = (body.get("description") or "").strip() or None
+            t = threading.Thread(target=do_compile_youtube,
+                                 args=(validated, league, title_override, description_override), daemon=True)
             t.start()
             self.send_json({"ok": True, "count": len(validated)})
 
