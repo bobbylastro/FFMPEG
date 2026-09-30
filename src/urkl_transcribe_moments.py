@@ -6,7 +6,7 @@ l'audio des rounds (langue auto-détectée -> anglais via Whisper) et demande à
 de repérer les moments de combat réel d'après les réactions des casters, plutôt que par
 pic de volume brut.
 
-Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league] [score_threshold] [matchup]
+Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whisper_model] [league] [score_threshold] [matchup] [extra_db_peaks]
   video_url: URL de la vidéo/stream à analyser (YouTube, X/Twitter broadcast, ...)
   rounds_spec: plages de rounds "MM:SS-MM:SS,MM:SS-MM:SS,..." ou "HH:MM:SS-HH:MM:SS,..."
                (vide ou omis = toute la vidéo)
@@ -19,6 +19,10 @@ Usage: python3 src/urkl_transcribe_moments.py <video_url> ["<rounds_spec>"] [whi
            humanoïdes" par défaut — nécessaire pour un affrontement exceptionnel (ex.
            humain vs robot), sinon l'IA rejette tout car ça ne correspond pas à ce
            qu'on lui dit d'attendre. Vide/omis = comportement normal (URKL/REK)
+  extra_db_peaks: nombre de pics de volume à ajouter par round en plus des moments
+                   Haiku, même sans commentaire clair (défaut 0) — utile pour une vidéo
+                   courte où l'on préfère trop de candidats à pas assez ; le tri se fait
+                   ensuite à la validation manuelle
 
 Écrit directement dans data/<league>_moments.json (même format que urkl_detect.py), prêt
 pour python3 src/urkl_download.py 0 <video_url> <league>.
@@ -260,6 +264,33 @@ def db_percentile(db_timeline: dict, db: float) -> float:
     return 100.0 * below / len(values)
 
 
+def extra_db_peak_moments(db_timeline: dict, existing_peaks: list[int], n: int, min_gap: int = 15) -> list[dict]:
+    """Ajoute jusqu'à `n` pics de volume supplémentaires (indépendants de Haiku/du
+    transcript), espacés d'au moins `min_gap` s entre eux et des moments déjà gardés —
+    pour ne pas rater un impact fort sans réaction de commentateur claire. Pensé pour une
+    vidéo courte où l'on préfère trop de candidats à pas assez (le tri manuel filtrera)."""
+    if n <= 0 or not db_timeline:
+        return []
+    taken = list(existing_peaks)
+    extras = []
+    for t, db in sorted(db_timeline.items(), key=lambda kv: -kv[1]):
+        if len(extras) >= n:
+            break
+        if any(abs(t - p) < min_gap for p in taken):
+            continue
+        pct = db_percentile(db_timeline, db)
+        extras.append({
+            "peak": t,
+            "start": max(0, t - PRE),
+            "end": t + POST,
+            "db": round(db, 1),
+            "score": round(pct / 10, 1),
+            "reason": "Pic sonore (pas de commentaire clair identifié par l'IA)",
+        })
+        taken.append(t)
+    return extras
+
+
 def ask_haiku(client, transcript, league_name: str = "URKL", max_retries: int = 2, matchup: str = None):
     """Appelle Haiku ; si la réponse est vide ([]), retente (variance d'échantillonnage
     du LLM sur des transcripts ambigus/mal traduits — souvent un faux négatif)."""
@@ -293,6 +324,7 @@ def main():
     league      = sys.argv[4] if len(sys.argv) > 4 else "urkl"
     score_threshold = float(sys.argv[5]) if len(sys.argv) > 5 else SCORE_THRESHOLD
     matchup     = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6].strip() else None
+    extra_db_peaks = int(sys.argv[7]) if len(sys.argv) > 7 and sys.argv[7].strip() else 0
     league_name = r2lib.display_name(league)
     moments_json = os.path.join(BASE_DIR, f"data/{league}_moments.json")
     if score_threshold != SCORE_THRESHOLD:
@@ -370,6 +402,7 @@ def main():
             scored.sort(key=lambda x: -x[0])
             print(f"  {len(scored)} moments proposés (score = {TEXT_WEIGHT}*intensité + {DB_WEIGHT}*percentile_dB, seuil {score_threshold})")
             round_kept = 0
+            round_peaks = []
             for score, peak, db, pct, intensity, reason in scored:
                 kept = score >= score_threshold
                 mark = "✓ gardé " if kept else "✗ rejeté"
@@ -377,6 +410,7 @@ def main():
                 if kept:
                     total_kept += 1
                     round_kept += 1
+                    round_peaks.append(peak)
                     all_moments.append({
                         "peak": peak,
                         "start": max(0, peak - PRE),
@@ -387,6 +421,14 @@ def main():
                     })
                 else:
                     total_rejected += 1
+
+            if extra_db_peaks > 0:
+                extras = extra_db_peak_moments(db_timeline, round_peaks, extra_db_peaks)
+                for e in extras:
+                    print(f"    [{fmt(e['peak'])}] + pic dB ajouté ({e['db']:+.1f} dB) {e['reason']}")
+                    all_moments.append(e)
+                    round_kept += 1
+                    total_kept += 1
 
             print(f"  → Round {idx+1}/{len(windows)} : {round_kept} gardés / {len(scored)} proposés")
             if step_summary:

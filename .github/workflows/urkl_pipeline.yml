@@ -30,6 +30,10 @@ on:
         description: "Description du combat pour l'IA (ex. 'a HUMAN fighter against a HUMANOID robot...'), pour un affrontement qui ne suit pas le format habituel de la ligue. Vide = comportement normal."
         required: false
         default: ""
+      extra_db_peaks:
+        description: "Nb de pics de volume à ajouter par round même sans commentaire clair identifié (défaut 0). Utile pour une vidéo courte où on préfère trop de candidats à pas assez."
+        required: false
+        default: "0"
 
 jobs:
   pipeline:
@@ -73,7 +77,7 @@ jobs:
           R2_ACCESS_KEY:     ${{ secrets.R2_ACCESS_KEY }}
           R2_SECRET_KEY:     ${{ secrets.R2_SECRET_KEY }}
         run: |
-          python3 src/urkl_pipeline.py "${{ github.event.inputs.video_url }}" "${{ github.event.inputs.rounds_spec }}" "${{ github.event.inputs.whisper_model }}" "${{ github.event.inputs.league }}" "${{ github.event.inputs.score_threshold }}" "${{ github.event.inputs.matchup }}"
+          python3 src/urkl_pipeline.py "${{ github.event.inputs.video_url }}" "${{ github.event.inputs.rounds_spec }}" "${{ github.event.inputs.whisper_model }}" "${{ github.event.inputs.league }}" "${{ github.event.inputs.score_threshold }}" "${{ github.event.inputs.matchup }}" "${{ github.event.inputs.extra_db_peaks }}"
 
       - name: Commit des moments détectés
         run: |
