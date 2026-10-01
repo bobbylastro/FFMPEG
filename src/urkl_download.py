@@ -47,6 +47,13 @@ def sec_to_hms(s):
 r2 = r2lib.client()
 total = len(moments_selected)
 failed = []
+consecutive_failures = 0  # backoff progressif : un échec entraîne une pause plus longue
+                          # avant le clip suivant, pour ne pas enchaîner les tentatives
+                          # pile quand YouTube rate-limite (sinon ça aggrave le blocage
+                          # pour le reste du run, qui échoue alors en cascade)
+
+def backoff_delay(n: int) -> float:
+    return min(10 * (2 ** n), 90) + random.uniform(0, 5)
 
 for i, m in enumerate(moments_selected):
     orig_idx  = all_starts.index(m["start"]) + 1
@@ -91,6 +98,15 @@ for i, m in enumerate(moments_selected):
             result = subprocess.run(cmd, capture_output=True, text=True)
             ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
 
+        # Un 2e essai complet après une pause — utile si le 1er échec venait d'un
+        # rate-limit ponctuel plutôt que d'un vrai problème avec ce clip.
+        if not ok:
+            retry_delay = backoff_delay(consecutive_failures)
+            print(f"  échec, nouvel essai dans {retry_delay:.0f}s...", flush=True)
+            time.sleep(retry_delay)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
+
         if ok:
             # Recadrage local à la durée exacte : la marge téléchargée en plus à la fin
             # absorbe la troncature audio de yt-dlp, ce recoupage ne touche plus le bord
@@ -112,6 +128,7 @@ for i, m in enumerate(moments_selected):
             ok = os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 100_000
 
         if ok:
+            consecutive_failures = 0
             size_kb = os.path.getsize(tmp_path) // 1024
             print(f"  téléchargé ({size_kb}KB) → upload R2...", end=" ", flush=True)
             r2lib.upload_clip(tmp_path, fname, r2, LEAGUE)
@@ -119,10 +136,14 @@ for i, m in enumerate(moments_selected):
             sleep = random.uniform(4, 9)
             time.sleep(sleep)
         else:
+            consecutive_failures += 1
             print(f"  ERREUR download")
             if result.stderr:
                 print(f"  {result.stderr.strip()[-200:]}")
             failed.append(orig_idx)
+            delay = backoff_delay(consecutive_failures)
+            print(f"  pause {delay:.0f}s avant le clip suivant (échecs consécutifs: {consecutive_failures})", flush=True)
+            time.sleep(delay)
     finally:
         for p in (tmp_path_raw, tmp_path):
             if os.path.exists(p):
