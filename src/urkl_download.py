@@ -5,9 +5,17 @@ R2 (persistant).
 Usage: python3 src/urkl_download.py [max_clips] [video_url] [league]
   max_clips: 0 = tous, sinon top N par dB (défaut 5 pour tests)
   video_url: URL de la vidéo source, YouTube ou X/Twitter broadcast (défaut : dernière connue)
-  league: urkl|rek (défaut: urkl)
+  league: urkl|rek|divers (défaut: urkl)
+
+Télécharge la vidéo source EN UNE SEULE FOIS (comme urkl_transcribe_moments.py pour
+l'audio), puis découpe tous les clips localement avec ffmpeg. Avant, chaque clip déclenchait
+son propre appel yt-dlp --download-sections — sur une vidéo avec beaucoup de clips (20+),
+ça fait autant de requêtes d'extraction d'infos rapprochées à YouTube depuis la même
+source, un pattern qui ressemble à du scraping automatisé et se fait bloquer bien plus
+sévèrement qu'un simple rate-limit, quelle que soit l'IP. Un seul téléchargement complet
+élimine ce risque pour la partie découpage, qui devient un traitement 100% local.
 """
-import json, subprocess, os, sys, time, random, tempfile
+import json, subprocess, os, sys, time, random, tempfile, glob, hashlib
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(BASE_DIR, "src"))
@@ -34,9 +42,6 @@ else:
 
 all_starts = [m["start"] for m in all_moments]
 
-PAD_END = 2.0  # marge de sécurité téléchargée en plus à la fin, retirée par un recadrage
-               # local précis — --force-keyframes-at-cuts de yt-dlp tronque parfois la
-               # toute fin de la piste audio sur des sources HLS (ex. broadcasts X)
 
 def sec_to_hms(s):
     s = int(s)
@@ -44,24 +49,71 @@ def sec_to_hms(s):
     m, sec = divmod(rem, 60)
     return f"{h:02d}:{m:02d}:{sec:02d}"
 
+
+def _cache_path_for(url: str) -> str:
+    """Base de cache par URL (sans extension) — même logique que
+    urkl_transcribe_moments.py, évite de réutiliser la vidéo d'une autre source."""
+    h = hashlib.md5(url.encode()).hexdigest()[:12]
+    return f"/tmp/urkl_full_video_cache_{h}"
+
+
+def download_full_video(url: str) -> str:
+    """Télécharge la vidéo (vidéo+audio) complète UNE SEULE FOIS. Fallback vers un
+    format muxé générique si bestvideo+bestaudio n'est pas disponible pour cette source."""
+    cache_base = _cache_path_for(url)
+    cached = glob.glob(cache_base + ".*")
+    if cached and os.path.getsize(cached[0]) > 1_000_000:
+        print(f"Vidéo complète déjà en cache ({os.path.getsize(cached[0])/1024/1024:.0f} MB), skip download")
+        return cached[0]
+
+    print("Téléchargement de la vidéo complète (une seule fois)...", flush=True)
+    cmd = [
+        "yt-dlp", "--cookies", COOKIES, "--no-update",
+        "--js-runtimes", "node", "--remote-components", "ejs:github",
+        "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
+        "--merge-output-format", "mp4",
+        "-o", cache_base + ".%(ext)s", "--no-part", url,
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    downloaded = glob.glob(cache_base + ".*")
+    if not downloaded:
+        cmd[cmd.index("-f") + 1] = "best[height<=1080]/bestvideo[height<=1080]+bestaudio/best"
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        downloaded = glob.glob(cache_base + ".*")
+    if not downloaded:
+        raise RuntimeError(f"Download vidéo complète échoué: {result.stderr[-500:]}")
+    path = downloaded[0]
+    print(f"  Vidéo complète téléchargée ({os.path.getsize(path)/1024/1024:.0f} MB)")
+    return path
+
+
+def cut_clip(full_video: str, start: float, duration: float, out_path: str) -> bool:
+    """Découpe + ré-encode un clip directement depuis la vidéo complète locale —
+    aucune requête réseau. -ss avant -i (seek rapide) reste précis au ré-encodage (ffmpeg
+    décode depuis la keyframe précédente jusqu'au point exact avant d'encoder).
+    CRF bas + preset lent : qualité correcte malgré la 2e génération de compression."""
+    subprocess.run(
+        ["ffmpeg", "-y", "-ss", str(start), "-i", full_video, "-t", str(duration),
+         "-c:v", "libx264", "-preset", "slow", "-crf", "16",
+         "-c:a", "aac", "-b:a", "192k",
+         out_path, "-hide_banner", "-loglevel", "error"],
+        capture_output=True, text=True,
+    )
+    return os.path.exists(out_path) and os.path.getsize(out_path) > 100_000
+
+
+full_video = download_full_video(URL)
+
 r2 = r2lib.client()
 total = len(moments_selected)
 failed = []
-consecutive_failures = 0  # backoff progressif : un échec entraîne une pause plus longue
-                          # avant le clip suivant, pour ne pas enchaîner les tentatives
-                          # pile quand YouTube rate-limite (sinon ça aggrave le blocage
-                          # pour le reste du run, qui échoue alors en cascade)
-
-def backoff_delay(n: int) -> float:
-    return min(10 * (2 ** n), 90) + random.uniform(0, 5)
 
 for i, m in enumerate(moments_selected):
-    orig_idx  = all_starts.index(m["start"]) + 1
-    fname     = f"clip_{orig_idx:02d}.mp4"
-    duration  = m["end"] - m["start"]
-    start_ts  = sec_to_hms(m["start"])
-    end_ts    = sec_to_hms(m["end"])
-    end_ts_dl = sec_to_hms(m["end"] + PAD_END)  # marge côté téléchargement
+    orig_idx = all_starts.index(m["start"]) + 1
+    fname    = f"clip_{orig_idx:02d}.mp4"
+    duration = m["end"] - m["start"]
+    start_ts = sec_to_hms(m["start"])
+    end_ts   = sec_to_hms(m["end"])
 
     if r2lib.clip_exists(fname, r2, LEAGUE):
         print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  déjà dans R2 ✓")
@@ -71,83 +123,21 @@ for i, m in enumerate(moments_selected):
     print(f"[{i+1:2d}/{total}] {fname} {start_ts}→{end_ts}  ({label}) ...", flush=True)
 
     with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
-        tmp_path_raw = tmp.name
-    with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as tmp:
         tmp_path = tmp.name
 
     try:
-        cmd = [
-            "yt-dlp",
-            "--cookies", COOKIES,
-            "--no-update",
-            "--js-runtimes", "node",
-            "--remote-components", "ejs:github",
-            "--download-sections", f"*{start_ts}-{end_ts_dl}",
-            "--force-keyframes-at-cuts",
-            "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
-            "--merge-output-format", "mp4",
-            "--no-part",
-            "-o", tmp_path_raw,
-            URL
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
-
-        if not ok:
-            cmd[cmd.index("-f") + 1] = "best[height<=1080]/bestvideo[height<=1080]+bestaudio/best"
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
-
-        # Un 2e essai complet après une pause — utile si le 1er échec venait d'un
-        # rate-limit ponctuel plutôt que d'un vrai problème avec ce clip.
-        if not ok:
-            retry_delay = backoff_delay(consecutive_failures)
-            print(f"  échec, nouvel essai dans {retry_delay:.0f}s...", flush=True)
-            time.sleep(retry_delay)
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            ok = os.path.exists(tmp_path_raw) and os.path.getsize(tmp_path_raw) > 200_000
-
+        ok = cut_clip(full_video, m["start"], duration, tmp_path)
         if ok:
-            # Recadrage local à la durée exacte : la marge téléchargée en plus à la fin
-            # absorbe la troncature audio de yt-dlp, ce recoupage ne touche plus le bord
-            # problématique (il est maintenant bien après la fin réelle du clip).
-            # Ré-encodage (pas -c copy) : couper à une durée arbitraire tombe rarement pile
-            # sur une keyframe, et une copie de flux sur un point hors-GOP produit un arrêt
-            # sur image en fin de clip (frames de référence manquantes pour le décodeur).
-            # CRF bas + preset lent : ce ré-encodage est une 2e génération de compression
-            # (par-dessus celle déjà faite par la source/yt-dlp) — sur de l'action rapide
-            # (combat), les pertes de "fast"+CRF20 étaient visibles. Le coût en temps est
-            # négligeable vu la durée d'un clip (~10s).
-            trim = subprocess.run(
-                ["ffmpeg", "-y", "-i", tmp_path_raw, "-t", str(duration),
-                 "-c:v", "libx264", "-preset", "slow", "-crf", "16",
-                 "-c:a", "aac", "-b:a", "192k",
-                 tmp_path, "-hide_banner", "-loglevel", "error"],
-                capture_output=True, text=True,
-            )
-            ok = os.path.exists(tmp_path) and os.path.getsize(tmp_path) > 100_000
-
-        if ok:
-            consecutive_failures = 0
             size_kb = os.path.getsize(tmp_path) // 1024
-            print(f"  téléchargé ({size_kb}KB) → upload R2...", end=" ", flush=True)
+            print(f"  découpé ({size_kb}KB) → upload R2...", end=" ", flush=True)
             r2lib.upload_clip(tmp_path, fname, r2, LEAGUE)
             print("OK ✓")
-            sleep = random.uniform(4, 9)
-            time.sleep(sleep)
         else:
-            consecutive_failures += 1
-            print(f"  ERREUR download")
-            if result.stderr:
-                print(f"  {result.stderr.strip()[-200:]}")
+            print("  ERREUR découpage ffmpeg")
             failed.append(orig_idx)
-            delay = backoff_delay(consecutive_failures)
-            print(f"  pause {delay:.0f}s avant le clip suivant (échecs consécutifs: {consecutive_failures})", flush=True)
-            time.sleep(delay)
     finally:
-        for p in (tmp_path_raw, tmp_path):
-            if os.path.exists(p):
-                os.unlink(p)
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 print(f"\n{'='*50}")
 clips_in_r2 = r2lib.list_clips(r2, LEAGUE)
