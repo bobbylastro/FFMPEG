@@ -5120,5 +5120,61 @@
     "_source": "twitch",
     "_velocity": 3.856940523605502,
     "used_at": "2026-09-28T09:47:23.753616+00:00"
+  },
+  {
+    "id": "ProductiveKitschyConsoleWholeWheat-hB2FKIxqENyhcOyQ",
+    "title": "best worst clutch",
+    "url": "https://www.twitch.tv/rainbow6/clip/ProductiveKitschyConsoleWholeWheat-hB2FKIxqENyhcOyQ",
+    "view_count": 691,
+    "duration": 60,
+    "broadcaster_name": "Rainbow6",
+    "created_at": "2026-09-17T12:05:11Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 46.363243359932895,
+    "used_at": "2026-10-02T09:47:26.582803+00:00"
+  },
+  {
+    "id": "DoubtfulDifferentCrocodileDxAbomb-VSXzRj_W8wGr7F95",
+    "title": "Benja 1v4 Clutch",
+    "url": "https://www.twitch.tv/rainbow6/clip/DoubtfulDifferentCrocodileDxAbomb-VSXzRj_W8wGr7F95",
+    "view_count": 449,
+    "duration": 55.7,
+    "broadcaster_name": "Rainbow6",
+    "created_at": "2026-09-15T20:10:15Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 27.101745624484288,
+    "used_at": "2026-10-02T09:47:26.582803+00:00"
+  },
+  {
+    "id": "AffluentGorgeousBananaSmoocherZ-x5JMpR4g0pkoO0zB",
+    "title": "Clutch a 1v1",
+    "url": "https://www.twitch.tv/clioaite/clip/AffluentGorgeousBananaSmoocherZ-x5JMpR4g0pkoO0zB",
+    "view_count": 127,
+    "duration": 23.6,
+    "broadcaster_name": "ClioAite",
+    "created_at": "2026-09-16T10:59:28Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 7.96253095907814,
+    "used_at": "2026-10-02T09:47:26.582803+00:00"
+  },
+  {
+    "id": "GiantStormyRabbitBrokeBack-smKInjUZYbnudxPx",
+    "title": "5 headshot ACE!",
+    "url": "https://www.twitch.tv/happysush/clip/GiantStormyRabbitBrokeBack-smKInjUZYbnudxPx",
+    "view_count": 100,
+    "duration": 48.3,
+    "broadcaster_name": "HappySush",
+    "created_at": "2026-09-14T19:59:32Z",
+    "_game": "Rainbow Six Siege",
+    "_game_slug": "r6-siege",
+    "_source": "twitch",
+    "_velocity": 5.690010581113824,
+    "used_at": "2026-10-02T09:47:26.582803+00:00"
   }
 ]
