@@ -10,16 +10,26 @@ source ne soit perçu comme la simple suite du 1er.
 `--focus` permet de sur-représenter une source pendant une plage de SA propre timeline
 (ex. "beaucoup de A entre 0:40 et 1:15").
 
+`--margin` exclut les N premières et dernières secondes de chaque source (intros/outros
+sans image exploitable). `--windows-a` / `--windows-b` restreignent les extraits aux
+"passages" donnés d'une source (plusieurs plages possibles) — on avance dans l'ordre à
+travers ces plages, et on saute à la suivante quand l'extrait ne tient plus dans la
+courante. Les plages sont toujours recoupées avec la zone utile (marges comprises).
+
 Usage:
   python interleave_videos.py <video_a> <video_b> [-o output.mp4]
     [--ratio 1:1] [--extract-min 5] [--extract-max 7] [--gap-min 3] [--gap-max 4]
-    [--start-a 0] [--start-b 0] [--width 1920] [--height 1080] [--fps 30] [--seed N]
+    [--start-a 0] [--start-b 0] [--end-a S] [--end-b S] [--margin 0]
+    [--windows-a "0:20-0:45,1:10-1:40"] [--windows-b "..."]
+    [--target-duration S] [--width 1920] [--height 1080] [--fps 30] [--seed N]
     [--focus <a|b> <start> <end> <ratio_a> <ratio_b>]   (répétable)
 
 Exemples :
   python interleave_videos.py A.mp4 B.mp4 -o out.mp4
   python interleave_videos.py A.mp4 B.mp4 -o out.mp4 --ratio 1:2 --extract-max 5 \
     --focus a 0:40 1:15 3 1
+  python interleave_videos.py jul.mp4 inna.mp4 -o out.mp4 --margin 15 \
+    --windows-a "0:20-0:50,1:10-1:45" --windows-b "0:30-1:00,1:20-2:00"
 """
 import argparse
 import json
@@ -44,6 +54,27 @@ def parse_tc(s: str) -> float:
 def parse_ratio(s: str) -> tuple[int, int]:
     a, b = s.split(":")
     return max(0, int(a)), max(0, int(b))
+
+
+def build_windows(spec: str | None, lo: float, hi: float, min_len: float) -> list[tuple[float, float]]:
+    """Plages utilisables d'une source : `spec` ("M:SS-M:SS,...") recoupée avec la zone
+    utile [lo, hi] ; sans spec, la zone utile entière. Triées, fusionnées si elles se
+    chevauchent, et les plages trop courtes pour contenir un extrait sont écartées."""
+    if spec and spec.strip():
+        raw = []
+        for part in spec.split(","):
+            a, b = part.strip().split("-")
+            raw.append((parse_tc(a), parse_tc(b)))
+    else:
+        raw = [(lo, hi)]
+    clipped = sorted((max(a, lo), min(b, hi)) for a, b in raw if min(b, hi) > max(a, lo))
+    merged: list[list[float]] = []
+    for a, b in clipped:
+        if merged and a <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], b)
+        else:
+            merged.append([a, b])
+    return [(a, b) for a, b in merged if b - a >= min_len]
 
 
 def probe_duration(path: str) -> float:
@@ -83,6 +114,12 @@ def main():
     p.add_argument("--start-b", type=float, default=0, help="Point de départ dans la vidéo B (s)")
     p.add_argument("--end-a", type=float, default=None, help="Point de fin dans la vidéo A (s ; défaut = fin)")
     p.add_argument("--end-b", type=float, default=None, help="Point de fin dans la vidéo B (s ; défaut = fin)")
+    p.add_argument("--margin", type=float, default=0,
+                   help="Exclut les N premières ET dernières secondes de chaque source (intros/outros)")
+    p.add_argument("--windows-a", default=None,
+                   help='Plages de A où piocher les extraits, ex. "0:20-0:45,1:10-1:40" (défaut : toute la zone utile)')
+    p.add_argument("--windows-b", default=None,
+                   help='Plages de B où piocher les extraits (même format)')
     p.add_argument("--target-duration", type=float, default=None,
                    help="Durée de sortie visée (s). Si une source s'épuise avant, on continue "
                         "avec l'autre jusqu'à l'atteindre ; on s'arrête dès qu'on la dépasse.")
@@ -108,14 +145,42 @@ def main():
                       "ratio": (max(0, int(ra)), max(0, int(rb)))})
 
     full_dur = {"a": probe_duration(args.video_a), "b": probe_duration(args.video_b)}
-    end = {"a": args.end_a if args.end_a is not None else full_dur["a"],
-           "b": args.end_b if args.end_b is not None else full_dur["b"]}
     src_path = {"a": args.video_a, "b": args.video_b}
-    pos = {"a": args.start_a, "b": args.start_b}
+
+    # Zone utile de chaque source = [début, fin] resserrée par la marge, puis plages
+    # éventuelles (--windows-x) recoupées avec cette zone.
+    usable = {
+        "a": (max(args.start_a, args.margin),
+              min(args.end_a if args.end_a is not None else full_dur["a"], full_dur["a"] - args.margin)),
+        "b": (max(args.start_b, args.margin),
+              min(args.end_b if args.end_b is not None else full_dur["b"], full_dur["b"] - args.margin)),
+    }
+    windows = {
+        "a": build_windows(args.windows_a, *usable["a"], args.extract_min),
+        "b": build_windows(args.windows_b, *usable["b"], args.extract_min),
+    }
+    for src in ("a", "b"):
+        if not windows[src]:
+            p.error(f"Aucune plage utilisable pour {src.upper()} (marge/plages trop restrictives "
+                    f"ou plages trop courtes pour un extrait de {args.extract_min:.0f}s)")
+
+    pos = {s: windows[s][0][0] for s in ("a", "b")}
     exhausted = {"a": False, "b": False}
     out_dur = 0.0
-    print(f"A ({args.video_a}): {full_dur['a']:.1f}s (usable {pos['a']:.0f}-{end['a']:.0f})   "
-          f"B ({args.video_b}): {full_dur['b']:.1f}s (usable {pos['b']:.0f}-{end['b']:.0f})")
+
+    def place_extract(src: str, ext: float):
+        """Point de départ d'un extrait de `ext` s : à partir de la position courante, dans
+        la première plage où il tient (donc on saute à la plage suivante si besoin) ;
+        None si la source est épuisée."""
+        for lo, hi in windows[src]:
+            start = max(pos[src], lo)
+            if hi - start >= ext:
+                return start
+        return None
+
+    for src, label in (("a", "A"), ("b", "B")):
+        spans = ", ".join(f"{lo:.0f}-{hi:.0f}s" for lo, hi in windows[src])
+        print(f"{label} ({src_path[src]}): {full_dur[src]:.1f}s — plages utilisées : {spans}")
     if focus:
         for fw in focus:
             print(f"  focus {fw['src'].upper()} {fw['lo']:.0f}-{fw['hi']:.0f}s -> ratio {fw['ratio'][0]}:{fw['ratio'][1]}")
@@ -138,17 +203,18 @@ def main():
                     continue
                 for _ in range(count):
                     ext = random.uniform(args.extract_min, args.extract_max)
-                    if pos[src] + ext > end[src]:
+                    start = place_extract(src, ext)
+                    if start is None:
                         print(f"[{i}] Fin de la zone utile {src.upper()} atteinte ({pos[src]:.1f}s).")
                         exhausted[src] = True
                         break
                     seg = os.path.join(tmp_dir, f"seg_{i:04d}_{src}.mp4")
-                    print(f"[{i}] {src.upper()} {pos[src]:.1f}-{pos[src]+ext:.1f}s", flush=True)
-                    extract_segment(src_path[src], pos[src], ext, seg,
+                    print(f"[{i}] {src.upper()} {start:.1f}-{start+ext:.1f}s", flush=True)
+                    extract_segment(src_path[src], start, ext, seg,
                                     args.width, args.height, args.fps)
                     segments.append(seg)
                     out_dur += ext
-                    pos[src] += ext + random.uniform(args.gap_min, args.gap_max)
+                    pos[src] = start + ext + random.uniform(args.gap_min, args.gap_max)
                     i += 1
                     if args.target_duration and out_dur >= args.target_duration:
                         done = True
