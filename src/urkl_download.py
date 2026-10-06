@@ -70,14 +70,17 @@ def download_full_video(url: str) -> str:
     cmd = [
         "yt-dlp", "--cookies", COOKIES, "--no-update",
         "--js-runtimes", "node", "--remote-components", "ejs:github",
-        "-f", "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080]",
+        # Pas de plafond de résolution : on prend la meilleure qualité source disponible
+        # (jusqu'à 4K) — le ré-encodage se fait sans downscale, donc tout ce qu'on jette
+        # ici est perdu définitivement pour la compilation finale.
+        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",
         "--merge-output-format", "mp4",
         "-o", cache_base + ".%(ext)s", "--no-part", url,
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     downloaded = glob.glob(cache_base + ".*")
     if not downloaded:
-        cmd[cmd.index("-f") + 1] = "best[height<=1080]/bestvideo[height<=1080]+bestaudio/best"
+        cmd[cmd.index("-f") + 1] = "best/bestvideo+bestaudio"
         result = subprocess.run(cmd, capture_output=True, text=True)
         downloaded = glob.glob(cache_base + ".*")
     if not downloaded:

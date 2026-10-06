@@ -81,8 +81,8 @@ def _build_urkl_short(clips: list[dict], tmp_dir: str, suffix: str = "", league:
         subprocess.run([
             "ffmpeg", "-y", "-i", c["local_path"],
             "-vf", "crop=ih*9/16:ih,scale=1080:1920,fps=30,setpts=PTS-STARTPTS",
-            "-c:v", "libx264", "-preset", "fast", "-crf", "26",
-            "-c:a", "aac", "-b:a", "128k", "-ar", "44100",
+            "-c:v", "libx264", "-preset", "slow", "-crf", "17",
+            "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
             out,
         ], capture_output=True)
         if not os.path.exists(out) or os.path.getsize(out) == 0:
