@@ -16,12 +16,20 @@ sans image exploitable). `--windows-a` / `--windows-b` restreignent les extraits
 travers ces plages, et on saute à la suivante quand l'extrait ne tient plus dans la
 courante. Les plages sont toujours recoupées avec la zone utile (marges comprises).
 
+`--plan` pilote le montage section par section sur la timeline FINALE : chaque section a
+des bornes exactes et une ou deux sources ("a", "b" ou "ab" = alternance des deux). Les
+sections sont découpées en extraits (--extract-min/max) dont les durées s'additionnent pile
+à la durée de la section, donc les changements d'artiste tombent aux timecodes voulus.
+Avec --plan, --ratio / --focus / --target-duration sont ignorés (le plan fixe tout).
+
 Usage:
   python interleave_videos.py <video_a> <video_b> [-o output.mp4]
     [--ratio 1:1] [--extract-min 5] [--extract-max 7] [--gap-min 3] [--gap-max 4]
     [--start-a 0] [--start-b 0] [--end-a S] [--end-b S] [--margin 0]
     [--windows-a "0:20-0:45,1:10-1:40"] [--windows-b "..."]
+    [--plan "0:00-0:15=ab,0:15-0:38=a,0:38-1:07=b,1:07-1:46=a,1:46-2:45=ab"]
     [--target-duration S] [--width 1920] [--height 1080] [--fps 30] [--seed N]
+    [--crf 17] [--preset slow]
     [--focus <a|b> <start> <end> <ratio_a> <ratio_b>]   (répétable)
 
 Exemples :
@@ -29,10 +37,11 @@ Exemples :
   python interleave_videos.py A.mp4 B.mp4 -o out.mp4 --ratio 1:2 --extract-max 5 \
     --focus a 0:40 1:15 3 1
   python interleave_videos.py jul.mp4 inna.mp4 -o out.mp4 --margin 15 \
-    --windows-a "0:20-0:50,1:10-1:45" --windows-b "0:30-1:00,1:20-2:00"
+    --plan "0:00-0:15=ab,0:15-0:38=a,0:38-1:07=b,1:07-1:46=a,1:46-2:45=ab"
 """
 import argparse
 import json
+import math
 import os
 import random
 import shutil
@@ -77,6 +86,50 @@ def build_windows(spec: str | None, lo: float, hi: float, min_len: float) -> lis
     return [(a, b) for a, b in merged if b - a >= min_len]
 
 
+def parse_plan(spec: str) -> list[tuple[float, float, str]]:
+    """'0:00-0:15=ab,0:15-0:38=a,...' -> [(0, 15, 'ab'), (15, 38, 'a'), ...]. Les sections
+    doivent s'enchaîner sans trou ni chevauchement (la timeline finale est continue)."""
+    plan = []
+    for part in spec.split(","):
+        rng, srcs = part.strip().split("=")
+        a, b = rng.split("-")
+        t0, t1, srcs = parse_tc(a), parse_tc(b), srcs.strip().lower()
+        if t1 <= t0:
+            raise ValueError(f"Section vide ou inversée dans --plan : '{part.strip()}'")
+        if not srcs or any(c not in "ab" for c in srcs):
+            raise ValueError(f"Sources invalides dans --plan ('{srcs}') : utiliser a, b ou ab")
+        plan.append((t0, t1, srcs))
+    plan.sort()
+    for (_, e1, _), (s2, _, _) in zip(plan, plan[1:]):
+        if abs(e1 - s2) > 0.01:
+            raise ValueError(f"--plan doit être continu : une section finit à {e1:.1f}s, la suivante commence à {s2:.1f}s")
+    return plan
+
+
+def split_duration(total: float, lo: float, hi: float, fps: int) -> list[float]:
+    """Découpe `total` secondes en durées d'extraits comprises dans [lo, hi] (si possible),
+    alignées sur la grille d'images (1/fps) et dont la somme vaut EXACTEMENT `total` à
+    l'image près — pour que les bornes de section du plan tombent pile."""
+    total_frames = round(total * fps)
+    if total <= hi:
+        return [total_frames / fps]
+    n_min = math.ceil(total / hi)
+    n_max = max(n_min, int(total // lo))
+    n = max(n_min, min(n_max, round(total / ((lo + hi) / 2))))
+    lens = [total / n] * n
+    for _ in range(n * 3):                      # variation aléatoire, somme conservée
+        if n < 2:
+            break
+        i, j = random.sample(range(n), 2)
+        d = random.uniform(0, 1.0)
+        if lens[i] + d <= hi and lens[j] - d >= lo:
+            lens[i] += d
+            lens[j] -= d
+    frames = [round(x * fps) for x in lens]
+    frames[-1] += total_frames - sum(frames)    # corrige l'arrondi sur le dernier extrait
+    return [f / fps for f in frames]
+
+
 def probe_duration(path: str) -> float:
     out = subprocess.check_output([
         "ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -86,15 +139,17 @@ def probe_duration(path: str) -> float:
 
 
 def extract_segment(src: str, start: float, dur: float, out_path: str,
-                     width: int, height: int, fps: int):
+                     width: int, height: int, fps: int, crf: int = 17, preset: str = "slow"):
     """Découpe + normalise un extrait (résolution/fps/codec communs, requis pour un
-    concat propre entre deux sources potentiellement hétérogènes)."""
+    concat propre entre deux sources potentiellement hétérogènes). Comme le montage final
+    est une concat en copie pure, la qualité de cette ré-encodation EST la qualité finale :
+    CRF bas + preset lent par défaut."""
     subprocess.run([
-        "ffmpeg", "-y", "-ss", f"{start:.2f}", "-i", src, "-t", f"{dur:.2f}",
+        "ffmpeg", "-y", "-ss", f"{start:.3f}", "-i", src, "-t", f"{dur:.4f}",
         "-vf", f"scale={width}:{height}:force_original_aspect_ratio=decrease,"
                f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,fps={fps}",
-        "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-        "-c:a", "aac", "-b:a", "128k", "-ar", "44100",
+        "-c:v", "libx264", "-preset", preset, "-crf", str(crf),
+        "-c:a", "aac", "-b:a", "192k", "-ar", "44100",
         "-hide_banner", "-loglevel", "error",
         out_path,
     ], check=True)
@@ -120,6 +175,11 @@ def main():
                    help='Plages de A où piocher les extraits, ex. "0:20-0:45,1:10-1:40" (défaut : toute la zone utile)')
     p.add_argument("--windows-b", default=None,
                    help='Plages de B où piocher les extraits (même format)')
+    p.add_argument("--plan", default=None,
+                   help='Montage section par section sur la timeline finale, ex. '
+                        '"0:00-0:15=ab,0:15-0:38=a,0:38-1:07=b" (a, b ou ab = alternance)')
+    p.add_argument("--crf", type=int, default=17, help="Qualité x264 (plus bas = meilleur ; défaut 17)")
+    p.add_argument("--preset", default="slow", help="Preset x264 (défaut slow)")
     p.add_argument("--target-duration", type=float, default=None,
                    help="Durée de sortie visée (s). Si une source s'épuise avant, on continue "
                         "avec l'autre jusqu'à l'atteindre ; on s'arrête dès qu'on la dépasse.")
@@ -136,6 +196,12 @@ def main():
         random.seed(args.seed)
 
     normal_ratio = parse_ratio(args.ratio)
+    plan = None
+    if args.plan:
+        try:
+            plan = parse_plan(args.plan)
+        except ValueError as e:
+            p.error(str(e))
     focus = []
     for src, start, end, ra, rb in args.focus:
         src = src.lower()
@@ -190,6 +256,51 @@ def main():
     i = 0
     done = False
     try:
+        if plan:
+            # Matière utile vs matière nécessaire par source : si les sauts entre extraits
+            # d'une même source "mangent" trop de zone utile pour boucler tout le plan, on
+            # les réduit proportionnellement plutôt que de manquer d'images en route.
+            budget = {s: sum(hi - lo for lo, hi in windows[s]) for s in ("a", "b")}
+            need = {"a": 0.0, "b": 0.0}
+            for t0, t1, srcs in plan:
+                for s in srcs:
+                    need[s] += (t1 - t0) / len(srcs)
+            avg_ext = (args.extract_min + args.extract_max) / 2
+            avg_gap = (args.gap_min + args.gap_max) / 2
+            gap_scale = {"a": 1.0, "b": 1.0}
+            for s in ("a", "b"):
+                if need[s] > 0 and avg_gap > 0:
+                    allowed = (budget[s] / need[s] - 1) * avg_ext * 0.9
+                    gap_scale[s] = max(0.0, min(1.0, allowed / avg_gap))
+                    if gap_scale[s] < 1.0:
+                        print(f"  note : sauts réduits pour {s.upper()} (x{gap_scale[s]:.2f}) — "
+                              f"{need[s]:.0f}s d'extraits à tirer de {budget[s]:.0f}s de matière utile")
+
+            total_plan = plan[-1][1] - plan[0][0]
+            print(f"Plan : {len(plan)} sections, {total_plan:.0f}s au total")
+            for t0, t1, srcs in plan:
+                lens = split_duration(t1 - t0, args.extract_min, args.extract_max, args.fps)
+                print(f"-- {t0:.0f}-{t1:.0f}s [{srcs.upper()}] : {len(lens)} extraits", flush=True)
+                for k, ext in enumerate(lens):
+                    src = srcs[k % len(srcs)]
+                    start = place_extract(src, ext)
+                    if start is None:
+                        print(f"   (zone utile {src.upper()} épuisée — on repart de son début, "
+                              f"des images vont se répéter)")
+                        pos[src] = windows[src][0][0]
+                        start = place_extract(src, ext)
+                        if start is None:
+                            sys.exit(f"Impossible de placer un extrait de {ext:.1f}s dans {src.upper()}.")
+                    seg = os.path.join(tmp_dir, f"seg_{i:04d}_{src}.mp4")
+                    print(f"   [{i}] {src.upper()} {start:.1f}-{start+ext:.1f}s  ({ext:.2f}s)", flush=True)
+                    extract_segment(src_path[src], start, ext, seg,
+                                    args.width, args.height, args.fps, args.crf, args.preset)
+                    segments.append(seg)
+                    out_dur += ext
+                    pos[src] = start + ext + random.uniform(args.gap_min, args.gap_max) * gap_scale[src]
+                    i += 1
+            done = True
+
         while not done:
             n_before = len(segments)
             na, nb = normal_ratio
@@ -211,7 +322,7 @@ def main():
                     seg = os.path.join(tmp_dir, f"seg_{i:04d}_{src}.mp4")
                     print(f"[{i}] {src.upper()} {start:.1f}-{start+ext:.1f}s", flush=True)
                     extract_segment(src_path[src], start, ext, seg,
-                                    args.width, args.height, args.fps)
+                                    args.width, args.height, args.fps, args.crf, args.preset)
                     segments.append(seg)
                     out_dur += ext
                     pos[src] = start + ext + random.uniform(args.gap_min, args.gap_max)
